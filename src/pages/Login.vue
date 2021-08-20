@@ -4,7 +4,7 @@
       <img src="../assets/logobloque7.png" height="140"/>
     </div>
   </div>
-  <div class="q-pa-md text-dark bg-secondary" style="border-radius: 10px 10px 0 0;padding:20px;">
+  <div class="q-pa-md text-dark bg-secondary formLogin">
     <form
       @submit="enviarLogin">
       <div class="text-weight-bold text-center text-dark" style="height:40px;">LOGIN</div>
@@ -48,14 +48,11 @@
       </div>
       <div class="text-center"  style="margin-bottom:20px;">
         <q-btn
+          style="width: -webkit-fill-available;"
           label="Login"
           type="submit"
           color="dark"/>
       </div>
-      <div class="text-center">
-        <q-checkbox dense v-model="mantener" label="Mantener sesión abierta" />
-      </div>
-
     </form>
   </div>
 </template>
@@ -80,14 +77,16 @@ export default defineComponent({
         console.log(this.clave)
         const resp = await auth.login(this.usuario, this.clave)
         console.log(resp)
-        if (resp.data.status === 200) {
+        if (resp.status === 200) {
           // const idusuario = resp.data.resp[0].id
           // console.log()
+          console.log(resp.data)
           // this.$q.localStorage.set('usuario', this.usuario)
           // this.$q.localStorage.set('idusuario', idusuario)
           // const resp4 = await asistencia.sincronizar(this.unidades)
           // console.log(resp4)
-          this.$router.push('/index')
+          // this.$router.push('/index')
+          // mysql -u usuario -p appbloque7 < numerixfw.sql
         } else {
           this.$q.dialog({
             title: 'Advertencia!',
@@ -134,5 +133,14 @@ export default defineComponent({
     justify-content: center;
     align-items: center;
   }
+  .formLogin {
+    border-radius: 10px 10px 0px 0px;
+    padding: 20px;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
 
 </style>
+

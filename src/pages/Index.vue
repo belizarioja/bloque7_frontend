@@ -22,7 +22,7 @@ export default defineComponent({
   name: 'PageIndex',
   methods: {
     gotoProductos () {
-      this.$router.push('/productos')
+      this.$router.push('/categorias')
     }
   }
 })
