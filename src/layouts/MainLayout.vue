@@ -14,8 +14,12 @@
         <q-toolbar-title>
           Bloque 7 App
         </q-toolbar-title>
-
-        <div>Versión 0.0.1</div>
+        <div class="totalItem">
+          <div class="circuloTotalItem">
+            {{ totalitemspedido }}
+          </div>
+          <q-icon name="shopping_cart" color="dark" style="font-size:xxx-large;" />
+        </div>
       </q-toolbar>
     </q-header>
 
@@ -86,6 +90,7 @@ export default defineComponent({
     const leftDrawerOpen = ref(false)
     return {
       leftDrawerOpen,
+      totalitemspedido: 0,
       toggleLeftDrawer () {
         leftDrawerOpen.value = !leftDrawerOpen.value
       }
@@ -93,3 +98,20 @@ export default defineComponent({
   }
 })
 </script>
+
+<style scoped>
+  .totalItem{
+    display: flex;
+    align-items: center;
+  }
+  .circuloTotalItem{
+    width: 30px;
+    height: 30px;
+    background: black;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+</style>

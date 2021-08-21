@@ -1,7 +1,14 @@
 <template>
   <q-page class="text-center">
-    <div style="margin:20px;">
-      Catálogo de productos
+    <div class="headerItem">
+       <div
+          class="menuitem"
+          @click="gotoCategorias()">
+          <q-icon name="keyboard_return" color="info" />
+        </div>
+        <div class="subHeaderItem">
+          Productos
+        </div>
     </div>
     <q-card class="my-card" style="margin: 10px;">
       <q-card-section style="padding: 10px;">
@@ -58,10 +65,20 @@ export default defineComponent({
     return {
       rows
     }
+  },
+  methods: {
+    gotoCategorias () {
+      this.$router.push('/categorias')
+    }
   }
 })
 </script>
 <style scoped>
+  .headerItem{
+    margin: 20px;
+    display: flex;
+    align-items: center;
+  }
   .menuitem {
     height: 60px;
     width: 60px;
@@ -71,5 +88,10 @@ export default defineComponent({
     align-items: center;
     justify-content: center;
     font-size: xx-large;
+  }
+  .subHeaderItem{
+    text-align: center;
+    width: 100%;
+    font-size: x-large;
   }
 </style>

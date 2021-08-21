@@ -1,14 +1,16 @@
 <template>
   <q-page class="text-center">
-    <div style="margin:20px;">
-      Aplicativos
+    <div class="headerItem">
+      <div class="subHeaderItem">
+        Aplicativos
+      </div>
     </div>
     <q-card class="my-card" style="margin: 20px;">
       <q-card-section>
         <div
           class="menuitem"
-          @click="gotoProductos()">
-          <q-icon name="inventory_2" color="info" />
+          @click="gotoClientes()">
+          <q-icon name="playlist_add" color="info" />
         </div>
       </q-card-section>
     </q-card>
@@ -21,13 +23,18 @@ import { defineComponent } from 'vue'
 export default defineComponent({
   name: 'PageIndex',
   methods: {
-    gotoProductos () {
+    gotoClientes () {
       this.$router.push('/clientes')
     }
   }
 })
 </script>
 <style scoped>
+  .headerItem{
+    margin: 30px;
+    display: flex;
+    align-items: center;
+  }
   .menuitem {
     height: 60px;
     width: 60px;
@@ -37,5 +44,10 @@ export default defineComponent({
     align-items: center;
     justify-content: center;
     font-size: xx-large;
+  }
+  .subHeaderItem{
+    text-align: center;
+    width: 100%;
+    font-size: x-large;
   }
 </style>
