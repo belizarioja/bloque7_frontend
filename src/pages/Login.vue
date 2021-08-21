@@ -77,7 +77,13 @@ export default defineComponent({
         console.log(this.clave)
         const resp = await auth.login(this.usuario, this.clave)
         console.log(resp)
-        if (resp.status === 200) {
+        if (resp.data.status === 400) {
+          this.$q.dialog({
+            title: 'Advertencia!',
+            message: resp.data.message,
+            cancel: true,
+            persistent: true
+          })
           // const idusuario = resp.data.resp[0].id
           // console.log()
           console.log(resp.data)
@@ -85,19 +91,21 @@ export default defineComponent({
           // this.$q.localStorage.set('idusuario', idusuario)
           // const resp4 = await asistencia.sincronizar(this.unidades)
           // console.log(resp4)
-          // this.$router.push('/index')
-          // mysql -u usuario -p appbloque7 < numerixfw.sql
+          // mysql -u usuario -p appbloque7 < 'numerixfw.sql';
         } else {
-          this.$q.dialog({
-            title: 'Advertencia!',
-            message: resp.data.message,
-            cancel: true,
-            persistent: true
-          })
+          if (resp.data.length > 0) {
+            this.$router.push('/index')
+          } else {
+            this.$q.dialog({
+              title: 'Advertencia!',
+              message: 'Credenciales no válidas',
+              cancel: true,
+              persistent: true
+            })
+          }
         }
       } catch (error) {
         console.log(error)
-        // this.$router.push('/activar')
       }
     }
   }
@@ -143,4 +151,3 @@ export default defineComponent({
   }
 
 </style>
-
