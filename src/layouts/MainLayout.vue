@@ -14,7 +14,41 @@
         <q-toolbar-title>
           Bloque 7 App
         </q-toolbar-title>
-        <div class="totalItem">
+        <q-dialog v-model="layoutModal">
+          <q-layout view="Lhh lpR fff" container class="bg-white">
+            <q-header class="bg-primary">
+              <q-toolbar>
+                <q-toolbar-title>
+                  {{ nombrecliente }}
+                </q-toolbar-title>
+                <q-btn flat v-close-popup round dense icon="close" />
+              </q-toolbar>
+            </q-header>
+            <q-footer class="bg-black text-white">
+              <q-toolbar inset>
+                <div style="margin: 0 20px;width: inherit;">
+                  Total : $24.50
+                </div>
+                <q-btn
+                  style="width: -webkit-fill-available;"
+                  label="Enviar Pedido"
+                  type="buttom"
+                  color="primary"/>
+              </q-toolbar>
+            </q-footer>
+            <q-page-container>
+              <q-page padding>
+                <p v-for="n in contentSize" :key="n">
+                  {{ lorem }}
+                </p>
+              </q-page>
+            </q-page-container>
+          </q-layout>
+        </q-dialog>
+        <div
+          v-if="hidecarrito"
+          class="totalItem"
+          @click="layoutModal = true">
           <div class="circuloTotalItem">
             {{ totalitemspedido }}
           </div>
@@ -83,18 +117,43 @@
 <script>
 
 import { defineComponent, ref } from 'vue'
+import clientesLib from '../logic/clientes'
 
 export default defineComponent({
   name: 'MainLayout',
   setup () {
     const leftDrawerOpen = ref(false)
+    const hidecarrito = ref(false)
+    const layoutModal = ref(false)
     return {
       leftDrawerOpen,
       totalitemspedido: 0,
+      hidecarrito,
+      layoutModal,
+      contentSize: 20,
+      lorem: 'Item Pedido',
+      nombrecliente: 'Cliente Público',
       toggleLeftDrawer () {
         leftDrawerOpen.value = !leftDrawerOpen.value
       }
     }
+  },
+  methods: {
+    async hideShowCarrito (idcliente) {
+      const resp = await clientesLib.getholds(idcliente)
+      console.log(resp)
+      if (resp.data.length > 0) {
+        this.hidecarrito = true
+        this.nombrecliente = resp.data[0].nombrecliente
+        // clientesLib.getcarrito(idcliente)
+      }
+    }
+  },
+  mounted () {
+    this.idusuario = this.$q.localStorage.getItem('idusuario')
+    console.log(this.idusuario)
+    console.log(this.idusuario)
+    this.hideShowCarrito(this.idusuario)
   }
 })
 </script>
@@ -113,5 +172,8 @@ export default defineComponent({
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+  .q-toolbar--inset {
+    padding-left: 5px;
   }
 </style>

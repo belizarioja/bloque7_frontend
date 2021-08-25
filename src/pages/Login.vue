@@ -76,7 +76,7 @@ export default defineComponent({
         console.log(this.usuario)
         console.log(this.clave)
         const resp = await auth.login(this.usuario, this.clave)
-        console.log(resp)
+        // console.log(resp)
         if (resp.data.status === 400) {
           this.$q.dialog({
             title: 'Advertencia!',
@@ -84,9 +84,6 @@ export default defineComponent({
             cancel: true,
             persistent: true
           })
-          // const idusuario = resp.data.resp[0].id
-          // console.log()
-          console.log(resp.data)
           // this.$q.localStorage.set('usuario', this.usuario)
           // this.$q.localStorage.set('idusuario', idusuario)
           // const resp4 = await asistencia.sincronizar(this.unidades)
@@ -94,6 +91,13 @@ export default defineComponent({
           // mysql -u usuario -p appbloque7 < 'numerixfw.sql';
         } else {
           if (resp.data.length > 0) {
+            const idusuario = resp.data[0].id
+            const nombreusuario = resp.data[0].nombre
+            // console.log()
+            console.log(resp.data)
+            this.$q.localStorage.set('usuario', this.usuario)
+            this.$q.localStorage.set('nombreusuario', nombreusuario)
+            this.$q.localStorage.set('idusuario', idusuario)
             this.$router.push('/index')
           } else {
             this.$q.dialog({
@@ -149,5 +153,4 @@ export default defineComponent({
     left: 0;
     right: 0;
   }
-
 </style>
