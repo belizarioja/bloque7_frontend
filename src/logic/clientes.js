@@ -1,6 +1,7 @@
 import axios from 'axios'
-// const ENDPOINT_PATH = 'http://ejdevelop.com/bloque7_backend/'
-const ENDPOINT_PATH = 'http://localhost:4001/'
+const config = require('../config/endpoints.js')
+const ENDPOINT_PATH = config.endpoint_path
+
 class Cliente {
   listar () {
     return axios.get(ENDPOINT_PATH + 'listar')
@@ -8,6 +9,7 @@ class Cliente {
 
   setupcarrito (idusuario, idcliente, nombrecliente) {
     const data = { idusuario, idcliente, nombrecliente }
+    console.log(idusuario, idcliente, nombrecliente)
     return axios.post(ENDPOINT_PATH + 'setupcarrito', data)
   }
 

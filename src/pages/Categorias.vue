@@ -16,11 +16,11 @@
           <q-item
             clickable
             v-ripple
-            v-for="row in rows"
+            v-for="row in serverData"
             :key="row.id">
             <q-item-section
-              @click="gotoProductos()">
-              <q-item-label>{{row.Nom_Producto}}</q-item-label>
+              @click="gotoProductos( row.categoria )">
+              <q-item-label>{{row.categoria}} {{row.nombre}}</q-item-label>
             </q-item-section>
           </q-item>
         </q-list>
@@ -30,33 +30,45 @@
 </template>
 
 <script>
-const rows = [
-  {
-    id: 1,
-    Nom_Producto: 'LENCERIA'
-  },
-  {
-    id: 2,
-    Nom_Producto: 'CHARCUTERIA'
-  }
-]
 
 import { defineComponent } from 'vue'
+import categoriasLib from '../logic/categorias'
 
 export default defineComponent({
-  name: 'PageIndex',
-  setup () {
+  name: 'Categorias',
+  data () {
     return {
-      rows
+      serverData: []
     }
   },
   methods: {
-    gotoProductos () {
+    gotoProductos (categoria) {
+      this.$q.localStorage.set('categoria', categoria)
       this.$router.push('/productos')
     },
     gotoClientes () {
       this.$router.push('/clientes')
+    },
+    async listarCategorias () {
+      const resp2 = await categoriasLib.listar()
+      this.serverData = []
+      const datos = resp2.data
+      // console.log(datos)
+      for (const i in datos) {
+        const item = datos[i]
+        // console.log(item)
+        const obj = {}
+        obj.id = item.id
+        obj.nombre = item.Nom_Grupo
+        obj.categoria = item.Cod_Grupo
+        this.serverData.push(obj)
+      }
     }
+  },
+  mounted () {
+    this.idusuario = this.$q.localStorage.getItem('idusuario')
+    console.log(this.idusuario)
+    this.listarCategorias()
   }
 })
 </script>

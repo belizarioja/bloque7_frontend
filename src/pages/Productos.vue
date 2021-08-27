@@ -16,11 +16,27 @@
           <q-item
             clickable
             v-ripple
-            v-for="row in rows"
+            v-for="row in serverData"
             :key="row.id">
             <q-item-section>
-              <q-item-label>{{row.Nom_Producto}}</q-item-label>
-              <q-item-label caption>{{row.Cod_Producto}} Precio ${{row.P_dollar}}</q-item-label>
+              <div style="display:grid;">
+                <div>
+                  {{row.nombre}}
+                </div>
+                <div  style="display:flex;">
+                  <div style="padding: 10px;">
+                    <img src="../assets/default.svg" height="40"/>
+                  </div>
+                  <div style="display:grid;">
+                    <div>
+                      {{row.codigo}} {{row.marca}}
+                    </div>
+                    <div>
+                      Precio $ {{row.precio}}
+                    </div>
+                  </div>
+                </div>
+              </div>
             </q-item-section>
           </q-item>
         </q-list>
@@ -30,46 +46,45 @@
 </template>
 
 <script>
-const rows = [
-  {
-    id: 1,
-    Nom_Producto: 'CHUPETAS MAXXI FRESA 1X24',
-    Cod_Producto: 'P410',
-    P_dollar: 1.99
-  },
-  {
-    id: 2,
-    Nom_Producto: 'MERMELADA GUAYABA CAJA 1X20 KG',
-    Cod_Producto: 'M0019',
-    P_dollar: 42.99
-  },
-  {
-    id: 3,
-    Nom_Producto: 'QUESO PARMESANO RALLADO DOÑA FLORA',
-    Cod_Producto: 'M450',
-    P_dollar: 21.99
-  },
-  {
-    id: 4,
-    Nom_Producto: 'PUDIN DE VAINILLA 5 KG CONDIBLUE',
-    Cod_Producto: 'PUD52',
-    P_dollar: 21.90
-  }
-]
 
 import { defineComponent } from 'vue'
+import productosLib from '../logic/productos'
 
 export default defineComponent({
   name: 'PageIndex',
-  setup () {
+  data () {
     return {
-      rows
+      serverData: []
     }
   },
   methods: {
     gotoCategorias () {
       this.$router.push('/categorias')
+    },
+    async listarProductos (categoria) {
+      const resp2 = await productosLib.listar(categoria)
+      this.serverData = []
+      const datos = resp2.data
+      console.log(datos)
+      for (const i in datos) {
+        const item = datos[i]
+        // console.log(item)
+        const obj = {}
+        obj.id = item.id
+        obj.nombre = item.Nom_Producto
+        obj.codigo = item.Cod_Producto
+        obj.precio = item.P_Dollar
+        obj.marca = item.Marca
+        this.serverData.push(obj)
+      }
+      console.log(this.serverData)
     }
+  },
+  mounted () {
+    this.idusuario = this.$q.localStorage.getItem('idusuario')
+    const categoria = this.$q.localStorage.getItem('categoria')
+    console.log(this.idusuario)
+    this.listarProductos(categoria)
   }
 })
 </script>

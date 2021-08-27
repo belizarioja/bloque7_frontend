@@ -66,10 +66,10 @@ export default defineComponent({
         const item = datos[i]
         const obj = {}
         obj.id = item.id
-        obj.nombre = item.nombre
-        obj.rif = item.rif
+        obj.nombre = item.Nom_Cliente
+        obj.rif = item.ced_cliente
         obj.chk = false
-        console.log(chk, item.id)
+        // console.log(chk, item.id)
         if (chk === item.id) {
           obj.chk = true
         }
