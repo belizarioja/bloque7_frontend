@@ -10,35 +10,94 @@
           Cartera de clientes
         </div>
     </div>
-    <q-card class="my-card" style="margin: 10px;">
-      <q-card-section style="padding: 10px;">
-        <q-list bordered separator class="text-left">
-          <q-item
-            clickable
-            v-ripple
-            v-for="row in serverData"
-            :key="row.id"
-            :class="{'done' : row.chk }">
-            <q-item-section
-              @click="gotoCategorias( row.id, row.nombre )">
-              <q-item-label>{{row.nombre}}</q-item-label>
-            </q-item-section>
-          </q-item>
-        </q-list>
-      </q-card-section>
-    </q-card>
+    <q-table
+      grid
+      :card-container-class="cardContainerClass"
+      :rows="serverData"
+      :columns="columns"
+      row-key="id"
+      :filter="filter"
+      hide-header
+      v-model:pagination="pagination"
+      :rows-per-page-options="rowsPerPageOptions"
+    >
+      <template v-slot:top-right>
+        <q-input borderless dense debounce="300" v-model="filter" placeholder="Buscar">
+          <template v-slot:append>
+            <q-icon name="search" />
+          </template>
+        </q-input>
+      </template>
+
+      <template v-slot:item="props">
+        <div class="q-pa-xs col-xs-12 col-sm-6 col-md-4">
+          <q-card>
+            <q-card-section
+              :class="{'done' : props.row.chk }"
+              @click="gotoCategorias( props.row.id, props.row.nombre )">
+              <strong>{{ props.row.nombre }}</strong>
+              <div>RIF {{ props.row.rif }}</div>
+            </q-card-section>
+          </q-card>
+        </div>
+      </template>
+    </q-table>
   </q-page>
 </template>
 
 <script>
-import { defineComponent } from 'vue'
+import { ref, computed, watch, defineComponent } from 'vue'
 import clientesLib from '../logic/clientes'
+import { useQuasar } from 'quasar'
 
 export default defineComponent({
   name: 'Clientes',
   data () {
     return {
       serverData: []
+    }
+  },
+  setup () {
+    const $q = useQuasar()
+    function getItemsPerPage () {
+      if ($q.screen.lt.sm) {
+        return 12
+      }
+      if ($q.screen.lt.md) {
+        return 24
+      }
+      return 36
+    }
+    const filter = ref('')
+    const pagination = ref({
+      page: 1,
+      rowsPerPage: getItemsPerPage()
+    })
+
+    watch(() => $q.screen.name, () => {
+      pagination.value.rowsPerPage = getItemsPerPage()
+    })
+
+    return {
+      filter,
+      pagination,
+
+      columns: [
+        { name: 'nombre', label: 'Nombre', field: 'nombre' },
+        { name: 'rif', label: 'Rif', field: 'rif' }
+      ],
+
+      cardContainerClass: computed(() => {
+        return $q.screen.gt.xs
+          ? 'grid-masonry grid-masonry--' + ($q.screen.gt.sm ? '3' : '2')
+          : null
+      }),
+
+      rowsPerPageOptions: computed(() => {
+        return $q.screen.gt.xs
+          ? $q.screen.gt.sm ? [3, 6, 9] : [3, 6]
+          : [3]
+      })
     }
   },
   methods: {

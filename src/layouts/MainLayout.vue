@@ -38,9 +38,27 @@
             </q-footer>
             <q-page-container>
               <q-page padding>
-                <p v-for="n in contentSize" :key="n">
-                  {{ lorem }}
-                </p>
+                <div>
+                  <table>
+                    <tr v-for="row in serverData" :key="row.id">
+                      <td>
+                        {{ row.idpropucto }}
+                      </td>
+                      <td>
+                        {{ row.nombreproducto }}
+                      </td>
+                      <td>
+                        {{ row.cantidad }}
+                      </td>
+                      <td>
+                        {{ row.precio }}
+                      </td>
+                      <td>
+                        {{ row.subtotal }}
+                      </td>
+                    </tr>
+                  </table>
+                </div>
               </q-page>
             </q-page-container>
           </q-layout>
@@ -118,9 +136,15 @@
 
 import { defineComponent, ref } from 'vue'
 import clientesLib from '../logic/clientes'
+import pedidosLib from '../logic/pedidos'
 
 export default defineComponent({
   name: 'MainLayout',
+  data () {
+    return {
+      serverData: []
+    }
+  },
   setup () {
     const leftDrawerOpen = ref(false)
     const hidecarrito = ref(false)
@@ -145,13 +169,27 @@ export default defineComponent({
       if (resp.data.length > 0) {
         this.hidecarrito = true
         this.nombrecliente = resp.data[0].nombrecliente
+        const idhold = resp.data[0].id
         // clientesLib.getcarrito(idcliente)
+        const resp2 = await pedidosLib.getitemcarrito(idhold)
+        console.log(resp2)
+        const datos = resp2.data
+        for (const i in datos) {
+          const item = datos[i]
+          const obj = {}
+          obj.id = item.id
+          obj.idproducto = item.idproducto
+          obj.nombreproducto = item.nombreproducto
+          obj.precio = item.precio
+          obj.cantidad = item.cantidad
+          obj.subtotal = item.subtotal
+          this.serverData.push(obj)
+        }
       }
     }
   },
   mounted () {
     this.idusuario = this.$q.localStorage.getItem('idusuario')
-    console.log(this.idusuario)
     console.log(this.idusuario)
     this.hideShowCarrito(this.idusuario)
   }
