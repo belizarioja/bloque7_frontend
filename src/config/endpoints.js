@@ -1,4 +1,4 @@
 module.exports = {
-  // endpoint_path: 'http://ejdevelop.com/bloque7_backend/'
-  endpoint_path: 'http://localhost:4001/'
+  endpoint_path: 'http://ejdevelop.com/bloque7_backend/'
+  // endpoint_path: 'http://localhost:4001/'
 }

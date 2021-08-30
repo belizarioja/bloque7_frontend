@@ -111,7 +111,7 @@
           <q-separator vertical />
 
           <q-card-section>
-             <q-input dense v-model="pieza" type="number" label="Pieza" min ="0.01" step="0.01"/>
+             <q-input dense v-model="subtotal" type="number" label="Subtotal" readonly/>
           </q-card-section>
         </q-card-section>
         <q-card-actions align="right" class="text-primary">
@@ -131,7 +131,7 @@
 
 import { ref, computed, watch, defineComponent } from 'vue'
 import productosLib from '../logic/productos'
-import ppedidosLib from '../logic/pedidos'
+import pedidosLib from '../logic/pedidos'
 import clientesLib from '../logic/clientes'
 import { useQuasar } from 'quasar'
 
@@ -139,9 +139,7 @@ export default defineComponent({
   name: 'PageIndex',
   data () {
     return {
-      serverData: [],
-      nombreproducto: ref(''),
-      precioproducto: ref('')
+      serverData: []
     }
   },
   setup () {
@@ -157,8 +155,10 @@ export default defineComponent({
       return 36
     }
     const filter = ref('')
+    const nombreproducto = ref('')
+    const precioproducto = ref('')
     const cantidad = ref(1)
-    const pieza = ref(cantidad)
+    const subtotal = ref(precioproducto.value * cantidad.value)
     const pagination = ref({
       page: 1,
       rowsPerPage: getItemsPerPage()
@@ -171,10 +171,11 @@ export default defineComponent({
     return {
       filter,
       cantidad,
-      pieza,
+      subtotal,
+      nombreproducto,
+      precioproducto,
       pagination,
       layoutModal,
-
       columns: [
         { name: 'nombre', label: 'Nombre', field: 'nombre' },
         { name: 'codigo', label: 'Código', field: 'codigo' },
@@ -203,6 +204,7 @@ export default defineComponent({
       this.idproducto = id
       this.nombreproducto = nombre
       this.precioproducto = precio
+      this.subtotal = this.cantidad * parseFloat(precio)
       this.layoutModal = true
     },
     async setCarrito () {
@@ -212,8 +214,9 @@ export default defineComponent({
         const idhold = resp.data[0].id
         // console.log(idhold, this.cantidad, this.pieza, this.precioproducto)
         const subtotal = this.cantidad * parseFloat(this.precioproducto)
-        await ppedidosLib.setitemcarrito(idhold, this.idproducto, this.nombreproducto, this.precioproducto, this.cantidad, this.pieza, subtotal)
+        await pedidosLib.setitemcarrito(idhold, this.idproducto, this.nombreproducto, this.precioproducto, this.cantidad, this.cantidad, subtotal)
         // clientesLib.getcarrito(idcliente)
+        this.$router.go(0)
       }
     },
     async listarProductos (categoria) {

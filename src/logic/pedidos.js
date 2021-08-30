@@ -14,5 +14,20 @@ class Pedido {
     console.log(idhold)
     return axios.post(ENDPOINT_PATH + 'getitemcarrito', data)
   }
+
+  setitemspedido (idpedido, idproducto, nombreproducto, precio, cantidad, pieza, subtotal) {
+    const data = { idpedido, idproducto, nombreproducto, precio, cantidad, pieza, subtotal }
+    return axios.post(ENDPOINT_PATH + 'setitemspedido', data)
+  }
+
+  setpedido (idusuario, idcliente, nombrecliente, total) {
+    const data = { idusuario, idcliente, nombrecliente, total }
+    return axios.post(ENDPOINT_PATH + 'setpedido', data)
+  }
+
+  deletecarrito (idhold) {
+    const data = { idhold }
+    return axios.post(ENDPOINT_PATH + 'deletecarrito', data)
+  }
 }
 export default new Pedido()
