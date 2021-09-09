@@ -105,7 +105,7 @@
 
         <q-card-section horizontal>
           <q-card-section>
-            <q-input dense v-model="cantidad" autofocus type="number" label="Cantidad" min ="0.01" step="0.01"/>
+            <q-input dense v-model="cantidad" autofocus type="number" label="Pieza" min ="1"/>
           </q-card-section>
 
           <q-separator vertical />
@@ -228,12 +228,12 @@ export default defineComponent({
         const item = datos[i]
         // console.log(item)
         const obj = {}
-        obj.id = item.id
-        obj.nombre = item.Nom_Producto
-        obj.codigo = item.Cod_Producto
-        obj.precio = item.P_Dollar
-        obj.marca = item.Marca
-        obj.disp = 12
+        obj.id = item.IdArticulo
+        obj.nombre = item.Articulo
+        obj.codigo = item.IdArticulo
+        obj.precio = item.Precio
+        obj.marca = 'S/Inf'
+        obj.disp = item.EXISCAJAS
         this.serverData.push(obj)
       }
       console.log(this.serverData)
@@ -266,7 +266,9 @@ export default defineComponent({
   .subHeaderItem{
     text-align: center;
     width: 100%;
-    font-size: x-large;
+    font-size: 16px;
+    font-weight: bold;
+    text-transform: uppercase;
   }
   .headerTableItems{
     background: aliceblue;

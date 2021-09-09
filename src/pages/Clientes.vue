@@ -124,12 +124,12 @@ export default defineComponent({
       for (const i in datos) {
         const item = datos[i]
         const obj = {}
-        obj.id = item.id
-        obj.nombre = item.Nom_Cliente
-        obj.rif = item.ced_cliente
+        obj.id = item.CLIEV_IDCLIENTE
+        obj.nombre = item.CLIEV_NOMBFISCAL
+        obj.rif = item.CLIEV_RIF
         obj.chk = false
         // console.log(chk, item.id)
-        if (chk === item.id) {
+        if (chk === item.CLIEV_IDCLIENTE) {
           obj.chk = true
         }
         this.serverData.push(obj)
@@ -162,7 +162,9 @@ export default defineComponent({
   .subHeaderItem{
     text-align: center;
     width: 100%;
-    font-size: x-large;
+    font-size: 16px;
+    font-weight: bold;
+    text-transform: uppercase;
   }
   .done{
     background: aquamarine;

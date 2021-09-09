@@ -118,9 +118,9 @@ export default defineComponent({
         const item = datos[i]
         // console.log(item)
         const obj = {}
-        obj.id = item.id
-        obj.nombre = item.Nom_Grupo
-        obj.categoria = item.Cod_Grupo
+        obj.id = item.SUBGPV_IDAGRUPAA
+        obj.nombre = item.SUBGPV_NOMBRE
+        obj.categoria = item.SUBGPV_IDAGRUPAA
         this.serverData.push(obj)
       }
     }
@@ -151,6 +151,8 @@ export default defineComponent({
   .subHeaderItem{
     text-align: center;
     width: 100%;
-    font-size: x-large;
+    font-size: 16px;
+    font-weight: bold;
+    text-transform: uppercase;
   }
 </style>

@@ -49,7 +49,7 @@
                         Producto
                       </td>
                       <td style="width:35px;border-bottom: 1px dashed #757575;">
-                        Cant.
+                        Pieza
                       </td>
                       <td style="width:41px;border-bottom: 1px dashed #757575;">
                         Precio
