@@ -2,7 +2,7 @@
   "name": "bloque7_frontend",
   "version": "0.0.1",
   "description": "App de pedidos de Bloque 7",
-  "productName": "com.bloque7.app",
+  "productName": "Bloque 7 App",
   "author": "ercomisario",
   "private": true,
   "scripts": {

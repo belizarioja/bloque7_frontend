@@ -1,0 +1,19 @@
+Instrucciones para crear apk
+
+Instalar jdk
+
+Crear llaves
+keytool -genkey -v -keystore quasar-release-key.jks -keyalg RSA -keysize 2048 -validity 10000 -alias quasar-release
+keytool -importkeystore -srckeystore quasar-release-key.jks -destkeystore quasar-release-key.jks -deststoretype pkcs12
+
+Indicar rutas del sdk
+export ANDROID_HOME="/home/jesus/Android/Sdk"
+export ANDROID_SDK_ROOT="/home/jesus/Android/Sdk"
+export PATH=$PATH:$ANDROID_SDK_ROOT/tools; PATH=$PATH:$ANDROID_SDK_ROOT/platform-tools
+
+Compilar a la platafotma Android
+quasar build -m cordova -T android
+
+Firmar app compilada
+jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore quasar-release-key.jks app-release-unsigned.apk quasar-release
+zipalign -v 4 app-release-unsigned.apk pasajeros.apk
