@@ -1,7 +1,7 @@
 <template>
   <div class="bg-transparent">
     <div class="bannerlogin">
-      <img src="../assets/logobloque7.png" height="140"/>
+      <img src="../assets/logobloque7.png" height="115"/>
     </div>
   </div>
   <div class="q-pa-md text-dark bg-secondary formLogin">
@@ -41,7 +41,7 @@
           </template>
       </q-input>
       <div
-        style="margin:40px 0 30px;"
+        style="margin:20px 0 20px;"
         class="text-center"
         to="/recover">
          Olvidó su clave?
@@ -93,11 +93,13 @@ export default defineComponent({
           if (resp.data.length > 0) {
             const idusuario = resp.data[0].id
             const nombreusuario = resp.data[0].nombre
+            const idrol = resp.data[0].idrol
             // console.log()
             console.log(resp.data)
             this.$q.localStorage.set('usuario', this.usuario)
             this.$q.localStorage.set('nombreusuario', nombreusuario)
             this.$q.localStorage.set('idusuario', idusuario)
+            this.$q.localStorage.set('idrol', idrol)
             this.$router.push('/index')
           } else {
             this.$q.dialog({
@@ -140,17 +142,18 @@ export default defineComponent({
     border: solid 1px #cbc9c9;
   }
   .bannerlogin{
-    height: 170px;
+    height: 120px;
     display: flex;
     justify-content: center;
     align-items: center;
   }
   .formLogin {
-    border-radius: 10px 10px 0px 0px;
+    border-radius: 10px 10px 0 0;
     padding: 20px;
     position: absolute;
-    bottom: 0;
+    top: 120px;
     left: 0;
     right: 0;
+    height: 100%;
   }
 </style>
