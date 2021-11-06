@@ -101,6 +101,7 @@ export default defineComponent({
             this.$q.localStorage.set('idusuario', idusuario)
             this.$q.localStorage.set('idrol', idrol)
             this.$router.push('/index')
+            // location.href = '/#/Index'
           } else {
             this.$q.dialog({
               title: 'Advertencia!',

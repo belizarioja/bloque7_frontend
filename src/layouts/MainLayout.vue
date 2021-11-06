@@ -12,7 +12,8 @@
         />
 
         <q-toolbar-title>
-          Bloque 7 App
+          <div>Bloque 7 App</div>
+          <div style="font-size: small;">Bienvenido {{ nombreusuario }}</div>
         </q-toolbar-title>
         <q-dialog v-model="layoutModal">
           <q-layout view="Lhh lpR fff" container class="bg-white">
@@ -237,6 +238,8 @@ export default defineComponent({
   },
   mounted () {
     this.idusuario = this.$q.localStorage.getItem('idusuario')
+    this.nombreusuario = this.$q.localStorage.getItem('nombreusuario')
+
     console.log(this.idusuario)
     this.hideShowCarrito(this.idusuario)
   }

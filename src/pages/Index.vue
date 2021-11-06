@@ -6,7 +6,7 @@
       </div>
     </div>
     <q-card class="my-card" style="margin: 20px;">
-      <q-card-section style="display: flex;">
+      <q-card-section style="display: flex; padding: 7px;">
         <div
           class="menuitem"
           @click="gotoClientes()">
@@ -25,6 +25,14 @@
           <div class="tituloApp">CTAS X COBRAR</div>
         </div>
       </q-card-section>
+      <q-card-section style="display: flex; padding: 7px;">
+        <div
+          class="menuitem"
+          @click="gotoUsuarios()">
+          <q-icon class="iconApp" name="account_circle" color="secondary" />
+          <div class="tituloApp">USUARIOS</div>
+        </div>
+      </q-card-section>
     </q-card>
   </q-page>
 </template>
@@ -37,6 +45,9 @@ export default defineComponent({
   methods: {
     gotoClientes () {
       this.$router.push('/clientes')
+    },
+    gotoUsuarios () {
+      this.$router.push('/usuarios')
     }
   }
 })
@@ -48,16 +59,17 @@ export default defineComponent({
     align-items: center;
   }
   .menuitem {
-    height: 70px;
-    width: 25%;
+    height: 80px;
+    width: 27%;
     border: 1px solid green;
     border-radius: 12px;
     display: block;
     align-items: center;
     justify-content: center;
-    font-size: x-small;
+    font-size: xx-small;
     float: left;
-    margin: 10px;
+    margin: 9px;
+    padding-top: 5PX;
   }
   .subHeaderItem{
     text-align: center;

@@ -6,5 +6,8 @@ export default {
   login (usuario, clave) {
     const data = { usuario, clave }
     return axios.post(ENDPOINT_PATH + 'login', data)
+  },
+  usuarios () {
+    return axios.get(ENDPOINT_PATH + 'usuarios')
   }
 }
