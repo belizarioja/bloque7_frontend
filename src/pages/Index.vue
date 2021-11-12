@@ -48,6 +48,9 @@ export default defineComponent({
     },
     gotoUsuarios () {
       this.$router.push('/usuarios')
+    },
+    gotoVendedores () {
+      this.$router.push('/vendedores')
     }
   }
 })

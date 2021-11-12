@@ -6,7 +6,7 @@
   </div>
   <div class="q-pa-md text-dark bg-secondary formLogin">
     <form
-      @submit="enviarLogin">
+      @submit.prevent="enviarLogin">
       <div class="text-weight-bold text-center text-dark" style="height:40px;">LOGIN</div>
       <q-input
         borderless
