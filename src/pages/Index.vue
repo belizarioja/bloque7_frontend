@@ -15,6 +15,7 @@
         </div>
         <div
           class="menuitem"
+           v-show="idrol === 1"
           @click="gotoVendedores()">
           <q-icon class="iconApp" name="manage_accounts" color="accent" />
           <div class="tituloApp">VENDEDORES</div>
@@ -28,6 +29,7 @@
       <q-card-section style="display: flex; padding: 7px;">
         <div
           class="menuitem"
+          v-show="idrol === 1"
           @click="gotoUsuarios()">
           <q-icon class="iconApp" name="account_circle" color="secondary" />
           <div class="tituloApp">USUARIOS</div>
@@ -42,6 +44,11 @@ import { defineComponent } from 'vue'
 
 export default defineComponent({
   name: 'PageIndex',
+  data () {
+    return {
+      idrol: this.$q.localStorage.getItem('idrol')
+    }
+  },
   methods: {
     gotoClientes () {
       this.$router.push('/clientes')

@@ -33,8 +33,26 @@
         <div class="q-pa-xs col-xs-12 col-sm-6 col-md-4">
           <q-card>
             <q-card-section>
-              <strong>{{ props.row.usuario }} {{ props.row.nombre }}</strong>
-              <div>ROL {{ props.row.id }}</div>
+              <div style="float: left; margin-right:10px;">
+                {{ props.row.usuario }} {{ props.row.nombre }}
+              </div>
+              <div style="float: left; margin-right:10px;">{{ props.row.rol }}</div>
+              <div style="float: right;">
+                <q-icon
+                 v-show="props.row.status"
+                 class="iconApp"
+                 name="check_circle"
+                 color="positive"
+                 style="font-size: x-large;margin-right:10px;"
+                />
+                <q-icon
+                 v-show="!props.row.status"
+                 class="iconApp"
+                 name="disabled_by_default"
+                 color="negative"
+                 style="font-size: x-large;margin-right:10px;"
+                />
+              </div>
             </q-card-section>
           </q-card>
         </div>

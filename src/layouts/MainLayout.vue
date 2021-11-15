@@ -161,7 +161,8 @@ export default defineComponent({
   name: 'MainLayout',
   data () {
     return {
-      serverData: []
+      serverData: [],
+      nombreusuario: this.$q.localStorage.getItem('nombreusuario')
     }
   },
   setup () {
@@ -238,7 +239,6 @@ export default defineComponent({
   },
   mounted () {
     this.idusuario = this.$q.localStorage.getItem('idusuario')
-    this.nombreusuario = this.$q.localStorage.getItem('nombreusuario')
 
     console.log(this.idusuario)
     this.hideShowCarrito(this.idusuario)

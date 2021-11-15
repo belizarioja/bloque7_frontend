@@ -158,7 +158,7 @@ export default defineComponent({
     const nombreproducto = ref('')
     const precioproducto = ref('')
     const cantidad = ref(1)
-    const subtotal = ref(precioproducto.value * cantidad.value)
+    // const subtotal = ref(precioproducto.value * cantidad.value)
     const pagination = ref({
       page: 1,
       rowsPerPage: getItemsPerPage()
@@ -171,7 +171,7 @@ export default defineComponent({
     return {
       filter,
       cantidad,
-      subtotal,
+      // subtotal,
       nombreproducto,
       precioproducto,
       pagination,
@@ -204,7 +204,7 @@ export default defineComponent({
       this.idproducto = id
       this.nombreproducto = nombre
       this.precioproducto = precio
-      this.subtotal = this.cantidad * parseFloat(precio)
+      // this.subtotal = this.saldo(parseFloat(precio))
       this.layoutModal = true
     },
     async setCarrito () {
@@ -228,15 +228,20 @@ export default defineComponent({
         const item = datos[i]
         // console.log(item)
         const obj = {}
-        obj.id = item.IdArticulo
-        obj.nombre = item.Articulo
-        obj.codigo = item.IdArticulo
-        obj.precio = item.Precio
+        obj.id = item.ARTV_IDARTICULO
+        obj.nombre = item.ARTV_DESCART
+        obj.codigo = item.ARTV_IDARTICULO
+        obj.precio = item.ARTN_PRECIOCAM
         obj.marca = 'S/Inf'
-        obj.disp = item.EXISCAJAS
+        obj.disp = 'S/Inf'
         this.serverData.push(obj)
       }
       console.log(this.serverData)
+    }
+  },
+  computed: {
+    subtotal () {
+      return this.cantidad * this.precioproducto
     }
   },
   mounted () {

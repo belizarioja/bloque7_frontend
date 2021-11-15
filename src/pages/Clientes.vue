@@ -7,7 +7,7 @@
           <q-icon name="keyboard_return" color="info" />
         </div>
         <div class="subHeaderItem">
-          Cartera de clientes
+          Clientes asignados
         </div>
     </div>
     <q-table
@@ -34,9 +34,9 @@
           <q-card>
             <q-card-section
               :class="{'done' : props.row.chk }"
-              @click="gotoCategorias( props.row.id, props.row.nombre )">
-              <strong>{{ props.row.nombre }}</strong>
-              <div>RIF {{ props.row.rif }}</div>
+              @click="gotoCategorias( props.row.idcliente, props.row.nombrecliente )">
+              <strong>{{ props.row.nombrecliente }}</strong>
+              <div>RIF {{ props.row.rifcliente }}</div>
             </q-card-section>
           </q-card>
         </div>
@@ -48,13 +48,16 @@
 <script>
 import { ref, computed, watch, defineComponent } from 'vue'
 import clientesLib from '../logic/clientes'
+import vendedorLib from '../logic/vendedores'
 import { useQuasar } from 'quasar'
 
 export default defineComponent({
   name: 'Clientes',
   data () {
     return {
-      serverData: []
+      serverData: [],
+      idVendedor: this.$q.localStorage.getItem('usuario'),
+      idusuario: this.$q.localStorage.getItem('idusuario')
     }
   },
   setup () {
@@ -118,18 +121,18 @@ export default defineComponent({
         chk = resp.data[0].idcliente
         // clientesLib.getcarrito(idcliente)
       }
-      const resp2 = await clientesLib.listar()
+      const resp2 = await vendedorLib.listarVendedorClientes(this.idVendedor)
       console.log(resp2)
       const datos = resp2.data
       for (const i in datos) {
         const item = datos[i]
         const obj = {}
-        obj.id = item.CLIEV_IDCLIENTE
-        obj.nombre = item.CLIEV_NOMBFISCAL
-        obj.rif = item.CLIEV_RIF
+        obj.idcliente = item.idcliente
+        obj.nombrecliente = item.nombrecliente
+        obj.rifcliente = item.rifcliente
         obj.chk = false
         // console.log(chk, item.id)
-        if (chk === item.CLIEV_IDCLIENTE) {
+        if (chk === item.idcliente) {
           obj.chk = true
         }
         this.serverData.push(obj)
@@ -137,8 +140,6 @@ export default defineComponent({
     }
   },
   mounted () {
-    this.idusuario = this.$q.localStorage.getItem('idusuario')
-    console.log(this.idusuario)
     this.listarClientes()
   }
 })
