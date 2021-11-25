@@ -76,33 +76,29 @@ export default defineComponent({
         console.log(this.usuario)
         console.log(this.clave)
         const resp = await auth.login(this.usuario, this.clave)
-        // console.log(resp)
-        if (resp.data.status === 400) {
+        console.log(resp)
+        if (resp.data.status === 500) {
+          // SI HAY ALGUN ERROR EN LAS CONSULTAS
           this.$q.dialog({
             title: 'Advertencia!',
-            message: resp.data.message,
+            message: resp.data.message + ' ' + resp.data.resp.code,
             cancel: true,
             persistent: true
           })
-          // this.$q.localStorage.set('usuario', this.usuario)
-          // this.$q.localStorage.set('idusuario', idusuario)
-          // const resp4 = await asistencia.sincronizar(this.unidades)
-          // console.log(resp4)
-          // mysql -u usuario -p appbloque7 < 'numerixfw.sql';
         } else {
           if (resp.data.length > 0) {
+            // SI LAS CREDENCIALES SON VALIDAS
             const idusuario = resp.data[0].id
             const nombreusuario = resp.data[0].nombre
             const idrol = resp.data[0].idrol
-            // console.log()
             console.log(resp.data)
             this.$q.localStorage.set('usuario', this.usuario)
             this.$q.localStorage.set('nombreusuario', nombreusuario)
             this.$q.localStorage.set('idusuario', idusuario)
             this.$q.localStorage.set('idrol', idrol)
             this.$router.push('/index')
-            // location.href = '/#/Index'
           } else {
+            // SI LAS CREDENCIALES NO SON VALIDAS
             this.$q.dialog({
               title: 'Advertencia!',
               message: 'Credenciales no válidas',
