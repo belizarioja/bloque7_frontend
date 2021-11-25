@@ -32,11 +32,11 @@
       <template v-slot:item="props">
         <div class="q-pa-xs col-xs-12 col-sm-6 col-md-4">
           <q-card>
-            <q-card-section>
+            <q-card-section style="height: 64px;">
               <div style="float: left; margin-right:10px;">
-                {{ props.row.usuario }} {{ props.row.nombre }}
+                <div style="text-align: left;">{{ props.row.usuario }} {{ props.row.nombre }}</div>
+                <div style="text-align: left;;font-weight: bold;">{{ props.row.rol }}</div>
               </div>
-              <div style="float: left; margin-right:10px;">{{ props.row.rol }}</div>
               <div style="float: right;">
                 <q-icon
                  v-show="props.row.status"
@@ -44,6 +44,7 @@
                  name="check_circle"
                  color="positive"
                  style="font-size: x-large;margin-right:10px;"
+                 @click="hideShow(props.row.status, props.row.id, props.row.nombre)"
                 />
                 <q-icon
                  v-show="!props.row.status"
@@ -51,6 +52,7 @@
                  name="disabled_by_default"
                  color="negative"
                  style="font-size: x-large;margin-right:10px;"
+                 @click="hideShow(props.row.status, props.row.id, props.row.nombre)"
                 />
               </div>
             </q-card-section>
@@ -123,6 +125,7 @@ export default defineComponent({
     async listarUsuarios () {
       this.serverData = []
       const resp = await authLib.usuarios()
+      console.log(resp.data)
       const datos = resp.data
       for (const i in datos) {
         const item = datos[i]
@@ -131,9 +134,38 @@ export default defineComponent({
         obj.usuario = item.usuario
         obj.clave = item.clave
         obj.nombre = item.nombre
-        obj.rol = item.idrol
+        obj.idrol = item.idrol
+        obj.rol = item.rol
+        obj.status = item.status
         this.serverData.push(obj)
       }
+    },
+    hideShow (val, id, nombre) {
+      let msg = 'HABILITAR'
+      if (val === 1) {
+        msg = 'INHABILITAR'
+        val = 0
+      } else {
+        val = 1
+      }
+      this.$q.dialog({
+        title: 'Confirmación!',
+        message: 'Desea ' + msg + ' a ' + nombre + '?',
+        ok: {
+          color: 'primary',
+          label: 'Sí'
+        },
+        cancel: {
+          color: 'secondary',
+          label: 'No'
+        },
+        persistent: true
+      }).onOk(async () => {
+        // console.log('Aqui', val, id)
+        await authLib.hideShowUsuarios(val, id)
+        // console.log(resp)
+        this.listarUsuarios()
+      })
     }
   },
   mounted () {

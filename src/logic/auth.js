@@ -9,5 +9,9 @@ export default {
   },
   usuarios () {
     return axios.get(ENDPOINT_PATH + 'usuarios')
+  },
+  hideShowUsuarios (val, id) {
+    const data = { val, id }
+    return axios.post(ENDPOINT_PATH + 'hideShowUsuarios', data)
   }
 }
