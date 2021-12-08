@@ -91,11 +91,13 @@ export default defineComponent({
             const idusuario = resp.data[0].id
             const nombreusuario = resp.data[0].nombre
             const idrol = resp.data[0].idrol
+            const idsucursal = resp.data[0].idsucursal
             console.log(resp.data)
             this.$q.localStorage.set('usuario', this.usuario)
             this.$q.localStorage.set('nombreusuario', nombreusuario)
             this.$q.localStorage.set('idusuario', idusuario)
             this.$q.localStorage.set('idrol', idrol)
+            this.$q.localStorage.set('idsucursal', idsucursal)
             this.$router.push('/index')
           } else {
             // SI LAS CREDENCIALES NO SON VALIDAS

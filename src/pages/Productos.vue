@@ -32,7 +32,7 @@
       <template v-slot:item="props">
         <div class="q-pa-xs col-xs-12 col-sm-6 col-md-4">
           <q-card>
-            <q-card-section @click="openSetItems( props.row.id, props.row.nombre, props.row.precio )">
+            <q-card-section @click="openSetItems( props.row.id, props.row.nombre, props.row.precio, props.row.preciocaj, props.row.unixcaja, props.row.costoactu, props.row.porciva, props.row.porkilos )">
               <div style="display:grid;">
                 <div class="text-left">
                   <strong>{{ props.row.nombre }}</strong>
@@ -53,7 +53,7 @@
                       </tr>
                       <tr class="rowTableItems">
                         <td>
-                          {{props.row.codigo}}
+                          {{props.row.id}}
                         </td>
                         <td>
                           {{props.row.marca}}
@@ -72,7 +72,7 @@
                           $ {{props.row.precio}}
                         </td>
                         <td>
-                          {{props.row.disp}}
+                          {{props.row.disponible}}
                         </td>
                       </tr>
                     </table>
@@ -105,7 +105,7 @@
 
         <q-card-section horizontal>
           <q-card-section>
-            <q-input dense v-model="cantidad" autofocus type="number" label="Pieza" min ="1"/>
+            <q-input dense v-model="cantidad" autofocus type="number" label="Cantidad" min ="1"/>
           </q-card-section>
 
           <q-separator vertical />
@@ -139,7 +139,8 @@ export default defineComponent({
   name: 'PageIndex',
   data () {
     return {
-      serverData: []
+      serverData: [],
+      idusuario: this.$q.localStorage.getItem('idusuario')
     }
   },
   setup () {
@@ -158,7 +159,6 @@ export default defineComponent({
     const nombreproducto = ref('')
     const precioproducto = ref('')
     const cantidad = ref(1)
-    // const subtotal = ref(precioproducto.value * cantidad.value)
     const pagination = ref({
       page: 1,
       rowsPerPage: getItemsPerPage()
@@ -171,16 +171,16 @@ export default defineComponent({
     return {
       filter,
       cantidad,
-      // subtotal,
       nombreproducto,
       precioproducto,
       pagination,
       layoutModal,
       columns: [
         { name: 'nombre', label: 'Nombre', field: 'nombre' },
-        { name: 'codigo', label: 'Código', field: 'codigo' },
+        { name: 'id', label: 'Código', field: 'id' },
         { name: 'precio', label: 'Precio', field: 'precio' },
-        { name: 'marca', label: 'Marca', field: 'marca' }
+        { name: 'marca', label: 'Marca', field: 'marca' },
+        { name: 'disponible', label: 'Disponible', field: 'disponible' }
       ],
 
       cardContainerClass: computed(() => {
@@ -200,21 +200,22 @@ export default defineComponent({
     gotoCategorias () {
       this.$router.push('/categorias')
     },
-    openSetItems (id, nombre, precio) {
+    openSetItems (id, nombre, precio, preciocaj, unixcaja, costoactu, porciva, porkilos) {
       this.idproducto = id
       this.nombreproducto = nombre
       this.precioproducto = precio
-      // this.subtotal = this.saldo(parseFloat(precio))
+      this.preciocaj = preciocaj
+      this.unixcaja = unixcaja
+      this.costoactu = costoactu
+      this.porciva = porciva
+      this.porkilos = porkilos
       this.layoutModal = true
     },
     async setCarrito () {
       const resp = await clientesLib.getholds(this.idusuario)
-      console.log(resp)
       if (resp.data.length > 0) {
         const idhold = resp.data[0].id
-        // console.log(idhold, this.cantidad, this.pieza, this.precioproducto)
-        const subtotal = this.cantidad * parseFloat(this.precioproducto)
-        await pedidosLib.setitemcarrito(idhold, this.idproducto, this.nombreproducto, this.precioproducto, this.cantidad, this.cantidad, subtotal)
+        await pedidosLib.setitemcarrito(idhold, this.idproducto, this.nombreproducto, this.precioproducto, this.cantidad, this.subtotal, this.preciocaj, this.unixcaja, this.costoactu, this.porciva, this.porkilos)
         // clientesLib.getcarrito(idcliente)
         this.$router.go(0)
       }
@@ -226,17 +227,20 @@ export default defineComponent({
       console.log(datos)
       for (const i in datos) {
         const item = datos[i]
-        // console.log(item)
         const obj = {}
-        obj.id = item.ARTV_IDARTICULO
-        obj.nombre = item.ARTV_DESCART
-        obj.codigo = item.ARTV_IDARTICULO
-        obj.precio = item.ARTN_PRECIOCAM
-        obj.marca = 'S/Inf'
-        obj.disp = 'S/Inf'
+        obj.id = item.id
+        obj.nombre = item.nombre
+        obj.precio = item.porkilos === 1 ? item.preciocaj : parseFloat(item.preciocaj / item.unixcaja)
+        obj.marca = item.marca
+        obj.disponible = item.disponible
+        obj.preciocaj = item.preciocaj
+        obj.unixcaja = item.unixcaja
+        obj.costoactu = item.costoactu
+        obj.porciva = item.porciva
+        obj.porkilos = item.porkilos
         this.serverData.push(obj)
       }
-      console.log(this.serverData)
+      // console.log(this.serverData)
     }
   },
   computed: {
@@ -245,9 +249,7 @@ export default defineComponent({
     }
   },
   mounted () {
-    this.idusuario = this.$q.localStorage.getItem('idusuario')
     const categoria = this.$q.localStorage.getItem('categoria')
-    console.log(this.idusuario)
     this.listarProductos(categoria)
   }
 })
@@ -282,6 +284,7 @@ export default defineComponent({
   }
   .rowTableItems{
     font-weight: bold;
+    font-size: x-small;
     height: 23px;
   }
   .rowTableItemsPrecio{

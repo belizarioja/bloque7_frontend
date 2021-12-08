@@ -7,9 +7,9 @@ class Cliente {
     return axios.get(ENDPOINT_PATH + 'listar')
   }
 
-  setupcarrito (idusuario, idcliente, nombrecliente) {
-    const data = { idusuario, idcliente, nombrecliente }
-    console.log(idusuario, idcliente, nombrecliente)
+  setupcarrito (idusuario, idcliente, nombrecliente, rifcliente) {
+    const data = { idusuario, idcliente, nombrecliente, rifcliente }
+    console.log(idusuario, idcliente, nombrecliente, rifcliente)
     return axios.post(ENDPOINT_PATH + 'setupcarrito', data)
   }
 

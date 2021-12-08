@@ -34,7 +34,7 @@
           <q-card>
             <q-card-section
               :class="{'done' : props.row.chk }"
-              @click="gotoCategorias( props.row.idcliente, props.row.nombrecliente )">
+              @click="gotoCategorias( props.row.idcliente, props.row.nombrecliente, props.row.rifcliente)">
               <strong>{{ props.row.nombrecliente }}</strong>
               <div>RIF {{ props.row.rifcliente }}</div>
             </q-card-section>
@@ -104,9 +104,9 @@ export default defineComponent({
     }
   },
   methods: {
-    async gotoCategorias (idcliente, nombrecliente) {
-      console.log(this.idusuario, idcliente, nombrecliente)
-      await clientesLib.setupcarrito(this.idusuario, idcliente, nombrecliente)
+    async gotoCategorias (idcliente, nombrecliente, rifcliente) {
+      console.log(this.idusuario, idcliente, rifcliente)
+      await clientesLib.setupcarrito(this.idusuario, idcliente, nombrecliente, rifcliente)
       this.$router.push('/categorias')
     },
     gotoIndex () {

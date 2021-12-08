@@ -113,15 +113,17 @@ export default defineComponent({
       const resp2 = await categoriasLib.listar()
       this.serverData = []
       const datos = resp2.data
-      // console.log(datos)
+      console.log(datos)
       for (const i in datos) {
         const item = datos[i]
         // console.log(item)
         const obj = {}
-        obj.id = item.SUBGPV_IDAGRUPAA
-        obj.nombre = item.SUBGPV_NOMBRE
-        obj.categoria = item.SUBGPV_IDAGRUPAA
-        this.serverData.push(obj)
+        obj.id = item.id
+        obj.nombre = item.nombre
+        obj.categoria = item.id
+        if (item.cantidad > 0) {
+          this.serverData.push(obj)
+        }
       }
     }
   },

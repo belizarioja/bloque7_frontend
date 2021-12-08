@@ -3,9 +3,9 @@ const config = require('../config/endpoints.js')
 const ENDPOINT_PATH = config.endpoint_path
 
 class Pedido {
-  setitemcarrito (idhold, idproducto, nombreproducto, precio, cantidad, pieza, subtotal) {
-    const data = { idhold, idproducto, nombreproducto, precio, cantidad, pieza, subtotal }
-    console.log(idhold, idproducto, nombreproducto, precio, cantidad, pieza, subtotal)
+  setitemcarrito (idhold, idproducto, nombreproducto, precio, cantidad, subtotal, preciocaj, unixcaja, costoactu, porciva, porkilos) {
+    const data = { idhold, idproducto, nombreproducto, precio, cantidad, subtotal, preciocaj, unixcaja, costoactu, porciva, porkilos }
+    console.log(idhold, idproducto, nombreproducto, precio, cantidad, subtotal, preciocaj, unixcaja, costoactu, porciva, porkilos)
     return axios.post(ENDPOINT_PATH + 'setitemcarrito', data)
   }
 
@@ -15,14 +15,21 @@ class Pedido {
     return axios.post(ENDPOINT_PATH + 'getitemcarrito', data)
   }
 
-  setitemspedido (idpedido, idproducto, nombreproducto, precio, cantidad, pieza, subtotal) {
-    const data = { idpedido, idproducto, nombreproducto, precio, cantidad, pieza, subtotal }
+  setitemspedido (idpedido, idproducto, nombreproducto, precio, cantidad, subtotal, preciocaj, unixcaja, costoactu, porciva, porkilos) {
+    const data = { idpedido, idproducto, nombreproducto, precio, cantidad, subtotal, preciocaj, unixcaja, costoactu, porciva, porkilos }
+    console.log(idpedido, idproducto, nombreproducto, precio, cantidad, subtotal, preciocaj, unixcaja, costoactu, porciva, porkilos)
+
     return axios.post(ENDPOINT_PATH + 'setitemspedido', data)
   }
 
-  setpedido (idusuario, idcliente, nombrecliente, total) {
-    const data = { idusuario, idcliente, nombrecliente, total }
+  setpedido (idusuario, usuario, idcliente, nombrecliente, rifcliente, total, idsucursal, itemsPedido, comentario) {
+    const data = { idusuario, usuario, idcliente, nombrecliente, rifcliente, total, idsucursal, itemsPedido, comentario }
     return axios.post(ENDPOINT_PATH + 'setpedido', data)
+  }
+
+  deleteitemcarrito (id) {
+    const data = { id }
+    return axios.post(ENDPOINT_PATH + 'deleteitemcarrito', data)
   }
 
   deletecarrito (idhold) {
