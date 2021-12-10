@@ -121,9 +121,9 @@ export default defineComponent({
         obj.id = item.id
         obj.nombre = item.nombre
         obj.categoria = item.id
-        if (item.cantidad > 0) {
-          this.serverData.push(obj)
-        }
+        // if (item.cantidad > 0) {
+        this.serverData.push(obj)
+        // }
       }
     }
   },
