@@ -12,15 +12,17 @@
         />
 
         <q-toolbar-title>
-          <div>Bloque 7 App</div>
-          <div style="font-size: small;">Bienvenido {{ nombreusuario }}</div>
+          <div>Bloque 7</div>
+          <div style="font-size: x-small;font-weight: bold;">{{ nombreusuario }}</div>
         </q-toolbar-title>
-        <q-dialog v-model="layoutModal">
+        <!-- CUENTA POR COBRAR DEL CLIENTE -->
+        <q-dialog v-model="layoutModalPays">
           <q-layout view="Lhh lpR fff" container class="bg-white">
             <q-header class="bg-primary">
               <q-toolbar>
-                <q-toolbar-title style="font-size: inherit;">
-                  {{ nombrecliente }}
+                <q-toolbar-title style="font-size: inherit;display: grid;">
+                  <span style=""> Deuda pendiente de: </span>
+                  <span style="">{{ nombrecliente }}</span>
                 </q-toolbar-title>
                 <q-btn flat v-close-popup round dense icon="close" />
               </q-toolbar>
@@ -30,6 +32,63 @@
                 <div>
                   <table style="width: -webkit-fill-available;">
                     <tr>
+                      <td style="border-bottom: 1px dashed #757575;">
+                        # Control
+                      </td>
+                      <td style="border-bottom: 1px dashed #757575;">
+                        Fecha
+                      </td>
+                      <td style="border-bottom: 1px dashed #757575;">
+                        Monto
+                      </td>
+                      <td style="border-bottom: 1px dashed #757575;">
+                        Saldo
+                      </td>
+                    </tr>
+                    <tr v-for="row in serverDataCxc" :key="row.id" style="font-size: smaller;">
+                      <td>
+                        {{ row.id }}
+                      </td>
+                      <td>
+                        {{ row.fecha }}
+                      </td>
+                      <td>
+                        {{ row.monto.toFixed(2) }}
+                      </td>
+                      <td>
+                        {{ row.saldo.toFixed(2) }}
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+              </q-page>
+            </q-page-container>
+            <q-footer class="bg-black text-white">
+              <q-toolbar inset style="width: 100%;justify-content: center;">
+                  <div id="idTotalCxc" style="margin: 0 20px;width: -webkit-fill-available;">
+                    Total : ${{ totalcxc.toFixed(2) }}
+                  </div>
+              </q-toolbar>
+            </q-footer>
+          </q-layout>
+        </q-dialog>
+        <!-- CARRITO DE COMPRA PEDIDO DEL CLIENTE -->
+        <q-dialog v-model="layoutModal">
+          <q-layout view="Lhh lpR fff" container class="bg-white">
+            <q-header class="bg-primary">
+              <q-toolbar>
+                <q-toolbar-title style="font-size: inherit;display: grid;">
+                  <span style=""> Detalle del pedido de: </span>
+                  <span style="">{{ nombrecliente }}</span>
+                </q-toolbar-title>
+                <q-btn flat v-close-popup round dense icon="close" />
+              </q-toolbar>
+            </q-header>
+            <q-page-container>
+              <q-page padding>
+                <div>
+                  <table style="width: -webkit-fill-available;">
+                    <tr style="font-size: x-small;">
                       <td style="border-bottom: 1px dashed #757575;width: 50px">
                         Código
                       </td>
@@ -50,7 +109,7 @@
                       </td>
                     </tr>
                     <tr v-for="row in serverData" :key="row.id" style="font-size: smaller;">
-                      <td>
+                      <td style="font-size: x-small;">
                         {{ row.idproducto }}
                       </td>
                       <td style="font-size: x-small;">
@@ -73,30 +132,43 @@
                 </div>
               </q-page>
             </q-page-container>
-            <q-footer class="bg-black text-white" style="height: 112px;">
-              <q-toolbar inset style="display: grid;">
-                <q-input color="teal" bg-color="white" outlined v-model="comentario" type="text" label="Comentario" style="margin-top: 10px;"/>
-                <div style="display: flex;margin-top: 10px;">
-                  <div id="idTotalCarrito" style="margin: 0 20px;width: -webkit-fill-available;">
+            <q-footer class="bg-black text-white">
+              <q-toolbar inset style="width: 100%;justify-content: center;">
+                  <!-- <div id="idTotalCarrito" style="margin: 0 20px;width: -webkit-fill-available;">
                     Total : ${{ totalcarrito.toFixed(2) }}
-                  </div>
+                  </div> -->
                   <q-btn
-                    style="width: -webkit-fill-available; font-size: x-small;"
+                    style="font-size: x-small;margin-right: 20px;"
                     label="Enviar Pedido"
                     type="buttom"
                     color="primary"
                     @click="createPedido()"
                   />
-                </div>
+                  <q-btn
+                    style="font-size: x-small;"
+                    label="Cancelar Pedido"
+                    type="buttom"
+                    color="negative"
+                    @click="deletePedido()"
+                  />
               </q-toolbar>
             </q-footer>
           </q-layout>
         </q-dialog>
         <div
+          v-if="hidecxc"
+          class="totalItem"
+          @click="layoutModalPays = true">
+          <div class="circuloTotalItem totalItemRed">
+            {{ totalitemscxc }}
+          </div>
+          <q-icon name="receipt" color="red" style="font-size:xxx-large;" />
+        </div>
+        <div
           v-if="hidecarrito"
           class="totalItem"
           @click="layoutModal = true">
-          <div class="circuloTotalItem">
+          <div class="circuloTotalItem totalItemBlack">
             {{ totalitemspedido }}
           </div>
           <q-icon name="shopping_cart" color="dark" style="font-size:xxx-large;" />
@@ -166,12 +238,14 @@
 import { defineComponent, ref } from 'vue'
 import clientesLib from '../logic/clientes'
 import pedidosLib from '../logic/pedidos'
+import moment from 'moment'
 
 export default defineComponent({
   name: 'MainLayout',
   data () {
     return {
       serverData: [],
+      serverDataCxc: [],
       nombreusuario: this.$q.localStorage.getItem('nombreusuario'),
       usuario: this.$q.localStorage.getItem('usuario'),
       idusuario: this.$q.localStorage.getItem('idusuario'),
@@ -181,15 +255,21 @@ export default defineComponent({
   setup () {
     const leftDrawerOpen = ref(false)
     const hidecarrito = ref(false)
+    const hidecxc = ref(false)
     const layoutModal = ref(false)
+    const layoutModalPays = ref(false)
     const idhold = ref(false)
     return {
       leftDrawerOpen,
       totalcarrito: 0,
       totalitemspedido: 0,
+      totalitemscxc: 0,
       hidecarrito,
+      totalcxc: 0,
+      hidecxc,
       idhold,
       layoutModal,
+      layoutModalPays,
       nombrecliente: 'Cliente Público',
       comentario: '',
       toggleLeftDrawer () {
@@ -198,24 +278,59 @@ export default defineComponent({
     }
   },
   methods: {
-    async createPedido () {
-      const resp = await pedidosLib.setpedido(this.idusuario, this.usuario, this.idcliente, this.nombrecliente, this.rifcliente, this.totalcarrito, this.idsucursal, this.serverData, this.comentario)
-      console.log(resp.data)
-      /* for (const i in this.serverData) {
-        const item = this.serverData[i]
-        console.log(idpedido, item.idproducto, item.nombreproducto, item.precio, item.cantidad, item.pieza, parseFloat(item.subtotal), this.idsucursal)
-        await pedidosLib.setitemspedido(idpedido, idpedidoenc, item.idproducto, item.nombreproducto, item.precio, item.cantidad, item.pieza, parseFloat(item.subtotal), this.idsucursal)
-      } */
-      // this.deleteCarrito()
-      // this.$router.go(0)
+    createPedido () {
+      this.$q.dialog({
+        title: 'Confirmación!',
+        message: 'Esta seguro de enviar este PEDIDO?',
+        ok: {
+          color: 'primary',
+          label: 'Sí'
+        },
+        cancel: {
+          color: 'secondary',
+          label: 'No'
+        },
+        persistent: true
+      }).onOk(async () => {
+        await pedidosLib.setpedido(this.idusuario, this.usuario, this.idcliente, this.nombrecliente, this.rifcliente, this.totalcarrito, this.idsucursal, this.serverData, this.comentario)
+        // console.log(resp.data)
+        this.confirmarEnvioPedido()
+      })
     },
-    async hideShowCarrito (idcliente) {
+    async hideShowCxc (idusuario, idcliente) {
+      this.serverDataCxc = []
+      this.totalcxc = 0
+      const resp = await clientesLib.getcxchold(idusuario, idcliente)
+      console.log(resp)
+      this.totalitemscxc = resp.data.length
+      if (resp.data.length > 0) {
+        for (const i in resp.data) {
+          const item = resp.data[i]
+          const obj2 = {}
+          obj2.id = item.id
+          obj2.fecha = moment(item.fecha).format('YYYY-MM-DD')
+          obj2.monto = item.monto
+          obj2.saldo = item.saldo
+          this.totalcxc += parseFloat(obj2.saldo)
+          this.serverDataCxc.push(obj2)
+        }
+        const idTotalCxc = document.querySelector('#idTotalCxc')
+        const circuloCxcItem = document.querySelector('.totalItemRed')
+        if (idTotalCxc) {
+          idTotalCxc.textContent = 'Total : $' + this.totalcxc.toFixed(2)
+        }
+        console.log(this.totalitemscxc, this.totalcxc)
+        circuloCxcItem.textContent = this.totalitemscxc
+      }
+    },
+    async hideShowCarrito (idusuario) {
       this.serverData = []
       this.totalcarrito = 0
-      const resp = await clientesLib.getholds(idcliente)
+      const resp = await clientesLib.getholds(idusuario)
       console.log(resp)
       if (resp.data.length > 0) {
         this.hidecarrito = true
+        this.hidecxc = true
         this.idcliente = resp.data[0].idcliente
         this.nombrecliente = resp.data[0].nombrecliente
         this.rifcliente = resp.data[0].rifcliente
@@ -243,25 +358,51 @@ export default defineComponent({
           this.serverData.push(obj)
         }
         const idTotalCarrito = document.querySelector('#idTotalCarrito')
-        const circuloTotalItem = document.querySelector('.circuloTotalItem')
-        // console.log(this.totalcarrito)
-        // console.log(this.totalitemspedido)
+        const circuloTotalItem = document.querySelector('.totalItemBlack')
         if (idTotalCarrito) {
           idTotalCarrito.textContent = 'Total : $' + this.totalcarrito.toFixed(2)
         }
         circuloTotalItem.textContent = this.totalitemspedido
+        console.log(this.usuario, this.idcliente)
+        this.hideShowCxc(this.usuario, this.idcliente)
       }
+    },
+    deletePedido () {
+      this.$q.dialog({
+        title: 'Confirmación!',
+        message: 'Seguro que sea ELIMINAR este PEDIDO?',
+        ok: {
+          color: 'primary',
+          label: 'Sí'
+        },
+        cancel: {
+          color: 'secondary',
+          label: 'No'
+        },
+        persistent: true
+      }).onOk(async () => {
+        await this.deleteCarrito()
+        this.$router.go(0)
+      })
     },
     async deleteCarrito () {
       const resp = await pedidosLib.deletecarrito(this.idhold)
       console.log(resp)
+      this.idhold = null
+    },
+    confirmarEnvioPedido () {
+      this.layoutModal = false
       this.$q.dialog({
         title: 'Confirmación!',
         message: 'Pedido realizado y enviado con éxito!',
+        ok: {
+          color: 'primary',
+          label: 'Aceptar'
+        },
         persistent: true
       }).onOk(() => {
+        this.deleteCarrito()
         this.$router.go(0)
-        // this.$router.push('/categorias')
       })
     },
     deleteItem (id) {
@@ -284,7 +425,6 @@ export default defineComponent({
     }
   },
   mounted () {
-    console.log(this.idusuario)
     this.hideShowCarrito(this.idusuario)
   }
 })
@@ -298,12 +438,20 @@ export default defineComponent({
   .circuloTotalItem{
     width: 30px;
     height: 30px;
-    background: black;
     color: white;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
+    margin-right: -10px;
+  }
+  .totalItemBlack{
+    background: black;
+    color: white;
+  }
+  .totalItemRed{
+    background: red;
+    color: black;
   }
   .q-toolbar--inset {
     padding-left: 5px;

@@ -21,7 +21,8 @@
           <div class="tituloApp">VENDEDORES</div>
         </div>
         <div
-          class="menuitem">
+          class="menuitem"
+          @click="gotoCxc()">
           <q-icon class="iconApp" name="paid" color="warning" />
           <div class="tituloApp">CTAS X COBRAR</div>
         </div>
@@ -58,6 +59,9 @@ export default defineComponent({
     },
     gotoVendedores () {
       this.$router.push('/vendedores')
+    },
+    gotoCxc () {
+      this.$router.push('/cuentasxcobrar')
     }
   }
 })

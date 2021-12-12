@@ -12,7 +12,8 @@ const routes = [
       { path: '/productos', component: () => import('pages/Productos.vue') },
       { path: '/vendedores', component: () => import('pages/Vendedores.vue') },
       { path: '/vendedoresclientes', component: () => import('pages/Vendedoresclientes.vue') },
-      { path: '/usuarios', component: () => import('pages/Usuarios.vue') }
+      { path: '/usuarios', component: () => import('pages/Usuarios.vue') },
+      { path: '/cuentasxcobrar', component: () => import('pages/Cuentasxcobrar.vue') }
     ]
   },
 

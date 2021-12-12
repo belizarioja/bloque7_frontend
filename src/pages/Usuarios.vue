@@ -141,13 +141,8 @@ export default defineComponent({
       }
     },
     hideShow (val, id, nombre) {
-      let msg = 'HABILITAR'
-      if (val === 1) {
-        msg = 'INHABILITAR'
-        val = 0
-      } else {
-        val = 1
-      }
+      const valor = val === 1 ? 0 : 1
+      const msg = val === 0 ? 'HABILITAR' : 'INHABILITAR'
       this.$q.dialog({
         title: 'Confirmación!',
         message: 'Desea ' + msg + ' a ' + nombre + '?',
@@ -161,8 +156,8 @@ export default defineComponent({
         },
         persistent: true
       }).onOk(async () => {
-        // console.log('Aqui', val, id)
-        await authLib.hideShowUsuarios(val, id)
+        console.log('Aqui', valor, id)
+        await authLib.hideShowUsuarios(valor, id)
         // console.log(resp)
         this.listarUsuarios()
       })

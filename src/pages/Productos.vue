@@ -3,7 +3,7 @@
     <div class="headerItem">
        <div
           class="menuitem"
-          @click="gotoCategorias()">
+          @click="gotoClientes()">
           <q-icon name="keyboard_return" color="info" />
         </div>
         <div class="subHeaderItem">
@@ -32,7 +32,7 @@
       <template v-slot:item="props">
         <div class="q-pa-xs col-xs-12 col-sm-6 col-md-4">
           <q-card>
-            <q-card-section @click="openSetItems( props.row.id, props.row.nombre, props.row.precio, props.row.preciocaj, props.row.unixcaja, props.row.costoactu, props.row.porciva, props.row.porkilos )">
+            <q-card-section @click="openSetItems( props.row.id, props.row.nombre, props.row.precio, props.row.preciocaj, props.row.unixcaja, props.row.costoactu, props.row.porciva, props.row.porkilos , props.row.disponible)">
               <div style="display:grid;">
                 <div class="text-left">
                   <strong>{{ props.row.nombre }}</strong>
@@ -69,7 +69,7 @@
                       </tr>
                       <tr class="rowTableItemsPrecio">
                         <td>
-                          $ {{props.row.precio}}
+                          $ {{props.row.precio.toFixed(2)}}
                         </td>
                         <td>
                           {{props.row.disponible}}
@@ -96,7 +96,8 @@
           <q-item-section>
             <q-item-label>{{ nombreproducto }}</q-item-label>
             <q-item-label caption>
-              $ {{ precioproducto }}
+              <span style="color: blue;"> Precio: ${{ precioproducto.toFixed(2) }} </span>
+              <span style="color: red;margin-left:40px;">Disp : {{ disponibleproducto }}</span>
             </q-item-label>
           </q-item-section>
         </q-item>
@@ -140,6 +141,7 @@ export default defineComponent({
   data () {
     return {
       serverData: [],
+      categoria: null,
       idusuario: this.$q.localStorage.getItem('idusuario')
     }
   },
@@ -157,7 +159,8 @@ export default defineComponent({
     }
     const filter = ref('')
     const nombreproducto = ref('')
-    const precioproducto = ref('')
+    const precioproducto = ref(0)
+    const disponibleproducto = ref(0)
     const cantidad = ref(1)
     const pagination = ref({
       page: 1,
@@ -173,6 +176,7 @@ export default defineComponent({
       cantidad,
       nombreproducto,
       precioproducto,
+      disponibleproducto,
       pagination,
       layoutModal,
       columns: [
@@ -197,13 +201,14 @@ export default defineComponent({
     }
   },
   methods: {
-    gotoCategorias () {
-      this.$router.push('/categorias')
+    gotoClientes () {
+      this.$router.push('/clientes')
     },
-    openSetItems (id, nombre, precio, preciocaj, unixcaja, costoactu, porciva, porkilos) {
+    openSetItems (id, nombre, precio, preciocaj, unixcaja, costoactu, porciva, porkilos, disponible) {
       this.idproducto = id
       this.nombreproducto = nombre
       this.precioproducto = precio
+      this.disponibleproducto = disponible
       this.preciocaj = preciocaj
       this.unixcaja = unixcaja
       this.costoactu = costoactu
@@ -218,6 +223,13 @@ export default defineComponent({
         await pedidosLib.setitemcarrito(idhold, this.idproducto, this.nombreproducto, this.precioproducto, this.cantidad, this.subtotal, this.preciocaj, this.unixcaja, this.costoactu, this.porciva, this.porkilos)
         // clientesLib.getcarrito(idcliente)
         this.$router.go(0)
+      } else {
+        this.$q.dialog({
+          title: 'Oops!',
+          message: 'Debe seleccionar cliente!',
+          persistent: true
+        })
+        this.gotoClientes()
       }
     },
     async listarProductos (categoria) {
@@ -230,7 +242,7 @@ export default defineComponent({
         const obj = {}
         obj.id = item.id
         obj.nombre = item.nombre
-        obj.precio = item.porkilos === 1 ? item.preciocaj : parseFloat(item.preciocaj / item.unixcaja)
+        obj.precio = item.porkilos === 1 ? item.precio : parseFloat(item.precio / item.unixcaja)
         obj.marca = item.marca
         obj.disponible = item.disponible
         obj.preciocaj = item.preciocaj
@@ -245,12 +257,12 @@ export default defineComponent({
   },
   computed: {
     subtotal () {
-      return this.cantidad * this.precioproducto
+      return (this.cantidad * this.precioproducto).toFixed(2)
     }
   },
   mounted () {
-    const categoria = this.$q.localStorage.getItem('categoria')
-    this.listarProductos(categoria)
+    // const categoria = this.$q.localStorage.getItem('categoria')
+    this.listarProductos(this.categoria)
   }
 })
 </script>

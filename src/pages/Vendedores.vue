@@ -41,27 +41,8 @@
                  name="manage_accounts"
                  color="primary"
                  style="font-size: x-large;"
-                 @click="gotoClientes(props.row.id, props.row.nombre)"
                 />
               </div>
-              <!-- <div style="float: right;">
-                <q-icon
-                 v-show="props.row.status"
-                 class="iconApp"
-                 name="check_circle"
-                 color="positive"
-                 style="font-size: x-large;margin-right:10px;"
-                 @click="hideShow(props.row.status, props.row.id, props.row.nombre)"
-                />
-                <q-icon
-                 v-show="!props.row.status"
-                 class="iconApp"
-                 name="disabled_by_default"
-                 color="negative"
-                 style="font-size: x-large;margin-right:10px;"
-                 @click="hideShow(props.row.status, props.row.id, props.row.nombre)"
-                />
-              </div> -->
             </q-card-section>
           </q-card>
         </div>
@@ -79,7 +60,8 @@ export default defineComponent({
   name: 'Usuarios',
   data () {
     return {
-      serverData: []
+      serverData: [],
+      idusuario: this.$q.localStorage.getItem('idusuario')
     }
   },
   setup () {
@@ -126,35 +108,6 @@ export default defineComponent({
     }
   },
   methods: {
-    hideShow (val, id, nombre) {
-      let msg = 'HABILITAR'
-      if (val) {
-        msg = 'INHABILITAR'
-      }
-      this.$q.dialog({
-        title: 'Confirmación!',
-        message: 'Desea ' + msg + ' a ' + nombre + '?',
-        ok: {
-          color: 'primary',
-          label: 'Sí'
-        },
-        cancel: {
-          color: 'secondary',
-          label: 'No'
-        },
-        persistent: true
-      }).onOk(async () => {
-        console.log('Aqui', !val, id, nombre)
-        const resp = await vendedorLib.hideShowVendedores(!val, id, nombre)
-        console.log(resp)
-      })
-    },
-    gotoClientes (id, nombre) {
-      this.$q.localStorage.set('idVendedor', id)
-      this.$q.localStorage.set('nombreVendedor', nombre)
-
-      this.$router.push('/vendedoresclientes')
-    },
     gotoIndex () {
       this.$router.push('/index')
     },
@@ -163,20 +116,9 @@ export default defineComponent({
       const resp = await vendedorLib.listarVendedores()
       console.log(resp.data)
       this.serverData = resp.data
-      /* const datos = resp.data
-      for (const i in datos) {
-        const item = datos[i]
-        const obj = {}
-        obj.id = item.id
-        obj.nombre = item.nombre
-        obj.status = item.status
-        this.serverData.push(obj)
-      } */
     }
   },
   mounted () {
-    this.idusuario = this.$q.localStorage.getItem('idusuario')
-    console.log(this.idusuario)
     this.listarVendedores()
   }
 })

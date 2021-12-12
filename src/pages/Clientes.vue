@@ -34,7 +34,7 @@
           <q-card>
             <q-card-section
               :class="{'done' : props.row.chk }"
-              @click="gotoCategorias( props.row.idcliente, props.row.nombrecliente, props.row.rifcliente)">
+              @click="gotoProductos( props.row.idcliente, props.row.nombrecliente, props.row.rifcliente)">
               <strong>{{ props.row.nombrecliente }}</strong>
               <div>RIF {{ props.row.rifcliente }}</div>
             </q-card-section>
@@ -86,8 +86,8 @@ export default defineComponent({
       pagination,
 
       columns: [
-        { name: 'nombre', label: 'Nombre', field: 'nombre' },
-        { name: 'rif', label: 'Rif', field: 'rif' }
+        { name: 'nombrecliente', label: 'Nombre', field: 'nombrecliente' },
+        { name: 'rifcliente', label: 'Rif', field: 'rifcliente' }
       ],
 
       cardContainerClass: computed(() => {
@@ -104,10 +104,10 @@ export default defineComponent({
     }
   },
   methods: {
-    async gotoCategorias (idcliente, nombrecliente, rifcliente) {
+    async gotoProductos (idcliente, nombrecliente, rifcliente) {
       console.log(this.idusuario, idcliente, rifcliente)
       await clientesLib.setupcarrito(this.idusuario, idcliente, nombrecliente, rifcliente)
-      this.$router.push('/categorias')
+      this.$router.push('/productos')
     },
     gotoIndex () {
       this.$router.push('/index')

@@ -22,5 +22,15 @@ class Cliente {
     const data = { idusuario }
     return axios.post(ENDPOINT_PATH + 'getholds', data)
   }
+
+  getcxchold (idusuario, idcliente) {
+    const data = { idusuario, idcliente }
+    return axios.post(ENDPOINT_PATH + 'getcxchold', data)
+  }
+
+  getcxc (idusuario) {
+    const data = { idusuario }
+    return axios.post(ENDPOINT_PATH + 'getcxc', data)
+  }
 }
 export default new Cliente()
