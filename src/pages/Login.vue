@@ -92,18 +92,27 @@ export default defineComponent({
             const nombreusuario = resp.data[0].nombre
             const idrol = resp.data[0].idrol
             const idsucursal = resp.data[0].idsucursal
+            const status = resp.data[0].status
             console.log(resp.data)
-            this.$q.localStorage.set('usuario', this.usuario)
-            this.$q.localStorage.set('nombreusuario', nombreusuario)
-            this.$q.localStorage.set('idusuario', idusuario)
-            this.$q.localStorage.set('idrol', idrol)
-            this.$q.localStorage.set('idsucursal', idsucursal)
-            this.$router.push('/index')
+            if (status === 1) {
+              this.$q.localStorage.set('usuario', this.usuario)
+              this.$q.localStorage.set('nombreusuario', nombreusuario)
+              this.$q.localStorage.set('idusuario', idusuario)
+              this.$q.localStorage.set('idrol', idrol)
+              this.$q.localStorage.set('idsucursal', idsucursal)
+              this.$router.push('/index')
+            } else {
+              this.$q.dialog({
+                title: 'Oops! No tiene acceso!',
+                message: 'Contacte a la adminstración de BLOQUE 7!',
+                persistent: true
+              })
+            }
           } else {
             // SI LAS CREDENCIALES NO SON VALIDAS
             this.$q.dialog({
-              title: 'Advertencia!',
-              message: 'Credenciales no válidas',
+              title: 'Oops! Advertencia!',
+              message: 'Credenciales no válidas!',
               cancel: true,
               persistent: true
             })
