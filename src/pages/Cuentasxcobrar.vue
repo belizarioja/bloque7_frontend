@@ -31,7 +31,7 @@
 
       <template v-slot:item="props">
         <div class="q-pa-xs col-xs-12 col-sm-6 col-md-4">
-          <q-card @click="hideShowCxc(props.row.idcliente, props.row.nombrecliente)">
+          <q-card @click="hideShowCxc(props.row.idcliente, props.row.nombrecliente, props.row.nombrevendedor)">
             <q-card-section>
               <strong>{{ props.row.nombrecliente }}</strong>
               <div>RIF {{ props.row.rifcliente }}</div>
@@ -61,6 +61,8 @@
                       </td>
                       <td style="border-bottom: 1px dashed #757575;">
                         Fecha
+                      </td> <td style="border-bottom: 1px dashed #757575;text-align: center;color: red;">
+                        Dias
                       </td>
                       <td style="border-bottom: 1px dashed #757575;">
                         Monto
@@ -76,6 +78,9 @@
                       <td>
                         {{ row.fecha }}
                       </td>
+                      <td style="text-align: center;color: red;">
+                        {{ row.dias }}
+                      </td>
                       <td>
                         {{ row.monto.toFixed(2) }}
                       </td>
@@ -88,9 +93,12 @@
               </q-page>
             </q-page-container>
             <q-footer class="bg-black text-white">
-              <q-toolbar inset style="width: 100%;justify-content: center;">
+              <q-toolbar inset style="display: contents;">
+                  <div style="margin: 0 20px;width: -webkit-fill-available;">
+                    Vendedor : {{ nombrevendedor }}
+                  </div>
                   <div id="idTotalCxc" style="margin: 0 20px;width: -webkit-fill-available;">
-                    Total : ${{ totalcxc.toFixed(2) }}
+                    Total : {{ totalcxc.toFixed(2) }}
                   </div>
               </q-toolbar>
             </q-footer>
@@ -114,7 +122,8 @@ export default defineComponent({
       layoutModalPays: false,
       totalcxc: 0,
       nombrecliente: '',
-      idVendedor: this.$q.localStorage.getItem('usuario'),
+      nombrevendedor: '',
+      usuario: this.$q.localStorage.getItem('usuario').toString().toUpperCase(),
       idusuario: this.$q.localStorage.getItem('idusuario')
     }
   },
@@ -162,10 +171,17 @@ export default defineComponent({
     }
   },
   methods: {
+    calcDiffHours (fecha) {
+      const now = moment()
+      const end = moment(fecha, 'YYYY-MM-DD')
+      console.log(now, end)
+      const duration = moment.duration(now.diff(end))
+      return duration.asDays().toFixed(0)
+    },
     async listarCxc () {
-      console.log(this.idVendedor)
+      console.log(this.usuario)
       this.serverData = []
-      const resp = await clientesLib.getcxc(this.idVendedor)
+      const resp = await clientesLib.getcxc(this.usuario)
       console.log(resp)
       const datos = resp.data
       for (const i in datos) {
@@ -173,6 +189,7 @@ export default defineComponent({
         const obj = {}
         obj.idcliente = item.idcliente
         obj.nombrecliente = item.nombrecliente
+        obj.nombrevendedor = item.nombrevendedor
         obj.rifcliente = item.rifcliente
         this.serverData.push(obj)
       }
@@ -180,12 +197,13 @@ export default defineComponent({
     gotoIndex () {
       this.$router.push('/index')
     },
-    async hideShowCxc (idcliente, nombrecliente) {
+    async hideShowCxc (idcliente, nombrecliente, nombrevendedor) {
       this.serverDataCxc = []
       this.totalcxc = 0
       this.layoutModalPays = true
       this.nombrecliente = nombrecliente
-      const resp = await clientesLib.getcxchold(this.idVendedor, idcliente)
+      this.nombrevendedor = nombrevendedor
+      const resp = await clientesLib.getcxchold(this.usuario, idcliente)
       console.log(resp)
       if (resp.data.length > 0) {
         for (const i in resp.data) {
@@ -193,6 +211,7 @@ export default defineComponent({
           const obj2 = {}
           obj2.id = item.id
           obj2.fecha = moment(item.fecha).format('YYYY-MM-DD')
+          obj2.dias = this.calcDiffHours(item.fecha)
           obj2.monto = item.monto
           obj2.saldo = item.saldo
           this.totalcxc += parseFloat(obj2.saldo)

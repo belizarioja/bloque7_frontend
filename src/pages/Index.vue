@@ -2,7 +2,7 @@
   <q-page class="text-center">
     <div class="headerItem">
       <div class="subHeaderItem">
-        Aplicativos
+        Módulos
       </div>
     </div>
     <q-card class="my-card" style="margin: 20px;">
@@ -10,7 +10,7 @@
         <div
           class="menuitem"
           @click="gotoClientes()">
-          <q-icon class="iconApp" name="playlist_add" color="info" />
+          <q-icon class="iconApp" name="point_of_sale" color="info" />
           <div class="tituloApp">PEDIDOS</div>
         </div>
         <div

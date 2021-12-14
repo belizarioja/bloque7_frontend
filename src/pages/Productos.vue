@@ -35,7 +35,7 @@
             <q-card-section @click="openSetItems( props.row.id, props.row.nombre, props.row.precio, props.row.preciocaj, props.row.unixcaja, props.row.costoactu, props.row.porciva, props.row.porkilos , props.row.disponible)">
               <div style="display:grid;">
                 <div class="text-left">
-                  <strong>{{ props.row.nombre }}</strong>
+                  <strong>{{props.row.id + '  ' + props.row.nombre }}</strong>
                 </div>
                 <div  style="display:flex;">
                   <div style="width: 150px;display: flex;align-items: center;justify-content: center;">
@@ -45,23 +45,23 @@
                     <table style="width:100%;">
                       <tr class="headerTableItems">
                         <td style="width:50%;">
-                          Código
+                          Precio caja
                         </td>
                         <td>
-                          Marca
+                          Unidad x caja
                         </td>
                       </tr>
-                      <tr class="rowTableItems">
+                      <tr class="rowTableItemsPrecio">
                         <td>
-                          {{props.row.id}}
+                           $ {{ (props.row.precio * props.row.unixcaja).toFixed(2)}}
                         </td>
                         <td>
-                          {{props.row.marca}}
+                          {{ props.row.unixcaja }}
                         </td>
                       </tr>
                       <tr class="headerTableItems">
                         <td style="width:50%;">
-                          Precio
+                          Precio unidad
                         </td>
                         <td>
                           Disponible
@@ -96,8 +96,9 @@
           <q-item-section>
             <q-item-label>{{ nombreproducto }}</q-item-label>
             <q-item-label caption>
-              <span style="color: blue;"> Precio: ${{ precioproducto.toFixed(2) }} </span>
-              <span style="color: red;margin-left:40px;">Disp : {{ disponibleproducto }}</span>
+              <span style="color: white;background: darkgreen;border-radius: 5px;padding: 1px 4px;"> ${{ precioproducto.toFixed(2) }} </span>
+              <span style="color: red;margin-left:10px;">Disp: {{ disponibleproducto }}</span>
+              <span style="color: blue;margin-left:8px;"> UniXcaja: {{ unixcaja }} </span>
             </q-item-label>
           </q-item-section>
         </q-item>
@@ -162,6 +163,7 @@ export default defineComponent({
     const precioproducto = ref(0)
     const disponibleproducto = ref(0)
     const cantidad = ref(1)
+    const unixcaja = ref(1)
     const pagination = ref({
       page: 1,
       rowsPerPage: getItemsPerPage()
@@ -177,6 +179,7 @@ export default defineComponent({
       nombreproducto,
       precioproducto,
       disponibleproducto,
+      unixcaja,
       pagination,
       layoutModal,
       columns: [
@@ -293,6 +296,7 @@ export default defineComponent({
     background: aliceblue;
     font-weight: bold;
     height: 23px;
+    font-size: smaller;
   }
   .rowTableItems{
     font-weight: bold;

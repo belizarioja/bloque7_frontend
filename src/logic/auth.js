@@ -7,6 +7,10 @@ export default {
     const data = { usuario, clave }
     return axios.post(ENDPOINT_PATH + 'login', data)
   },
+  cambiarclave (usuario, claveactual, nuevaclave) {
+    const data = { usuario, claveactual, nuevaclave }
+    return axios.post(ENDPOINT_PATH + 'cambiarclave', data)
+  },
   usuarios () {
     return axios.get(ENDPOINT_PATH + 'usuarios')
   },

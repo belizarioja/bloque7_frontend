@@ -5,7 +5,7 @@
     </div>
     <q-card class="my-card" style="margin: 20px;">
       <q-card-section>
-        Aqui texto de ayuda de la app
+        Módulo en construcción. Contacte a soporte de<blockquote> BLOQUE 7</blockquote> para mas información
       </q-card-section>
     </q-card>
   </q-page>
@@ -15,6 +15,6 @@
 import { defineComponent } from 'vue'
 
 export default defineComponent({
-  name: 'PageIndex'
+  name: 'Ayuda'
 })
 </script>

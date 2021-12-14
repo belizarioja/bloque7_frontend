@@ -38,6 +38,9 @@
                       <td style="border-bottom: 1px dashed #757575;">
                         Fecha
                       </td>
+                      <td style="border-bottom: 1px dashed #757575;text-align: center;color: red;">
+                        Dias
+                      </td>
                       <td style="border-bottom: 1px dashed #757575;">
                         Monto
                       </td>
@@ -51,6 +54,9 @@
                       </td>
                       <td>
                         {{ row.fecha }}
+                      </td>
+                      <td style="text-align: center;color: red;">
+                        {{ row.dias }}
                       </td>
                       <td>
                         {{ row.monto.toFixed(2) }}
@@ -66,7 +72,7 @@
             <q-footer class="bg-black text-white">
               <q-toolbar inset style="width: 100%;justify-content: center;">
                   <div id="idTotalCxc" style="margin: 0 20px;width: -webkit-fill-available;">
-                    Total : ${{ totalcxc.toFixed(2) }}
+                    Total : {{ totalcxc.toFixed(2) }}
                   </div>
               </q-toolbar>
             </q-footer>
@@ -115,7 +121,7 @@
                       <td style="font-size: x-small;">
                         {{ row.nombreproducto }}
                       </td>
-                      <td>
+                      <td style="">
                         {{ row.cantidad }}
                       </td>
                       <td>
@@ -194,10 +200,46 @@
           clickable
           v-ripple>
           <q-item-section avatar>
-            <q-icon name="rule" />
+            <q-icon name="home" />
           </q-item-section>
           <q-item-section>
             Principal
+          </q-item-section>
+        </q-item>
+        <q-item
+          to="/clientes"
+          exact
+          clickable
+          v-ripple>
+          <q-item-section avatar>
+            <q-icon name="point_of_sale" />
+          </q-item-section>
+          <q-item-section>
+            Realizar pedido
+          </q-item-section>
+        </q-item>
+        <q-item
+          to="/cuentasxcobrar"
+          exact
+          clickable
+          v-ripple>
+          <q-item-section avatar>
+            <q-icon name="paid" />
+          </q-item-section>
+          <q-item-section>
+            Cuentas por cobrar
+          </q-item-section>
+        </q-item>
+        <q-item
+          to="/cambiarclave"
+          exact
+          clickable
+          v-ripple>
+          <q-item-section avatar>
+            <q-icon name="lock_clock" />
+          </q-item-section>
+          <q-item-section>
+            Cambiar clave
           </q-item-section>
         </q-item>
         <q-item
@@ -213,7 +255,7 @@
           </q-item-section>
         </q-item>
         <q-item
-          to="/"
+          to="/logout"
           active
           clickable
           v-ripple>
@@ -239,6 +281,7 @@ import { defineComponent, ref } from 'vue'
 import clientesLib from '../logic/clientes'
 import pedidosLib from '../logic/pedidos'
 import moment from 'moment'
+// import { date } from 'quasar'
 
 export default defineComponent({
   name: 'MainLayout',
@@ -297,6 +340,13 @@ export default defineComponent({
         this.confirmarEnvioPedido()
       })
     },
+    calcDiffHours (fecha) {
+      const now = moment()
+      const end = moment(fecha, 'YYYY-MM-DD')
+      console.log(now, end)
+      const duration = moment.duration(now.diff(end))
+      return duration.asDays().toFixed(0)
+    },
     async hideShowCxc (idusuario, idcliente) {
       this.serverDataCxc = []
       this.totalcxc = 0
@@ -309,6 +359,7 @@ export default defineComponent({
           const obj2 = {}
           obj2.id = item.id
           obj2.fecha = moment(item.fecha).format('YYYY-MM-DD')
+          obj2.dias = this.calcDiffHours(item.fecha)
           obj2.monto = item.monto
           obj2.saldo = item.saldo
           this.totalcxc += parseFloat(obj2.saldo)

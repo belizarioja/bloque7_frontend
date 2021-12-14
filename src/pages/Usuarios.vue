@@ -125,7 +125,6 @@ export default defineComponent({
     async listarUsuarios () {
       this.serverData = []
       const resp = await authLib.usuarios()
-      console.log(resp.data)
       const datos = resp.data
       for (const i in datos) {
         const item = datos[i]
@@ -156,16 +155,13 @@ export default defineComponent({
         },
         persistent: true
       }).onOk(async () => {
-        console.log('Aqui', valor, id)
         await authLib.hideShowUsuarios(valor, id)
-        // console.log(resp)
         this.listarUsuarios()
       })
     }
   },
   mounted () {
     this.idusuario = this.$q.localStorage.getItem('idusuario')
-    console.log(this.idusuario)
     this.listarUsuarios()
   }
 })

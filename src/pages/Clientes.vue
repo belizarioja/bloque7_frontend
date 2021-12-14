@@ -56,7 +56,7 @@ export default defineComponent({
   data () {
     return {
       serverData: [],
-      idVendedor: this.$q.localStorage.getItem('usuario'),
+      usuario: this.$q.localStorage.getItem('usuario'),
       idusuario: this.$q.localStorage.getItem('idusuario')
     }
   },
@@ -121,7 +121,7 @@ export default defineComponent({
         chk = resp.data[0].idcliente
         // clientesLib.getcarrito(idcliente)
       }
-      const resp2 = await vendedorLib.listarVendedorClientes(this.idVendedor)
+      const resp2 = await vendedorLib.listarVendedorClientes(this.usuario)
       console.log(resp2)
       const datos = resp2.data
       for (const i in datos) {
