@@ -1,7 +1,7 @@
 {
   "name": "com.bloque7.app",
-  "displayName": "Bloque7",
-  "version": "1.0.0",
+  "displayName": "BLOQUE 7",
+  "version": "1.0.1",
   "description": "App de pedidos de Bloque 7.",
   "main": "index.js",
   "scripts": {

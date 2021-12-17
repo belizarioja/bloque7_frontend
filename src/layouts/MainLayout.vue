@@ -556,8 +556,9 @@ export default defineComponent({
           title: 'Oops! Problemas con INTERNET',
           message: 'Revise conexión e intente ingresar de nuevo!',
           persistent: true
+        }).onOk(() => {
+          this.$router.push('/logout')
         })
-        this.$router.push('/logout')
       }
     }, (1000 * 2))
   }

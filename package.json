@@ -1,8 +1,8 @@
 {
   "name": "bloque7_frontend",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "App de pedidos de Bloque 7",
-  "productName": "Bloque 7",
+  "productName": "BLOQUE 7",
   "author": "Jesus Belizario",
   "private": true,
   "scripts": {

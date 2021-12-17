@@ -97,8 +97,8 @@
             <q-item-label>{{ nombreproducto }}</q-item-label>
             <q-item-label caption>
               <span style="color: white;background: darkgreen;border-radius: 5px;padding: 1px 4px;"> ${{ precioproducto.toFixed(2) }} </span>
-              <span style="color: red;margin-left:10px;">Disp: {{ disponibleproducto }}</span>
-              <span style="color: blue;margin-left:8px;"> UniXcaja: {{ unixcaja }} </span>
+              <span style="color: red;margin-left:30px;">Disp: {{ disponibleproducto }}</span>
+              <span style="color: blue;margin-left:25px;">UniXcaja: {{ unixcaja }} </span>
             </q-item-label>
           </q-item-section>
         </q-item>
