@@ -38,9 +38,10 @@
               <div style="float: right;">
                 <q-icon
                  class="iconApp"
-                 name="manage_accounts"
+                 name="view_list"
                  color="primary"
-                 style="font-size: x-large;"
+                 style="font-size: 24px;"
+                 @click="gotoReportePedidos(props.row.id, props.row.nombre)"
                 />
               </div>
             </q-card-section>
@@ -110,6 +111,11 @@ export default defineComponent({
   methods: {
     gotoIndex () {
       this.$router.push('/index')
+    },
+    gotoReportePedidos (usuarioreporte, nombrereporte) {
+      this.$q.localStorage.set('usuarioreporte', usuarioreporte)
+      this.$q.localStorage.set('nombrereporte', nombrereporte)
+      this.$router.push('/reportepedidos')
     },
     async listarVendedores () {
       this.serverData = []

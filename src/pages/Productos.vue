@@ -143,7 +143,8 @@ export default defineComponent({
     return {
       serverData: [],
       categoria: null,
-      idusuario: this.$q.localStorage.getItem('idusuario')
+      idusuario: this.$q.localStorage.getItem('idusuario'),
+      usuario: this.$q.localStorage.getItem('usuario')
     }
   },
   setup () {
@@ -263,9 +264,26 @@ export default defineComponent({
       return (this.cantidad * this.precioproducto).toFixed(2)
     }
   },
-  mounted () {
-    // const categoria = this.$q.localStorage.getItem('categoria')
-    this.listarProductos(this.categoria)
+  async mounted () {
+    const idcliente = this.$q.localStorage.getItem('idcliente')
+    if (idcliente) {
+      const resp = await clientesLib.getcxchold(this.usuario, idcliente)
+      console.log(resp)
+      if (resp.data.length > 0) {
+        this.$q.dialog({
+          title: 'Advertencia!',
+          message: 'Este cliente tiene deudas pendientes!',
+          persistent: true
+        }).onOk(() => {
+          this.$q.localStorage.remove('idcliente')
+          this.$router.go(0)
+        })
+      } else {
+        this.$q.localStorage.remove('idcliente')
+        this.$router.go(0)
+      }
+    }
+    this.listarProductos(null)
   }
 })
 </script>

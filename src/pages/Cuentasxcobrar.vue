@@ -64,10 +64,10 @@
                       </td> <td style="border-bottom: 1px dashed #757575;text-align: center;color: red;">
                         Dias
                       </td>
-                      <td style="border-bottom: 1px dashed #757575;">
+                      <td class="text-right" style="border-bottom: 1px dashed #757575;">
                         Monto
                       </td>
-                      <td style="border-bottom: 1px dashed #757575;">
+                      <td  class="text-right" style="border-bottom: 1px dashed #757575;">
                         Saldo
                       </td>
                     </tr>
@@ -81,10 +81,10 @@
                       <td style="text-align: center;color: red;">
                         {{ row.dias }}
                       </td>
-                      <td>
+                      <td class="text-right">
                         {{ row.monto.toFixed(2) }}
                       </td>
-                      <td>
+                      <td class="text-right">
                         {{ row.saldo.toFixed(2) }}
                       </td>
                     </tr>

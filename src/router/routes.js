@@ -15,7 +15,8 @@ const routes = [
       { path: '/vendedores', component: () => import('pages/Vendedores.vue') },
       { path: '/vendedoresclientes', component: () => import('pages/Vendedoresclientes.vue') },
       { path: '/usuarios', component: () => import('pages/Usuarios.vue') },
-      { path: '/cuentasxcobrar', component: () => import('pages/Cuentasxcobrar.vue') }
+      { path: '/cuentasxcobrar', component: () => import('pages/Cuentasxcobrar.vue') },
+      { path: '/reportepedidos', component: () => import('pages/Reportepedidos.vue') }
     ]
   },
 

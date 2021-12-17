@@ -12,8 +12,8 @@
         />
 
         <q-toolbar-title>
-          <div>Bloque 7</div>
-          <div style="font-size: x-small;font-weight: bold;">{{ nombreusuario }}</div>
+          <div>Bloque 7 - V {{ VERSION }}</div>
+          <div style="font-size: 16px;font-weight: bold;">{{ nombreusuario }}</div>
         </q-toolbar-title>
         <!-- CUENTA POR COBRAR DEL CLIENTE -->
         <q-dialog v-model="layoutModalPays">
@@ -95,7 +95,10 @@
                 <div>
                   <table style="width: -webkit-fill-available;">
                     <tr style="font-size: x-small;">
-                      <td style="border-bottom: 1px dashed #757575;width: 50px">
+                      <td style="border-bottom: 1px dashed #757575;">
+                        #
+                      </td>
+                      <td style="border-bottom: 1px dashed #757575;width: 50px;">
                         Código
                       </td>
                       <td style="border-bottom: 1px dashed #757575;width: 111px;">
@@ -114,23 +117,31 @@
                         Editar
                       </td>
                     </tr>
-                    <tr v-for="row in serverData" :key="row.id" style="font-size: smaller;">
-                      <td style="font-size: x-small;">
+                    <tr
+                      v-for="row in serverData"
+                      :key="row.id"
+                      :class="{'otropedido' : row.i > 13 }"
+                      style="font-size: smaller;"
+                    >
+                      <td :class="{'bordeotropedido' : row.i === 14 }" style="font-size: x-small;">
+                        {{ row.i }}
+                      </td>
+                      <td :class="{'bordeotropedido' : row.i === 14 }" style="font-size: x-small;">
                         {{ row.idproducto }}
                       </td>
-                      <td style="font-size: x-small;">
+                      <td :class="{'bordeotropedido' : row.i === 14 }" style="font-size: x-small;">
                         {{ row.nombreproducto }}
                       </td>
-                      <td style="">
+                      <td :class="{'bordeotropedido' : row.i === 14 }">
                         {{ row.cantidad }}
                       </td>
-                      <td>
+                      <td :class="{'bordeotropedido' : row.i === 14 }">
                         {{ row.precio.toFixed(2) }}
                       </td>
-                      <td>
+                      <td :class="{'bordeotropedido' : row.i === 14 }">
                         {{ row.subtotal }}
                       </td>
-                      <td>
+                      <td :class="{'bordeotropedido' : row.i === 14 }">
                         <q-icon name="delete" color="red" style="font-size:x-large;" @click="deleteItem(row.id)" />
                       </td>
                     </tr>
@@ -140,9 +151,6 @@
             </q-page-container>
             <q-footer class="bg-black text-white">
               <q-toolbar inset style="width: 100%;justify-content: center;">
-                  <!-- <div id="idTotalCarrito" style="margin: 0 20px;width: -webkit-fill-available;">
-                    Total : ${{ totalcarrito.toFixed(2) }}
-                  </div> -->
                   <q-btn
                     style="font-size: x-small;margin-right: 20px;"
                     label="Enviar Pedido"
@@ -168,7 +176,7 @@
           <div class="circuloTotalItem totalItemRed">
             {{ totalitemscxc }}
           </div>
-          <q-icon name="receipt" color="red" style="font-size:xxx-large;" />
+          <q-icon name="receipt" color="red" style="font-size:48px;" />
         </div>
         <div
           v-if="hidecarrito"
@@ -177,7 +185,7 @@
           <div class="circuloTotalItem totalItemBlack">
             {{ totalitemspedido }}
           </div>
-          <q-icon name="shopping_cart" color="dark" style="font-size:xxx-large;" />
+          <q-icon name="shopping_cart" color="dark" style="font-size:48px;" />
         </div>
       </q-toolbar>
     </q-header>
@@ -231,6 +239,32 @@
           </q-item-section>
         </q-item>
         <q-item
+          v-show="idrol > 1"
+          to="/reportepedidos"
+          exact
+          clickable
+          v-ripple>
+          <q-item-section avatar>
+            <q-icon name="view_list" />
+          </q-item-section>
+          <q-item-section>
+            Reporte de pedidos
+          </q-item-section>
+        </q-item>
+        <q-item
+          v-show="idrol === 1"
+          to="/vendedores"
+          exact
+          clickable
+          v-ripple>
+          <q-item-section avatar>
+            <q-icon name="manage_accounts" />
+          </q-item-section>
+          <q-item-section>
+            Vendedores
+          </q-item-section>
+        </q-item>
+        <q-item
           to="/cambiarclave"
           exact
           clickable
@@ -273,6 +307,11 @@
       <router-view />
     </q-page-container>
   </q-layout>
+  <div v-if="loader" class="procesando">
+    <span style="display:grid;">Enviando pedido...
+    <q-linear-progress indeterminate />
+    </span>
+  </div>
 </template>
 
 <script>
@@ -281,7 +320,8 @@ import { defineComponent, ref } from 'vue'
 import clientesLib from '../logic/clientes'
 import pedidosLib from '../logic/pedidos'
 import moment from 'moment'
-// import { date } from 'quasar'
+const config = require('../config/endpoints.js')
+const ENDPOINT_PATH = config.endpoint_path
 
 export default defineComponent({
   name: 'MainLayout',
@@ -289,10 +329,12 @@ export default defineComponent({
     return {
       serverData: [],
       serverDataCxc: [],
+      loader: false,
       nombreusuario: this.$q.localStorage.getItem('nombreusuario'),
       usuario: this.$q.localStorage.getItem('usuario'),
       idusuario: this.$q.localStorage.getItem('idusuario'),
-      idsucursal: this.$q.localStorage.getItem('idsucursal')
+      idsucursal: this.$q.localStorage.getItem('idsucursal'),
+      idrol: this.$q.localStorage.getItem('idrol')
     }
   },
   setup () {
@@ -302,6 +344,7 @@ export default defineComponent({
     const layoutModal = ref(false)
     const layoutModalPays = ref(false)
     const idhold = ref(false)
+    const VERSION = config.version
     return {
       leftDrawerOpen,
       totalcarrito: 0,
@@ -315,6 +358,7 @@ export default defineComponent({
       layoutModalPays,
       nombrecliente: 'Cliente Público',
       comentario: '',
+      VERSION,
       toggleLeftDrawer () {
         leftDrawerOpen.value = !leftDrawerOpen.value
       }
@@ -335,15 +379,29 @@ export default defineComponent({
         },
         persistent: true
       }).onOk(async () => {
-        await pedidosLib.setpedido(this.idusuario, this.usuario, this.idcliente, this.nombrecliente, this.rifcliente, this.totalcarrito, this.idsucursal, this.serverData, this.comentario)
-        // console.log(resp.data)
+        const arregloOriginal = this.serverData
+        const arregloDeArreglos = []
+        // console.log('Arreglo original: ', arregloOriginal)
+        const LONGITUD_PEDAZOS = 13
+        for (let i = 0; i < arregloOriginal.length; i += LONGITUD_PEDAZOS) {
+          const pedazo = arregloOriginal.slice(i, i + LONGITUD_PEDAZOS)
+          arregloDeArreglos.push(pedazo)
+        }
+        // console.log('Arreglo de arreglos: ', arregloDeArreglos)
+        this.loader = true
+        for (const i in arregloDeArreglos) {
+          const arreglopedido = arregloDeArreglos[i]
+          // console.log(arreglopedido)
+          await pedidosLib.setpedido(this.idusuario, this.usuario, this.idcliente, this.nombrecliente, this.rifcliente, this.totalcarrito, this.idsucursal, arreglopedido, this.comentario)
+        }
+        this.loader = false
         this.confirmarEnvioPedido()
       })
     },
     calcDiffHours (fecha) {
       const now = moment()
       const end = moment(fecha, 'YYYY-MM-DD')
-      console.log(now, end)
+      // console.log(now, end)
       const duration = moment.duration(now.diff(end))
       return duration.asDays().toFixed(0)
     },
@@ -351,10 +409,11 @@ export default defineComponent({
       this.serverDataCxc = []
       this.totalcxc = 0
       const resp = await clientesLib.getcxchold(idusuario, idcliente)
-      console.log(resp)
+      // console.log(resp)
       this.totalitemscxc = resp.data.length
       if (resp.data.length > 0) {
         for (const i in resp.data) {
+          this.hidecxc = true
           const item = resp.data[i]
           const obj2 = {}
           obj2.id = item.id
@@ -370,30 +429,33 @@ export default defineComponent({
         if (idTotalCxc) {
           idTotalCxc.textContent = 'Total : $' + this.totalcxc.toFixed(2)
         }
-        console.log(this.totalitemscxc, this.totalcxc)
+        // console.log(this.totalitemscxc, this.totalcxc)
         circuloCxcItem.textContent = this.totalitemscxc
+      } else {
+        this.hidecxc = false
       }
     },
     async hideShowCarrito (idusuario) {
       this.serverData = []
       this.totalcarrito = 0
       const resp = await clientesLib.getholds(idusuario)
-      console.log(resp)
+      // console.log(resp)
       if (resp.data.length > 0) {
         this.hidecarrito = true
-        this.hidecxc = true
+        // this.hidecxc = true
         this.idcliente = resp.data[0].idcliente
         this.nombrecliente = resp.data[0].nombrecliente
         this.rifcliente = resp.data[0].rifcliente
         this.idhold = resp.data[0].id
         // clientesLib.getcarrito(idcliente)
         const resp2 = await pedidosLib.getitemcarrito(this.idhold)
-        console.log(resp2)
+        // console.log(resp2)
         const datos = resp2.data
         this.totalitemspedido = resp2.data.length
         for (const i in datos) {
           const item = datos[i]
           const obj = {}
+          obj.i = parseInt(i) + 1
           obj.id = item.id
           obj.idproducto = item.idproducto
           obj.nombreproducto = item.nombreproducto
@@ -414,7 +476,7 @@ export default defineComponent({
           idTotalCarrito.textContent = 'Total : $' + this.totalcarrito.toFixed(2)
         }
         circuloTotalItem.textContent = this.totalitemspedido
-        console.log(this.usuario, this.idcliente)
+        // console.log(this.usuario, this.idcliente)
         this.hideShowCxc(this.usuario, this.idcliente)
       }
     },
@@ -437,8 +499,8 @@ export default defineComponent({
       })
     },
     async deleteCarrito () {
-      const resp = await pedidosLib.deletecarrito(this.idhold)
-      console.log(resp)
+      await pedidosLib.deletecarrito(this.idhold)
+      // console.log(resp)
       this.idhold = null
     },
     confirmarEnvioPedido () {
@@ -476,7 +538,28 @@ export default defineComponent({
     }
   },
   mounted () {
+    console.log('Main Layout')
     this.hideShowCarrito(this.idusuario)
+  },
+  created () {
+    const verificarServidor = setInterval(() => {
+      const cadena = ENDPOINT_PATH
+      const request = new XMLHttpRequest()
+      try {
+        request.open('GET', cadena, false)
+        // TE FALTA
+        request.send()
+      } catch (error) {
+        console.log(console.log(cadena + ' CAIDO'))
+        clearInterval(verificarServidor)
+        this.$q.dialog({
+          title: 'Oops! Problemas con INTERNET',
+          message: 'Revise conexión e intente ingresar de nuevo!',
+          persistent: true
+        })
+        this.$router.push('/logout')
+      }
+    }, (1000 * 2))
   }
 })
 </script>
@@ -506,5 +589,24 @@ export default defineComponent({
   }
   .q-toolbar--inset {
     padding-left: 5px;
+  }
+  .otropedido {
+    color: cornflowerblue
+  }
+  .bordeotropedido {
+    border-top: 1px dashed #757575;
+  }
+  .procesando {
+    background: #3a4142cc;
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    z-index: 99999;
+    top: 0px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 29px;
+    color: white;
   }
 </style>

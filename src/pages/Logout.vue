@@ -1,7 +1,7 @@
 <template>
   <div class="bg-transparent text-center"  style="padding-top: 20px;">
-    <span style="font-size:x-large"> Saludos</span>
-    <p>Gracias por usar nuestra App</p>
+    <span style="font-size:x-large"> Enhorabuena!</span>
+    <p>Gracias por usar nuestra App!</p>
     <div class="bannerlogout">
       <img src="../assets/logobloque7.png" height="115"/>
     </div>

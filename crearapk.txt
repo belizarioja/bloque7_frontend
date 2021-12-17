@@ -16,4 +16,10 @@ quasar build -m cordova -T android
 
 Firmar app compilada
 jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore quasar-release-key.jks app-release-unsigned.apk quasar-release
-zipalign -v 4 app-release-unsigned.apk pasajeros.apk
+jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore my-release-key.keystore <path-to-unsigned-apk-file> alias_name
+
+en linux
+zipalign -v 4 app-release-unsigned.apk bloque7.apk
+
+en win 10
+C:\Users\Personal\AppData\Local\Android\Sdk\build-tools\30.0.3\zipalign.exe -v 4 app-release-unsigned.apk bloque7.apk

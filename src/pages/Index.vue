@@ -26,6 +26,13 @@
           <q-icon class="iconApp" name="paid" color="warning" />
           <div class="tituloApp">CTAS X COBRAR</div>
         </div>
+        <div
+          class="menuitem"
+          v-show="idrol > 1"
+          @click="gotoReportePedidos()">
+          <q-icon class="iconApp" name="view_list" color="primary" />
+          <div class="tituloApp">REPORTE</div>
+        </div>
       </q-card-section>
       <q-card-section style="display: flex; padding: 7px;">
         <div
@@ -62,6 +69,9 @@ export default defineComponent({
     },
     gotoCxc () {
       this.$router.push('/cuentasxcobrar')
+    },
+    gotoReportePedidos () {
+      this.$router.push('/reportepedidos')
     }
   }
 })
@@ -80,7 +90,8 @@ export default defineComponent({
     display: block;
     align-items: center;
     justify-content: center;
-    font-size: xx-small;
+    font-size: 10px;
+    font-weight: bold;
     float: left;
     margin: 9px;
     padding-top: 5PX;
@@ -91,6 +102,6 @@ export default defineComponent({
     font-size: x-large;
   }
   .iconApp{
-    font-size: xxx-large;
+    font-size: 50px;
   }
 </style>

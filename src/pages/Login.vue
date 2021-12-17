@@ -60,6 +60,8 @@
 <script>
 import { ref, defineComponent } from 'vue'
 import auth from '../logic/auth'
+const config = require('../config/endpoints.js')
+const ENDPOINT_PATH = config.endpoint_path
 
 export default defineComponent({
   setup () {
@@ -118,8 +120,27 @@ export default defineComponent({
           }
         }
       } catch (error) {
-        console.log(error)
+        // console.log(error)
+        this.$q.dialog({
+          title: 'Oops! Problemas con INTERNET',
+          message: 'Revise conexión e intente ingresar de nuevo!',
+          persistent: true
+        })
       }
+    }
+  },
+  created () {
+    const cadena = ENDPOINT_PATH
+    const request = new XMLHttpRequest()
+    try {
+      request.open('GET', cadena, false)
+      request.send()
+    } catch (error) {
+      this.$q.dialog({
+        title: 'Oops! Problemas con INTERNET',
+        message: 'Revise conexión e intente ingresar de nuevo!',
+        persistent: true
+      })
     }
   }
 })

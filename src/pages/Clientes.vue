@@ -105,8 +105,9 @@ export default defineComponent({
   },
   methods: {
     async gotoProductos (idcliente, nombrecliente, rifcliente) {
-      console.log(this.idusuario, idcliente, rifcliente)
+      // console.log(this.idusuario, idcliente, rifcliente)
       await clientesLib.setupcarrito(this.idusuario, idcliente, nombrecliente, rifcliente)
+      this.$q.localStorage.set('idcliente', idcliente)
       this.$router.push('/productos')
     },
     gotoIndex () {

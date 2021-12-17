@@ -36,5 +36,15 @@ class Pedido {
     const data = { idhold }
     return axios.post(ENDPOINT_PATH + 'deletecarrito', data)
   }
+
+  reportePedidos (usuario) {
+    const data = { usuario }
+    return axios.post(ENDPOINT_PATH + 'reportePedidos', data)
+  }
+
+  reporteItemsPedidos (idpedido) {
+    const data = { idpedido }
+    return axios.post(ENDPOINT_PATH + 'reporteItemsPedidos', data)
+  }
 }
 export default new Pedido()
