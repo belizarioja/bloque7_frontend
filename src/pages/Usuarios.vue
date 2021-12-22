@@ -35,7 +35,8 @@
             <q-card-section style="height: 64px;">
               <div style="float: left; margin-right:10px;">
                 <div style="text-align: left;">{{ props.row.usuario }} {{ props.row.nombre }}</div>
-                <div style="text-align: left;;font-weight: bold;">{{ props.row.rol }}</div>
+                <div style="text-align: left;font-weight: bold;">{{ props.row.rol }}</div>
+                <div style="text-align: left;">{{ props.row.rol }}</div>
               </div>
               <div style="float: right;">
                 <q-icon

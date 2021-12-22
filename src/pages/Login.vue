@@ -40,12 +40,10 @@
             <q-icon name="lock" color="dark" />
           </template>
       </q-input>
-      <!-- <div
-        style="margin:20px 0 20px;"
-        class="text-center"
-        to="/recover">
-         Olvidó su clave?
-      </div> -->
+      <div>IMEI: {{ imei.uuid }}</div>
+      <div class="q-gutter-sm">
+        <q-checkbox v-model="mantener" label="Guardar acceso" />
+      </div>
       <div class="text-center"  style="margin-bottom:20px;">
         <q-btn
           style="width: -webkit-fill-available;"
@@ -62,13 +60,20 @@ import { ref, defineComponent } from 'vue'
 import auth from '../logic/auth'
 const config = require('../config/endpoints.js')
 const ENDPOINT_PATH = config.endpoint_path
+// import macaddress from 'macaddress'
 
 export default defineComponent({
   setup () {
+    const imei = ref(
+      window.device === void 0
+        ? 'Run this on a mobile/tablet device'
+        : window.device
+    )
     return {
+      imei,
       usuario: ref(''),
       clave: ref(''),
-      mantener: false
+      mantener: ref(false)
     }
   },
   methods: {
@@ -76,7 +81,9 @@ export default defineComponent({
       try {
         // console.log(this.usuario)
         // console.log(this.clave)
-        const resp = await auth.login(this.usuario, this.clave)
+        console.log(this.mantener)
+        // alert(this.mantener)
+        const resp = await auth.login(this.usuario, this.clave, this.imei.uuid)
         // console.log(resp)
         if (resp.data.status === 500) {
           // SI HAY ALGUN ERROR EN LAS CONSULTAS
@@ -97,10 +104,13 @@ export default defineComponent({
             // console.log(resp.data)
             if (status === 1) {
               this.$q.localStorage.set('usuario', this.usuario)
+              this.$q.localStorage.set('clave', this.clave)
               this.$q.localStorage.set('nombreusuario', nombreusuario)
               this.$q.localStorage.set('idusuario', idusuario)
               this.$q.localStorage.set('idrol', idrol)
               this.$q.localStorage.set('idsucursal', idsucursal)
+              this.$q.localStorage.set('mantener', this.mantener)
+              this.$q.localStorage.set('salida', false)
               this.$router.push('/index')
             } else {
               this.$q.dialog({
@@ -130,6 +140,19 @@ export default defineComponent({
     }
   },
   created () {
+    // this.showMacAddress()
+    if (this.$q.localStorage.getItem('mantener')) {
+      this.mantener = this.$q.localStorage.getItem('mantener')
+      this.usuario = this.$q.localStorage.getItem('usuario')
+      this.clave = this.$q.localStorage.getItem('clave')
+      if (!this.$q.localStorage.getItem('salida')) {
+        // console.log('Entrar sin logueo de una :', this.salida)
+        this.$router.push('/index')
+      }
+    } else {
+      this.mantener = false
+    }
+    console.log(this.mantener)
     const cadena = ENDPOINT_PATH
     const request = new XMLHttpRequest()
     try {

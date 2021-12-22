@@ -26,8 +26,13 @@ export default defineComponent({
     }
   },
   created () {
-    this.$q.localStorage.clear()
-    // this.$router.push('/')
+    console.log(this.$q.localStorage.getItem('mantener'))
+    this.$q.localStorage.set('salida', true)
+    if (!this.$q.localStorage.getItem('mantener')) {
+      this.$q.localStorage.clear()
+    } else {
+      this.gotoIndex()
+    }
   }
 })
 </script>
