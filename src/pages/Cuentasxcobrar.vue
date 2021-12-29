@@ -12,14 +12,13 @@
     </div>
     <q-table
       grid
-      :card-container-class="cardContainerClass"
       :rows="serverData"
       :columns="columns"
       row-key="id"
       :filter="filter"
       hide-header
       v-model:pagination="pagination"
-      :rows-per-page-options="rowsPerPageOptions"
+      :rows-per-page-options="[0]"
     >
       <template v-slot:top-right>
         <q-input borderless dense debounce="300" v-model="filter" placeholder="Buscar">
@@ -108,9 +107,8 @@
 </template>
 
 <script>
-import { ref, computed, watch, defineComponent } from 'vue'
+import { ref, defineComponent } from 'vue'
 import clientesLib from '../logic/clientes'
-import { useQuasar } from 'quasar'
 import moment from 'moment'
 
 export default defineComponent({
@@ -124,50 +122,21 @@ export default defineComponent({
       nombrecliente: '',
       nombrevendedor: '',
       usuario: this.$q.localStorage.getItem('usuario').toString().toUpperCase(),
-      idusuario: this.$q.localStorage.getItem('idusuario')
+      idusuario: this.$q.localStorage.getItem('idusuario'),
+      pagination: {
+        page: 1,
+        rowsPerPage: 0 // 0 means all rows
+      }
     }
   },
   setup () {
-    const $q = useQuasar()
-    function getItemsPerPage () {
-      if ($q.screen.lt.sm) {
-        return 12
-      }
-      if ($q.screen.lt.md) {
-        return 24
-      }
-      return 36
-    }
     const filter = ref('')
-    const pagination = ref({
-      page: 1,
-      rowsPerPage: getItemsPerPage()
-    })
-
-    watch(() => $q.screen.name, () => {
-      pagination.value.rowsPerPage = getItemsPerPage()
-    })
-
     return {
       filter,
-      pagination,
-
       columns: [
         { name: 'nombrecliente', label: 'Nombre', field: 'nombrecliente' },
         { name: 'rifcliente', label: 'Rif', field: 'rifcliente' }
-      ],
-
-      cardContainerClass: computed(() => {
-        return $q.screen.gt.xs
-          ? 'grid-masonry grid-masonry--' + ($q.screen.gt.sm ? '3' : '2')
-          : null
-      }),
-
-      rowsPerPageOptions: computed(() => {
-        return $q.screen.gt.xs
-          ? $q.screen.gt.sm ? [3, 6, 9] : [3, 6]
-          : [3]
-      })
+      ]
     }
   },
   methods: {

@@ -83,7 +83,7 @@ export default defineComponent({
     align-items: center;
   }
   .menuitem {
-    height: 80px;
+    height: 90px;
     width: 27%;
     border: 1px solid green;
     border-radius: 12px;
@@ -95,6 +95,7 @@ export default defineComponent({
     float: left;
     margin: 9px;
     padding-top: 5PX;
+    line-height: 12px;
   }
   .subHeaderItem{
     text-align: center;

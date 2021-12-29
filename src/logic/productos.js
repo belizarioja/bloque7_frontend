@@ -7,5 +7,10 @@ class Producto {
     const data = { categoria }
     return axios.post(ENDPOINT_PATH + 'listarproductos', data)
   }
+
+  getimagenproducto (idproducto) {
+    const data = { idproducto }
+    return axios.post(ENDPOINT_PATH + 'getimagenproducto', data)
+  }
 }
 export default new Producto()

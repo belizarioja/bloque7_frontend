@@ -46,5 +46,10 @@ class Pedido {
     const data = { idpedido }
     return axios.post(ENDPOINT_PATH + 'reporteItemsPedidos', data)
   }
+
+  getSaves (usuario) {
+    const data = { usuario }
+    return axios.post(ENDPOINT_PATH + 'getSaves', data)
+  }
 }
 export default new Pedido()
