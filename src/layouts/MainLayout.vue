@@ -34,7 +34,7 @@
                       <td style="border-bottom: 1px dashed #757575;">
                         #
                       </td>
-                      <td style="border-bottom: 1px dashed #757575;">
+                      <td style="border-bottom: 1px dashed #757575;width: 50px;">
                         Fecha
                       </td>
                       <td style="border-bottom: 1px dashed #757575;">
@@ -67,8 +67,18 @@
                         {{ row.subtotal.toFixed(2) }}
                       </td>
                       <td style="display: flex;">
-                        <q-icon name="add_shopping_cart" color="primary" style="font-size:20px;" />
-                        <q-icon name="delete" color="red" style="font-size:20px;" />
+                        <q-icon
+                         name="add_shopping_cart"
+                         color="primary"
+                         style="font-size:20px;"
+                         @click="checkoutSaves(row.id)"
+                        />
+                        <q-icon
+                         name="delete"
+                         color="red"
+                         style="font-size:20px;margin-left: 10px;"
+                         @click="deleteSaves(row.id)"
+                        />
                       </td>
                     </tr>
                   </table>
@@ -221,15 +231,22 @@
             <q-footer class="bg-black text-white">
               <q-toolbar inset style="width: 100%;justify-content: center;">
                   <q-btn
-                    style="font-size: x-small;margin-right: 20px;"
-                    label="Enviar Pedido"
+                    style="font-size: 12px;margin-right: 20px;"
+                    label="Guardar"
+                    type="buttom"
+                    color="positive"
+                    @click="savePedido()"
+                  />
+                  <q-btn
+                    style="font-size: 12px;margin-right: 20px;"
+                    label="Enviar"
                     type="buttom"
                     color="primary"
                     @click="createPedido()"
                   />
                   <q-btn
-                    style="font-size: x-small;"
-                    label="Cancelar Pedido"
+                    style="font-size: 12px;"
+                    label="Eliminar"
                     type="buttom"
                     color="negative"
                     @click="deletePedido()"
@@ -242,13 +259,13 @@
           class="totalItem totalItemSaves"
           @click="hideShowSaves(idusuario); layoutModalSaves = !layoutModalSaves">
           <div class="circuloTotalItem totalItemBlue">
-            {{ totalitemscxc }}
+            {{ totalitemsaves }}
           </div>
           <q-icon name="point_of_sale" color="primary" style="font-size:35px;" />
         </div>
         <div
           class="totalItem invisible totalItemCxc"
-          @click="hideShowCxc(usuario)">
+          @click="hideShowCxc(usuario); layoutModalPays = !layoutModalPays">
           <div class="circuloTotalItem totalItemRed">
             {{ totalitemscxc }}
           </div>
@@ -256,7 +273,7 @@
         </div>
         <div
           class="totalItem invisible totalItemHold"
-          @click="hideShowCarrito(idusuario)">
+          @click="hideShowCarrito(idusuario); layoutModal = !layoutModal">
           <div class="circuloTotalItem totalItemBlack">
             {{ totalitemspedido }}
           </div>
@@ -426,6 +443,7 @@ export default defineComponent({
       leftDrawerOpen,
       totalcarrito: 0,
       totalitemspedido: 0,
+      totalitemsaves: 0,
       totalitemscxc: 0,
       // hidecarrito,
       totalcxc: 0,
@@ -444,10 +462,73 @@ export default defineComponent({
     }
   },
   methods: {
+    checkoutSaves (idhold) {
+      this.$q.dialog({
+        title: 'Seguro de ENVIAR este PEDIDO al CARRITO?',
+        message: 'Al aceptar, si existe un pedido en el carrito, lo guardará y lo sustituirá por este!',
+        ok: {
+          color: 'primary',
+          label: 'Sí'
+        },
+        cancel: {
+          color: 'secondary',
+          label: 'No'
+        },
+        persistent: true
+      }).onOk(async () => {
+        console.log(idhold, this.idusuario)
+        await pedidosLib.checkoutSave(idhold, this.idusuario)
+        this.cleanCarrito()
+        this.hideShowSaves(this.idusuario)
+        this.hideShowCarrito(this.idusuario)
+        this.layoutModalSaves = false
+      })
+    },
+    deleteSaves (idhold) {
+      this.$q.dialog({
+        title: 'CONFIRMACIÓN!',
+        message: 'Seguro de ELIMINAR este PEDIDO de GUARDADOS?',
+        ok: {
+          color: 'primary',
+          label: 'Sí'
+        },
+        cancel: {
+          color: 'secondary',
+          label: 'No'
+        },
+        persistent: true
+      }).onOk(async () => {
+        console.log(idhold)
+        await pedidosLib.deletecarrito(idhold)
+        this.cleanCarrito()
+        this.hideShowSaves(this.idusuario)
+        this.layoutModalSaves = false
+      })
+    },
+    savePedido () {
+      this.$q.dialog({
+        title: 'CONFIRMACIÓN!',
+        message: 'Está seguro de GUARDAR este PEDIDO?',
+        ok: {
+          color: 'primary',
+          label: 'Sí'
+        },
+        cancel: {
+          color: 'secondary',
+          label: 'No'
+        },
+        persistent: true
+      }).onOk(async () => {
+        console.log(this.idhold)
+        await pedidosLib.savePedido(this.idhold)
+        this.cleanCarrito()
+        this.hideShowSaves(this.idusuario)
+      })
+    },
     createPedido () {
       this.$q.dialog({
-        title: 'Confirmación!',
-        message: 'Esta seguro de enviar este PEDIDO?',
+        title: 'CONFIRMACIÓN!',
+        message: 'Está seguro de ENVIAR este PEDIDO?',
         ok: {
           color: 'primary',
           label: 'Sí'
@@ -488,7 +569,7 @@ export default defineComponent({
       const idcliente = this.$q.localStorage.getItem('idcliente')
       this.serverDataCxc = []
       this.totalcxc = 0
-      this.layoutModalPays = true
+      // this.layoutModalPays = true
       console.log(usuario, idcliente)
       const resp = await clientesLib.getcxchold(usuario, idcliente)
       console.log(resp)
@@ -508,31 +589,26 @@ export default defineComponent({
         }
         const idTotalCxc = document.querySelector('#idTotalCxc')
         const circuloCxcItem = document.querySelector('.totalItemRed')
+        const totalItemCxc = document.querySelector('.totalItemCxc')
+        totalItemCxc.classList.remove('invisible')
         if (idTotalCxc) {
           idTotalCxc.textContent = 'Total : $' + this.totalcxc.toFixed(2)
         }
         circuloCxcItem.textContent = this.totalitemscxc
       }
-      // else {
-      //  this.hidecxc = false
-      // }
     },
     async hideShowCarrito (idusuario) {
       this.serverData = []
       this.totalcarrito = 0
-      this.layoutModal = true
+      // this.layoutModal = true
       const resp = await clientesLib.getholds(idusuario)
-      // console.log(resp)
+      console.log(resp)
       if (resp.data.length > 0) {
-        // this.hidecarrito = true
-        // this.hidecxc = true
-        // this.idcliente = resp.data[0].idcliente
+        this.$q.localStorage.set('idcliente', resp.data[0].idcliente)
         this.nombrecliente = resp.data[0].nombrecliente
         this.rifcliente = resp.data[0].rifcliente
         this.idhold = resp.data[0].id
-        // clientesLib.getcarrito(idcliente)
         const resp2 = await pedidosLib.getitemcarrito(this.idhold)
-        // console.log(resp2)
         const datos = resp2.data
         this.totalitemspedido = resp2.data.length
         for (const i in datos) {
@@ -555,14 +631,18 @@ export default defineComponent({
         }
         const idTotalCarrito = document.querySelector('#idTotalCarrito')
         const circuloTotalItem = document.querySelector('.totalItemBlack')
+        const totalItemHold = document.querySelector('.totalItemHold')
+
+        if (totalItemHold.classList.contains('invisible')) {
+          totalItemHold.classList.remove('invisible')
+        }
         if (idTotalCarrito) {
           idTotalCarrito.textContent = 'Total : $' + this.totalcarrito.toFixed(2)
         }
         if (circuloTotalItem) {
           circuloTotalItem.textContent = this.totalitemspedido
         }
-        // console.log(this.usuario, this.idcliente)
-        // this.hideShowCxc(this.usuario, this.idcliente)
+        this.hideShowCxc(this.usuario)
       }
     },
     async hideShowSaves (idusuario) {
@@ -597,8 +677,8 @@ export default defineComponent({
     },
     deletePedido () {
       this.$q.dialog({
-        title: 'Confirmación!',
-        message: 'Seguro que sea ELIMINAR este PEDIDO?',
+        title: 'CONFIRMACIÓN!',
+        message: 'Seguro que desea ELIMINAR este PEDIDO?',
         ok: {
           color: 'primary',
           label: 'Sí'
@@ -615,6 +695,9 @@ export default defineComponent({
     },
     async deleteCarrito () {
       await pedidosLib.deletecarrito(this.idhold)
+      this.cleanCarrito()
+    },
+    cleanCarrito () {
       this.layoutModal = false
       this.idhold = null
       const totalItemCxc = document.querySelector('.totalItemCxc')
@@ -634,7 +717,7 @@ export default defineComponent({
     confirmarEnvioPedido () {
       this.layoutModal = false
       this.$q.dialog({
-        title: 'Confirmación!',
+        title: 'ENHORABUENA!',
         message: 'Pedido realizado y enviado con éxito!',
         ok: {
           color: 'primary',
@@ -648,7 +731,7 @@ export default defineComponent({
     },
     deleteItem (id) {
       this.$q.dialog({
-        title: 'Confirmación!',
+        title: 'CONFIRMACIÓN!',
         message: 'Desea eliminar este item al pedido?' + id,
         ok: {
           color: 'primary',
@@ -668,6 +751,7 @@ export default defineComponent({
   mounted () {
     console.log('Main Layout')
     this.hideShowSaves(this.idusuario)
+    this.hideShowCarrito(this.idusuario)
   },
   created () {
     const verificarServidor = setInterval(() => {
