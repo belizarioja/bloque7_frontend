@@ -212,11 +212,10 @@ export default defineComponent({
       // console.log(this.usuario)
       this.serverData = []
       const resp = await clientesLib.getcxc(this.usuario)
-      console.log(resp)
+      // console.log(resp)
       const datos = resp.data
       for (const i in datos) {
         const item = datos[i]
-
         const obj2 = {}
         obj2.id = item.id
         obj2.fecha = moment(item.fecha).format('YYYY-MM-DD')
