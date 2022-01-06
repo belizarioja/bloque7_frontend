@@ -60,7 +60,6 @@ import { ref, defineComponent } from 'vue'
 import auth from '../logic/auth'
 const config = require('../config/endpoints.js')
 const ENDPOINT_PATH = config.endpoint_path
-// import macaddress from 'macaddress'
 
 export default defineComponent({
   setup () {

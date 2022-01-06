@@ -10,7 +10,7 @@
           Clientes con deudas
         </div>
     </div>
-    <q-table
+    <!-- <q-table
       grid
       :rows="serverData"
       :columns="columns"
@@ -38,71 +38,109 @@
           </q-card>
         </div>
       </template>
+    </q-table> -->
+    <!-- INICIO NUEVA TABLA EXPANSIVA -->
+    <q-table
+      :rows="serverData"
+      :columns="columns"
+      ref="myTable"
+      dense
+      row-key="idcliente"
+      :filter="filter"
+      hide-header
+      v-model:pagination="pagination"
+      :rows-per-page-options="[0]"
+    >
+      <template v-slot:top>
+        <q-btn size="xs" color="secondary" round dense @click="toggleExpansions" :icon="expansionsToggled ? 'remove' : 'add'"></q-btn>
+        <span style="font-size: 12px;margin-left: 6px;">{{ hideShowAll }}</span>
+        <q-space />
+        <q-input borderless dense debounce="300" color="primary" v-model="filter" placeholder="Buscar">
+          <template v-slot:append>
+            <q-icon name="search" />
+          </template>
+        </q-input>
+      </template>
+
+      <template v-slot:header="props">
+        <q-tr :props="props">
+          <q-th auto-width />
+          <q-th
+            v-for="col in props.cols"
+            style="text-align: left;"
+            :key="col.name"
+            :props="props"          >
+            {{ col.label }}
+          </q-th>
+        </q-tr>
+      </template>
+
+      <template v-slot:body="props">
+        <q-tr :props="props">
+          <q-td auto-width>
+            <q-btn size="xs" color="accent" round dense @click="props.expand = !props.expand" :icon="props.expand ? 'remove' : 'add'" />
+          </q-td>
+          <q-td
+            auto-width
+            v-for="col in props.cols"
+            :key="col.name"
+            :props="props"
+          >
+            {{ col.value }}
+          </q-td>
+        </q-tr>
+        <q-tr v-show="props.expand" :props="props">
+          <q-td colspan="100%">
+            <q-table
+              style="background: #f5f5f5;"
+              :rows="props.row.details"
+              dense
+              :columns="columns2"
+              row-key="id"
+              v-model:pagination="pagination"
+              :rows-per-page-options="[0]"
+            >
+              <template v-slot:header="props">
+                <q-tr :props="props">
+                  <q-th
+                    v-for="col in props.cols"
+                    :key="col.name"
+                    :props="props"
+                    class="text-italic text-purple"
+                  >
+                    {{ col.label }}
+                  </q-th>
+                </q-tr>
+              </template>
+              <template v-slot:pagination="scope">
+                <q-btn
+                 style="font-size: 12px;font-weight: bold;"
+                  color="primary"
+                  :label="'Vendedor: ' + props.row.nombrevendedor"
+                  round
+                  dense
+                  flat
+                  :disable="scope.isFirstPage"
+                  @click="scope.prevPage"
+                />
+                <q-btn
+                 style="font-size: 12px;font-weight: bold;margin-left: 20px;"
+                  color="primary"
+                  :label="'Total: $' + props.row.totalcxc.toFixed(2)"
+                  round
+                  dense
+                  flat
+                  :disable="scope.isFirstPage"
+                  @click="scope.prevPage"
+                />
+              </template>
+            </q-table>
+          </q-td>
+        </q-tr>
+      </template>
+
     </q-table>
-    <q-dialog v-model="layoutModalPays">
-        <q-layout view="Lhh lpR fff" container class="bg-white">
-           <q-header class="bg-primary">
-              <q-toolbar>
-                <q-toolbar-title style="font-size: inherit;display: grid;">
-                  <span style=""> Deuda pendiente de: </span>
-                  <span style="">{{ nombrecliente }}</span>
-                </q-toolbar-title>
-                <q-btn flat v-close-popup round dense icon="close" />
-              </q-toolbar>
-            </q-header>
-            <q-page-container>
-              <q-page padding>
-                <div>
-                  <table style="width: -webkit-fill-available;">
-                    <tr>
-                      <td style="border-bottom: 1px dashed #757575;">
-                        # Control
-                      </td>
-                      <td style="border-bottom: 1px dashed #757575;">
-                        Fecha
-                      </td> <td style="border-bottom: 1px dashed #757575;text-align: center;color: red;">
-                        Dias
-                      </td>
-                      <td class="text-right" style="border-bottom: 1px dashed #757575;">
-                        Monto
-                      </td>
-                      <td  class="text-right" style="border-bottom: 1px dashed #757575;">
-                        Saldo
-                      </td>
-                    </tr>
-                    <tr v-for="row in serverDataCxc" :key="row.id" style="font-size: smaller;">
-                      <td>
-                        {{ row.id }}
-                      </td>
-                      <td>
-                        {{ row.fecha }}
-                      </td>
-                      <td style="text-align: center;color: red;">
-                        {{ row.dias }}
-                      </td>
-                      <td class="text-right">
-                        {{ row.monto.toFixed(2) }}
-                      </td>
-                      <td class="text-right">
-                        {{ row.saldo.toFixed(2) }}
-                      </td>
-                    </tr>
-                  </table>
-                </div>
-              </q-page>
-            </q-page-container>
-            <q-footer class="bg-black text-white">
-              <q-toolbar inset style="display: contents;">
-                  <div style="margin: 0 20px;width: -webkit-fill-available;">
-                    Vendedor : {{ nombrevendedor }}
-                  </div>
-                  <div id="idTotalCxc" style="margin: 0 20px;width: -webkit-fill-available;">
-                    Total : {{ totalcxc.toFixed(2) }}
-                  </div>
-              </q-toolbar>
-            </q-footer>
-        </q-layout>
-    </q-dialog>
+    <!-- FIN NUEVA TABLA EXPANSIVA -->
   </q-page>
 </template>
 
@@ -115,6 +153,8 @@ export default defineComponent({
   name: 'Clientes',
   data () {
     return {
+      expansionsToggled: false,
+      hideShowAll: 'Mostrar todos',
       serverData: [],
       serverDataCxc: [],
       layoutModalPays: false,
@@ -134,39 +174,78 @@ export default defineComponent({
     return {
       filter,
       columns: [
-        { name: 'nombrecliente', label: 'Nombre', field: 'nombrecliente' },
-        { name: 'rifcliente', label: 'Rif', field: 'rifcliente' }
+        { name: 'idcliente', label: 'ID', field: 'idcliente', style: 'text-align: left;font-size: 10px;font-weight: bold;' },
+        { name: 'nombrecliente', label: 'Nombre', field: 'nombrecliente', style: 'white-space: pre-wrap;text-align: left;font-size: 10px;font-weight: bold;' },
+        { name: 'rifcliente', label: 'RIF', field: 'rifcliente', style: 'text-align: left;font-size: 10px;font-weight: bold;' }
+      ],
+      columns2: [
+        { name: 'id', label: '# Control', field: 'id', style: 'text-align: rigth;font-size: 10px;font-weight: bold;' },
+        { name: 'fecha', label: 'Fecha', field: 'fecha', style: 'text-align: rigth;font-size: 10px;font-weight: bold;' },
+        { name: 'dias', label: 'Días', field: 'dias', style: 'color: red;text-align: center;font-size: 10px;font-weight: bold;' },
+        { name: 'monto', label: 'Monto', field: 'monto', style: 'text-align: rigth;font-size: 10px;font-weight: bold;' },
+        { name: 'saldo', label: 'Saldo', field: 'saldo', style: 'text-align: rigth;font-size: 10px;font-weight: bold;' }
       ]
     }
   },
   methods: {
+    toggleExpansions () {
+      this.expansionsToggled = !this.expansionsToggled
+      let rowArray = []
+      if (this.expansionsToggled) {
+        this.hideShowAll = 'Ocultar todos'
+        rowArray = this.serverData.map(row => row.idcliente)
+        // depends on what your key is set up to be - here it is row.name
+      } else {
+        this.hideShowAll = 'Mostrar todos'
+        rowArray = []
+      }
+      this.$refs.myTable.setExpanded(rowArray)
+    },
     calcDiffHours (fecha) {
       const now = moment()
       const end = moment(fecha, 'YYYY-MM-DD')
-      console.log(now, end)
+      // console.log(now, end)
       const duration = moment.duration(now.diff(end))
       return duration.asDays().toFixed(0)
     },
     async listarCxc () {
-      console.log(this.usuario)
+      // console.log(this.usuario)
       this.serverData = []
       const resp = await clientesLib.getcxc(this.usuario)
       console.log(resp)
       const datos = resp.data
       for (const i in datos) {
         const item = datos[i]
-        const obj = {}
-        obj.idcliente = item.idcliente
-        obj.nombrecliente = item.nombrecliente
-        obj.nombrevendedor = item.nombrevendedor
-        obj.rifcliente = item.rifcliente
-        this.serverData.push(obj)
+
+        const obj2 = {}
+        obj2.id = item.id
+        obj2.fecha = moment(item.fecha).format('YYYY-MM-DD')
+        obj2.dias = this.calcDiffHours(item.fecha)
+        obj2.monto = '$' + item.monto.toFixed(2)
+        obj2.saldo = '$' + item.saldo.toFixed(2)
+        const index = this.serverData.findIndex(obj => obj.idcliente === item.idcliente)
+        if (index === -1) {
+          const obj = {}
+          obj.totalcxc = 0
+          obj.details = []
+          obj.idcliente = item.idcliente
+          obj.nombrecliente = item.nombrecliente
+          obj.nombrevendedor = item.nombrevendedor
+          obj.rifcliente = item.rifcliente
+          obj.nombrevendedor = item.nombrevendedor
+          obj.totalcxc += parseFloat(item.saldo)
+          obj.details.push(obj2)
+          this.serverData.push(obj)
+        } else {
+          this.serverData[index].totalcxc += parseFloat(item.saldo)
+          this.serverData[index].details.push(obj2)
+        }
       }
     },
     gotoIndex () {
       this.$router.push('/index')
-    },
-    async hideShowCxc (idcliente, nombrecliente, nombrevendedor) {
+    }
+    /* async hideShowCxc (idcliente, nombrecliente, nombrevendedor) {
       this.serverDataCxc = []
       this.totalcxc = 0
       this.layoutModalPays = true
@@ -192,7 +271,7 @@ export default defineComponent({
         }
         console.log(this.totalcxc)
       }
-    }
+    } */
   },
   mounted () {
     this.listarCxc()
