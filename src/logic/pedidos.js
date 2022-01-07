@@ -37,14 +37,9 @@ class Pedido {
     return axios.post(ENDPOINT_PATH + 'deletecarrito', data)
   }
 
-  reportePedidos (usuario) {
-    const data = { usuario }
+  reportePedidos (usuario, fecha) {
+    const data = { usuario, fecha }
     return axios.post(ENDPOINT_PATH + 'reportePedidos', data)
-  }
-
-  reporteItemsPedidos (idpedido) {
-    const data = { idpedido }
-    return axios.post(ENDPOINT_PATH + 'reporteItemsPedidos', data)
   }
 
   getSaves (usuario) {

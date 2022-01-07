@@ -11,110 +11,114 @@
           <span id="idNombreReporte" v-if="nombrereporte"> de {{ nombrereporte }}</span>
         </div>
     </div>
+    <div style="font-size: 14px;display: flex;justify-content: flex-start;align-items: center;">
+      <span style="margin-left: 20px;margin-right: 20px;">Fecha del pedido : </span>
+      <q-input borderless dense
+          style="font-size:12px;width: 120px;"
+          v-model="fechaReporte"
+        >
+          <template v-slot:append style="padding: none;">
+            <q-icon name="event" class="cursor-pointer" size="sm" color="primary">
+              <q-popup-proxy transition-show="scale" transition-hide="scale">
+                <q-date
+                  v-model="fechaReporte"
+                  @change="listarReporte()"
+                  first-day-of-week="1"
+                  today-btn
+                  :locale="myLocale"
+                >
+                  <div class="row items-center justify-end">
+                    <q-btn v-close-popup label="Cerrar" color="negative" />
+                    <q-btn v-close-popup label="Buscar" color="primary" @click="listarReporte()" />
+                  </div>
+                </q-date>
+              </q-popup-proxy>
+            </q-icon>
+          </template>
+
+        </q-input>
+    </div>
+    <!-- INICIO NUEVA TABLA EXPANSIVA -->
     <q-table
-      grid
-      :card-container-class="cardContainerClass"
       :rows="serverData"
       :columns="columns"
-      row-key="id"
+      ref="myTable"
+      dense
+      row-key="numedocu"
       :filter="filter"
       hide-header
       v-model:pagination="pagination"
-      :rows-per-page-options="rowsPerPageOptions"
+      :rows-per-page-options="[0]"
     >
-      <template v-slot:top-right>
-        <q-input borderless dense debounce="300" v-model="filter" placeholder="Buscar">
+      <template v-slot:top>
+        <q-btn size="xs" color="secondary" round dense @click="toggleExpansions" :icon="expansionsToggled ? 'remove' : 'add'"></q-btn>
+        <span style="font-size: 12px;margin-left: 6px;">{{ hideShowAll }}</span>
+        <q-space />
+        <q-input borderless dense debounce="300" color="primary" v-model="filter" placeholder="Buscar">
           <template v-slot:append>
             <q-icon name="search" />
           </template>
         </q-input>
       </template>
 
-      <template v-slot:item="props">
-        <div class="q-pa-xs col-xs-12 col-sm-6 col-md-4">
-          <q-card>
-            <q-card-section style="height: 64px;" @click="listaReporteItems(props.row.id, props.row.numedocu, props.row.nombrecliente)">
-              <div style="float: left; margin-right:10px;">
-                <div style="text-align: left;">{{ props.row.idcliente }} {{ props.row.nombrecliente }}</div>
-                <div style="text-align: left;;font-weight: bold;">{{ props.row.numedocu }} {{ props.row.fecha }}</div>
-              </div>
-              <div style="float: right;">
-                <q-icon
-                 v-show="props.row.status"
-                 class="iconApp"
-                 name="check_circle"
-                 color="positive"
-                 style="font-size: x-large;margin-right:10px;"
-                />
-                <q-icon
-                 v-show="!props.row.status"
-                 class="iconApp"
-                 name="disabled_by_default"
-                 color="negative"
-                 style="font-size: x-large;margin-right:10px;"
-                />
-              </div>
-            </q-card-section>
-          </q-card>
-        </div>
+      <template v-slot:header="props">
+        <q-tr :props="props">
+          <q-th auto-width />
+          <q-th
+            v-for="col in props.cols"
+            style="text-align: left;"
+            :key="col.name"
+            :props="props"          >
+            {{ col.label }}
+          </q-th>
+        </q-tr>
       </template>
+
+      <template v-slot:body="props">
+        <q-tr :props="props">
+          <q-td auto-width>
+            <q-btn size="xs" color="accent" round dense @click="props.expand = !props.expand" :icon="props.expand ? 'remove' : 'add'" />
+          </q-td>
+          <q-td
+            auto-width
+            v-for="col in props.cols"
+            :key="col.name"
+            :props="props"
+          >
+            {{ col.value }}
+          </q-td>
+        </q-tr>
+        <q-tr v-show="props.expand" :props="props">
+          <q-td colspan="100%">
+            <q-table
+              style="background: #f5f5f5;"
+              :rows="props.row.details"
+              dense
+              :columns="columns2"
+              row-key="idproducto"
+              v-model:pagination="pagination"
+              :rows-per-page-options="[0]"
+              hide-bottom
+            >
+              <template v-slot:header="props">
+                <q-tr :props="props">
+                  <q-th
+                    v-for="col in props.cols"
+                    :key="col.name"
+                    :props="props"
+                    class="text-italic text-purple"
+                  >
+                    {{ col.label }}
+                  </q-th>
+                </q-tr>
+              </template>
+            </q-table>
+          </q-td>
+        </q-tr>
+      </template>
+
     </q-table>
-    <!-- ITEMS DE COMPRA PEDIDO DEL CLIENTE -->
-    <q-dialog v-model="layoutModal">
-        <q-layout view="Lhh lpR fff" container class="bg-white">
-            <q-header class="bg-primary">
-              <q-toolbar>
-                <q-toolbar-title style="font-size: inherit;display: grid;">
-                  <span style=""> Detalle del pedido {{ numedocu }} de: </span>
-                  <span style="">{{ nombrecliente }}</span>
-                </q-toolbar-title>
-                <q-btn flat v-close-popup round dense icon="close" />
-              </q-toolbar>
-            </q-header>
-            <q-page-container>
-              <q-page padding>
-                <div>
-                  <table style="width: -webkit-fill-available;">
-                    <tr style="font-size: x-small;">
-                      <td style="border-bottom: 1px dashed #757575;width: 50px">
-                        Código
-                      </td>
-                      <td style="border-bottom: 1px dashed #757575;width: 111px;">
-                        Producto
-                      </td>
-                      <td class="text-center" style="border-bottom: 1px dashed #757575;">
-                        Cantidad
-                      </td>
-                      <td class="text-right"  style="border-bottom: 1px dashed #757575;">
-                        Precio
-                      </td>
-                      <td class="text-right" style="border-bottom: 1px dashed #757575;">
-                        Subtotal
-                      </td>
-                    </tr>
-                    <tr v-for="row in serverDataItems" :key="row.id" style="font-size: smaller;">
-                      <td style="font-size: x-small;">
-                        {{ row.idproducto }}
-                      </td>
-                      <td style="font-size: x-small;">
-                        {{ row.nombreproducto }}
-                      </td>
-                      <td class="text-center" >
-                        {{ row.cantidad }}
-                      </td>
-                      <td class="text-right" >
-                        {{ row.precio }}
-                      </td>
-                      <td class="text-right" >
-                        {{ row.subtotal }}
-                      </td>
-                    </tr>
-                  </table>
-                </div>
-              </q-page>
-            </q-page-container>
-        </q-layout>
-      </q-dialog>
+    <!-- FIN NUEVA TABLA EXPANSIVA -->
   </q-page>
 </template>
 
@@ -128,9 +132,12 @@ export default defineComponent({
   name: 'Reportepedidos',
   data () {
     return {
+      expansionsToggled: false,
+      hideShowAll: 'Mostrar todos',
       serverData: [],
       serverDataItems: [],
       nombrereporte: false,
+      fechaReporte: moment().format('YYYY/MM/DD'),
       usuario: this.$q.localStorage.getItem('usuario')
     }
   },
@@ -162,15 +169,26 @@ export default defineComponent({
       layoutModal,
       nombrecliente: 'Cliente Público',
       numedocu: '',
-
+      myLocale: {
+        /* starting with Sunday */
+        days: 'Domingo_Lunes_Martes_Miércoles_Jueves_Viernes_Sábado'.split('_'),
+        daysShort: 'Dom_Lun_Mar_Mié_Jue_Vie_Sáb'.split('_'),
+        months: 'Enero_Febrero_Marzo_Abril_Mayo_Junio_Julio_Agosto_Septiembre_Octubre_Noviembre_Diciembre'.split('_'),
+        monthsShort: 'Ene_Feb_Mar_Abr_May_Jun_Jul_Ago_Sep_Oct_Nov_Dic'.split('_'),
+        firstDayOfWeek: 1
+      },
       columns: [
-        { name: 'id', label: 'ID', field: 'id' },
-        { name: 'numedocu', label: '# documento', field: 'numedocu' },
-        { name: 'nombrecliente', label: 'Cliente', field: 'nombrecliente' },
-        { name: 'idcliente', label: 'ID Cliente', field: 'idcliente' },
-        { name: 'fecha', label: 'Fecha', field: 'fecha' }
+        { name: 'numedocu', label: '# documento', field: 'numedocu', style: 'text-align: rigth;font-size: 10px;font-weight: bold;' },
+        { name: 'nombrecliente', label: 'Cliente', field: 'nombrecliente', style: 'white-space: pre-wrap;text-align: left;font-size: 10px;font-weight: bold;' },
+        { name: 'fecha', label: 'Fecha', field: 'fecha', style: 'text-align: rigth;font-size: 10px;font-weight: bold;' },
+        { name: 'hora', label: 'Hora', field: 'hora', style: 'text-align: rigth;font-size: 10px;font-weight: bold;' }
       ],
-
+      columns2: [
+        { name: 'nombreproducto', label: 'Producto', field: 'nombreproducto', style: 'white-space: pre-wrap;text-align: left;font-size: 10px;font-weight: bold;' },
+        { name: 'precio', label: 'Precio', field: 'precio', style: 'text-align: center;font-size: 10px;font-weight: bold;' },
+        { name: 'cantidad', label: 'Cantidad', field: 'cantidad', style: 'text-align: rigth;font-size: 10px;font-weight: bold;' },
+        { name: 'subtotal', label: 'Subtotal', field: 'subtotal', style: 'text-align: rigth;font-size: 10px;font-weight: bold;' }
+      ],
       cardContainerClass: computed(() => {
         return $q.screen.gt.xs
           ? 'grid-masonry grid-masonry--' + ($q.screen.gt.sm ? '3' : '2')
@@ -185,7 +203,22 @@ export default defineComponent({
     }
   },
   methods: {
+    toggleExpansions () {
+      this.expansionsToggled = !this.expansionsToggled
+      let rowArray = []
+      if (this.expansionsToggled) {
+        this.hideShowAll = 'Ocultar todos'
+        rowArray = this.serverData.map(row => row.numedocu)
+        // depends on what your key is set up to be - here it is row.name
+      } else {
+        this.hideShowAll = 'Mostrar todos'
+        rowArray = []
+      }
+      this.$refs.myTable.setExpanded(rowArray)
+    },
     gotoIndex () {
+      this.$q.localStorage.remove('usuarioreporte')
+      this.$q.localStorage.remove('nombrereporte')
       if (this.usuario.toString().toUpperCase() === 'ADMIN') {
         this.$router.push('/vendedores')
       } else {
@@ -195,49 +228,47 @@ export default defineComponent({
     async listarReporte () {
       this.serverData = []
       let usuarioreporte = this.usuario
-      console.log(this.usuario.toUpperCase)
-      if (this.usuario.toString().toUpperCase() === 'ADMIN') {
+      const USER = this.usuario.toString().toUpperCase()
+      console.log(USER)
+      if (USER === 'ADMIN' || USER === 'SOPORTE') {
         usuarioreporte = this.$q.localStorage.getItem('usuarioreporte')
         this.nombrereporte = this.$q.localStorage.getItem('nombrereporte')
         const idNombreReporte = document.querySelector('#idNombreReporte')
         if (idNombreReporte) {
           idNombreReporte.textContent = 'de : ' + this.nombrereporte
         }
-        this.$q.localStorage.remove('usuarioreporte')
-        this.$q.localStorage.remove('nombrereporte')
       }
-      console.log(usuarioreporte)
-      const resp = await pedidosLib.reportePedidos(usuarioreporte)
+      console.log(usuarioreporte, moment(this.fechaReporte).format('YYYY-MM-DD'))
+      const resp = await pedidosLib.reportePedidos(usuarioreporte, moment(this.fechaReporte).format('YYYY-MM-DD'))
       const datos = resp.data
       console.log(datos)
       for (const i in datos) {
         const item = datos[i]
-        const obj = {}
-        obj.id = item.id
-        obj.numedocu = item.numedocu
-        obj.idcliente = item.idcliente
-        obj.nombrecliente = item.nombrecliente
-        obj.fecha = moment(item.fecha).format('YYYY-MM-DD')
-        obj.status = true
-        this.serverData.push(obj)
-      }
-    },
-    async listaReporteItems (idpedido, numedocu, nombrecliente) {
-      this.serverDataItems = []
-      this.layoutModal = true
-      this.numedocu = numedocu
-      this.nombrecliente = nombrecliente
-      const resp = await pedidosLib.reporteItemsPedidos(idpedido)
-      console.log(resp)
-      for (const i in resp.data) {
-        const item = resp.data[i]
         const obj2 = {}
-        obj2.idproducto = item.idproducto
-        obj2.nombreproducto = item.nombreproducto
-        obj2.precio = item.precio
+        // obj2.idproducto = item.idproducto
+        obj2.nombreproducto = item.idproducto + ' - ' + item.nombreproducto
+        obj2.precio = '$' + item.precio.toFixed(2)
         obj2.cantidad = item.cantidad
-        obj2.subtotal = item.subtotal
-        this.serverDataItems.push(obj2)
+        obj2.subtotal = '$' + item.subtotal.toFixed(2)
+        const index = this.serverData.findIndex(obj => obj.numedocu === item.numedocu)
+        if (index === -1) {
+          const obj = {}
+          // obj.totalcxc = 0
+          obj.details = []
+          obj.id = item.id
+          obj.numedocu = item.numedocu
+          // obj.idcliente = item.idcliente
+          obj.nombrecliente = item.idcliente + ' - ' + item.nombrecliente
+          obj.fecha = moment(item.fecha).format('YYYY/MM/DD')
+          obj.hora = moment(item.fecha).format('HH:mm:ss')
+          obj.status = true
+          // obj.totalcxc += parseFloat(item.saldo)
+          obj.details.push(obj2)
+          this.serverData.push(obj)
+        } else {
+          // this.serverData[index].totalcxc += parseFloat(item.saldo)
+          this.serverData[index].details.push(obj2)
+        }
       }
     }
   },

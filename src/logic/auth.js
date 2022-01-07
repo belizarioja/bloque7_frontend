@@ -3,8 +3,8 @@ const config = require('../config/endpoints.js')
 const ENDPOINT_PATH = config.endpoint_path
 
 export default {
-  login (usuario, clave) {
-    const data = { usuario, clave }
+  login (usuario, clave, uuid) {
+    const data = { usuario, clave, uuid }
     return axios.post(ENDPOINT_PATH + 'login', data)
   },
   cambiarclave (usuario, claveactual, nuevaclave) {

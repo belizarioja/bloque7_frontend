@@ -10,35 +10,6 @@
           Clientes con deudas
         </div>
     </div>
-    <!-- <q-table
-      grid
-      :rows="serverData"
-      :columns="columns"
-      row-key="id"
-      :filter="filter"
-      hide-header
-      v-model:pagination="pagination"
-      :rows-per-page-options="[0]"
-    >
-      <template v-slot:top-right>
-        <q-input borderless dense debounce="300" v-model="filter" placeholder="Buscar">
-          <template v-slot:append>
-            <q-icon name="search" />
-          </template>
-        </q-input>
-      </template>
-
-      <template v-slot:item="props">
-        <div class="q-pa-xs col-xs-12 col-sm-6 col-md-4">
-          <q-card @click="hideShowCxc(props.row.idcliente, props.row.nombrecliente, props.row.nombrevendedor)">
-            <q-card-section>
-              <strong>{{ props.row.nombrecliente }}</strong>
-              <div>RIF {{ props.row.rifcliente }}</div>
-            </q-card-section>
-          </q-card>
-        </div>
-      </template>
-    </q-table> -->
     <!-- INICIO NUEVA TABLA EXPANSIVA -->
     <q-table
       :rows="serverData"
@@ -50,6 +21,7 @@
       hide-header
       v-model:pagination="pagination"
       :rows-per-page-options="[0]"
+      :loading="loading"
     >
       <template v-slot:top>
         <q-btn size="xs" color="secondary" round dense @click="toggleExpansions" :icon="expansionsToggled ? 'remove' : 'add'"></q-btn>
@@ -60,6 +32,9 @@
             <q-icon name="search" />
           </template>
         </q-input>
+      </template>
+      <template v-slot:loading>
+        <q-inner-loading showing color="primary" />
       </template>
 
       <template v-slot:header="props">
@@ -114,7 +89,7 @@
               </template>
               <template v-slot:pagination="scope">
                 <q-btn
-                 style="font-size: 12px;font-weight: bold;"
+                 style="font-size: 10px;font-weight: bold;"
                   color="primary"
                   :label="'Vendedor: ' + props.row.nombrevendedor"
                   round
@@ -124,7 +99,7 @@
                   @click="scope.prevPage"
                 />
                 <q-btn
-                 style="font-size: 12px;font-weight: bold;margin-left: 20px;"
+                 style="font-size: 10px;font-weight: bold;margin-left: 20px;"
                   color="primary"
                   :label="'Total: $' + props.row.totalcxc.toFixed(2)"
                   round
@@ -171,8 +146,10 @@ export default defineComponent({
   },
   setup () {
     const filter = ref('')
+    const loading = ref(false)
     return {
       filter,
+      loading,
       columns: [
         { name: 'idcliente', label: 'ID', field: 'idcliente', style: 'text-align: left;font-size: 10px;font-weight: bold;' },
         { name: 'nombrecliente', label: 'Nombre', field: 'nombrecliente', style: 'white-space: pre-wrap;text-align: left;font-size: 10px;font-weight: bold;' },
@@ -211,6 +188,7 @@ export default defineComponent({
     async listarCxc () {
       // console.log(this.usuario)
       this.serverData = []
+      this.loading = true
       const resp = await clientesLib.getcxc(this.usuario)
       // console.log(resp)
       const datos = resp.data
@@ -240,37 +218,11 @@ export default defineComponent({
           this.serverData[index].details.push(obj2)
         }
       }
+      this.loading = false
     },
     gotoIndex () {
       this.$router.push('/index')
     }
-    /* async hideShowCxc (idcliente, nombrecliente, nombrevendedor) {
-      this.serverDataCxc = []
-      this.totalcxc = 0
-      this.layoutModalPays = true
-      this.nombrecliente = nombrecliente
-      this.nombrevendedor = nombrevendedor
-      const resp = await clientesLib.getcxchold(this.usuario, idcliente)
-      console.log(resp)
-      if (resp.data.length > 0) {
-        for (const i in resp.data) {
-          const item = resp.data[i]
-          const obj2 = {}
-          obj2.id = item.id
-          obj2.fecha = moment(item.fecha).format('YYYY-MM-DD')
-          obj2.dias = this.calcDiffHours(item.fecha)
-          obj2.monto = item.monto
-          obj2.saldo = item.saldo
-          this.totalcxc += parseFloat(obj2.saldo)
-          this.serverDataCxc.push(obj2)
-        }
-        const idTotalCxc = document.querySelector('#idTotalCxc')
-        if (idTotalCxc) {
-          idTotalCxc.textContent = 'Total : $' + this.totalcxc.toFixed(2)
-        }
-        console.log(this.totalcxc)
-      }
-    } */
   },
   mounted () {
     this.listarCxc()

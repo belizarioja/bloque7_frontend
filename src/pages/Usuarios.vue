@@ -32,11 +32,11 @@
       <template v-slot:item="props">
         <div class="q-pa-xs col-xs-12 col-sm-6 col-md-4">
           <q-card>
-            <q-card-section style="height: 64px;">
+            <q-card-section style="height: 90px;">
               <div style="float: left; margin-right:10px;">
                 <div style="text-align: left;">{{ props.row.usuario }} {{ props.row.nombre }}</div>
-                <div style="text-align: left;font-weight: bold;">{{ props.row.rol }}</div>
-                <div style="text-align: left;">{{ props.row.rol }}</div>
+                <div style="text-align: left;font-weight: bold;">Útimo acceso : {{ props.row.fe_ult_acceso }}</div>
+                <div style="text-align: left;">Dispositivo : {{ props.row.uuid }}</div>
               </div>
               <div style="float: right;">
                 <q-icon
@@ -68,6 +68,7 @@
 import { ref, computed, watch, defineComponent } from 'vue'
 import authLib from '../logic/auth'
 import { useQuasar } from 'quasar'
+import moment from 'moment'
 
 export default defineComponent({
   name: 'Usuarios',
@@ -136,6 +137,8 @@ export default defineComponent({
         obj.nombre = item.nombre
         obj.idrol = item.idrol
         obj.rol = item.rol
+        obj.uuid = item.uuid ? item.uuid : 'S/Inf'
+        obj.fe_ult_acceso = item.fe_ult_acceso ? moment(item.fe_ult_acceso).format('DD/MM/YYYY HH:mm:ss') : 'S/Inf'
         obj.status = item.status
         this.serverData.push(obj)
       }

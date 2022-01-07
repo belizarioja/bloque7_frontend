@@ -40,7 +40,7 @@
             <q-icon name="lock" color="dark" />
           </template>
       </q-input>
-      <div>IMEI: {{ imei.uuid }}</div>
+      <div>IMEI: {{ imei }}</div>
       <div class="q-gutter-sm">
         <q-checkbox v-model="mantener" label="Guardar acceso" />
       </div>
@@ -65,8 +65,8 @@ export default defineComponent({
   setup () {
     const imei = ref(
       window.device === void 0
-        ? 'Run this on a mobile/tablet device'
-        : window.device
+        ? '11111111111111111111'
+        : window.device.uuid
     )
     return {
       imei,
@@ -82,13 +82,13 @@ export default defineComponent({
         // console.log(this.clave)
         console.log(this.mantener)
         // alert(this.mantener)
-        const resp = await auth.login(this.usuario, this.clave, this.imei.uuid)
+        const resp = await auth.login(this.usuario, this.clave, this.imei)
         // console.log(resp)
         if (resp.data.status === 500) {
           // SI HAY ALGUN ERROR EN LAS CONSULTAS
           this.$q.dialog({
             title: 'Advertencia!',
-            message: resp.data.message + ' ' + resp.data.resp.code,
+            message: resp.data.message,
             cancel: true,
             persistent: true
           })
@@ -152,6 +152,7 @@ export default defineComponent({
       this.mantener = false
     }
     console.log(this.mantener)
+    console.log(this.imei)
     const cadena = ENDPOINT_PATH
     const request = new XMLHttpRequest()
     try {

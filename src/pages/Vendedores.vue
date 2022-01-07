@@ -19,7 +19,7 @@
       :filter="filter"
       hide-header
       v-model:pagination="pagination"
-      :rows-per-page-options="rowsPerPageOptions"
+      :rows-per-page-options="[0]"
     >
       <template v-slot:top-right>
         <q-input borderless dense debounce="300" v-model="filter" placeholder="Buscar">
@@ -53,9 +53,8 @@
 </template>
 
 <script>
-import { ref, computed, watch, defineComponent } from 'vue'
+import { ref, defineComponent } from 'vue'
 import vendedorLib from '../logic/vendedores'
-import { useQuasar } from 'quasar'
 
 export default defineComponent({
   name: 'Usuarios',
@@ -66,46 +65,17 @@ export default defineComponent({
     }
   },
   setup () {
-    const $q = useQuasar()
-    function getItemsPerPage () {
-      if ($q.screen.lt.sm) {
-        return 12
-      }
-      if ($q.screen.lt.md) {
-        return 24
-      }
-      return 36
-    }
     const filter = ref('')
-    const pagination = ref({
-      page: 1,
-      rowsPerPage: getItemsPerPage()
-    })
-
-    watch(() => $q.screen.name, () => {
-      pagination.value.rowsPerPage = getItemsPerPage()
-    })
-
     return {
       filter,
-      pagination,
-
+      pagination: {
+        page: 1,
+        rowsPerPage: 0 // 0 means all rows
+      },
       columns: [
         { name: 'id', label: 'ID', field: 'id' },
         { name: 'nombre', label: 'Nombre', field: 'nombre' }
-      ],
-
-      cardContainerClass: computed(() => {
-        return $q.screen.gt.xs
-          ? 'grid-masonry grid-masonry--' + ($q.screen.gt.sm ? '3' : '2')
-          : null
-      }),
-
-      rowsPerPageOptions: computed(() => {
-        return $q.screen.gt.xs
-          ? $q.screen.gt.sm ? [3, 6, 9] : [3, 6]
-          : [3]
-      })
+      ]
     }
   },
   methods: {

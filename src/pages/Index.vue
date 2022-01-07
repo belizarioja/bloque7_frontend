@@ -9,16 +9,24 @@
       <q-card-section style="display: flex; padding: 7px;">
         <div
           class="menuitem"
+          v-show="idrol > 1"
           @click="gotoClientes()">
           <q-icon class="iconApp" name="point_of_sale" color="info" />
           <div class="tituloApp">PEDIDOS</div>
         </div>
         <div
           class="menuitem"
+          v-show="idrol === 1"
+          @click="gotoUsuarios()">
+          <q-icon class="iconApp" name="account_circle" color="secondary" />
+          <div class="tituloApp">USUARIOS</div>
+        </div>
+        <div
+          class="menuitem"
            v-show="idrol === 1"
           @click="gotoVendedores()">
-          <q-icon class="iconApp" name="manage_accounts" color="accent" />
-          <div class="tituloApp">VENDEDORES</div>
+          <q-icon class="iconApp" name="view_list" color="primary" />
+          <div class="tituloApp">REPORTE</div>
         </div>
         <div
           class="menuitem"
@@ -35,13 +43,6 @@
         </div>
       </q-card-section>
       <q-card-section style="display: flex; padding: 7px;">
-        <div
-          class="menuitem"
-          v-show="idrol === 1"
-          @click="gotoUsuarios()">
-          <q-icon class="iconApp" name="account_circle" color="secondary" />
-          <div class="tituloApp">USUARIOS</div>
-        </div>
       </q-card-section>
     </q-card>
   </q-page>
