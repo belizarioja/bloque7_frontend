@@ -17,5 +17,9 @@ export default {
   hideShowUsuarios (val, id) {
     const data = { val, id }
     return axios.post(ENDPOINT_PATH + 'hideShowUsuarios', data)
+  },
+  resetDevice (id) {
+    const data = { id }
+    return axios.post(ENDPOINT_PATH + 'resetDevice', data)
   }
 }

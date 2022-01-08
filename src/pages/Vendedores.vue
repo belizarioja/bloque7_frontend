@@ -12,7 +12,6 @@
     </div>
     <q-table
       grid
-      :card-container-class="cardContainerClass"
       :rows="serverData"
       :columns="columns"
       row-key="id"
@@ -32,16 +31,29 @@
       <template v-slot:item="props">
         <div class="q-pa-xs col-xs-12 col-sm-6 col-md-4">
           <q-card>
-            <q-card-section style="display:block; height: 48px;">
-              <div style="float: left; margin-right:10px;">{{ props.row.id }}</div>
-              <div style="float: left; font-weight: bold;">{{ props.row.nombre }}</div>
+            <q-card-section style="display:block; height: 90px;">
+              <div style="float: left; margin-right:10px;">
+                <div style="text-align: left;">{{ props.row.id }}</div>
+                <div style="text-align: left; font-weight: bold;">{{ props.row.nombre }}</div>
+                <div v-if="props.row.fecha" style="text-align: left;">Ultimo pedido {{ ultimopedido(props.row.fecha) }}</div>
+              </div>
               <div style="float: right;">
                 <q-icon
                  class="iconApp"
+                 name="paid"
+                 color="warning"
+                 style="font-size: 30px;"
+                 @click="gotoReporteCxc(props.row.id, props.row.nombre)"
+                />
+              </div>
+              <div style="float: right;">
+                <q-icon
+                 v-if="props.row.fecha"
+                 class="iconApp"
                  name="view_list"
                  color="primary"
-                 style="font-size: 24px;"
-                 @click="gotoReportePedidos(props.row.id, props.row.nombre)"
+                 style="font-size: 30px;"
+                 @click="gotoReportePedidos(props.row.id, props.row.nombre, props.row.fecha)"
                 />
               </div>
             </q-card-section>
@@ -55,26 +67,28 @@
 <script>
 import { ref, defineComponent } from 'vue'
 import vendedorLib from '../logic/vendedores'
+import moment from 'moment'
 
 export default defineComponent({
   name: 'Usuarios',
   data () {
     return {
       serverData: [],
-      idusuario: this.$q.localStorage.getItem('idusuario')
+      idusuario: this.$q.localStorage.getItem('idusuario'),
+      pagination: {
+        page: 1,
+        rowsPerPage: 0 // 0 means all rows
+      }
     }
   },
   setup () {
     const filter = ref('')
     return {
       filter,
-      pagination: {
-        page: 1,
-        rowsPerPage: 0 // 0 means all rows
-      },
       columns: [
         { name: 'id', label: 'ID', field: 'id' },
-        { name: 'nombre', label: 'Nombre', field: 'nombre' }
+        { name: 'nombre', label: 'Nombre', field: 'nombre' },
+        { name: 'fecha', label: 'Fecha', field: 'fecha' }
       ]
     }
   },
@@ -82,9 +96,15 @@ export default defineComponent({
     gotoIndex () {
       this.$router.push('/index')
     },
-    gotoReportePedidos (usuarioreporte, nombrereporte) {
+    gotoReporteCxc (usuarioreporte, nombrereporte) {
       this.$q.localStorage.set('usuarioreporte', usuarioreporte)
       this.$q.localStorage.set('nombrereporte', nombrereporte)
+      this.$router.push('/cuentasxcobrar')
+    },
+    gotoReportePedidos (usuarioreporte, nombrereporte, fechareporte) {
+      this.$q.localStorage.set('usuarioreporte', usuarioreporte)
+      this.$q.localStorage.set('nombrereporte', nombrereporte)
+      this.$q.localStorage.set('fechareporte', moment(fechareporte).format('YYYY-MM-DD'))
       this.$router.push('/reportepedidos')
     },
     async listarVendedores () {
@@ -92,7 +112,11 @@ export default defineComponent({
       const resp = await vendedorLib.listarVendedores()
       console.log(resp.data)
       this.serverData = resp.data
+    },
+    ultimopedido (fecha) {
+      return moment(fecha).format('YYYY-MM-DD')
     }
+
   },
   mounted () {
     this.listarVendedores()

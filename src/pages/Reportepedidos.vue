@@ -28,7 +28,7 @@
                   :locale="myLocale"
                 >
                   <div class="row items-center justify-end">
-                    <q-btn v-close-popup label="Cerrar" color="negative" />
+                    <q-btn v-close-popup label="Cerrar" color="negative" style="margin-right: 20px;" />
                     <q-btn v-close-popup label="Buscar" color="primary" @click="listarReporte()" />
                   </div>
                 </q-date>
@@ -123,9 +123,8 @@
 </template>
 
 <script>
-import { ref, computed, watch, defineComponent } from 'vue'
+import { ref, defineComponent } from 'vue'
 import pedidosLib from '../logic/pedidos'
-import { useQuasar } from 'quasar'
 import moment from 'moment'
 
 export default defineComponent({
@@ -138,34 +137,18 @@ export default defineComponent({
       serverDataItems: [],
       nombrereporte: false,
       fechaReporte: moment().format('YYYY/MM/DD'),
-      usuario: this.$q.localStorage.getItem('usuario')
+      usuario: this.$q.localStorage.getItem('usuario'),
+      pagination: {
+        page: 1,
+        rowsPerPage: 0 // 0 means all rows
+      }
     }
   },
   setup () {
-    const $q = useQuasar()
     const layoutModal = ref(false)
-    function getItemsPerPage () {
-      if ($q.screen.lt.sm) {
-        return 12
-      }
-      if ($q.screen.lt.md) {
-        return 24
-      }
-      return 36
-    }
     const filter = ref('')
-    const pagination = ref({
-      page: 1,
-      rowsPerPage: getItemsPerPage()
-    })
-
-    watch(() => $q.screen.name, () => {
-      pagination.value.rowsPerPage = getItemsPerPage()
-    })
-
     return {
       filter,
-      pagination,
       layoutModal,
       nombrecliente: 'Cliente Público',
       numedocu: '',
@@ -188,18 +171,7 @@ export default defineComponent({
         { name: 'precio', label: 'Precio', field: 'precio', style: 'text-align: center;font-size: 10px;font-weight: bold;' },
         { name: 'cantidad', label: 'Cantidad', field: 'cantidad', style: 'text-align: rigth;font-size: 10px;font-weight: bold;' },
         { name: 'subtotal', label: 'Subtotal', field: 'subtotal', style: 'text-align: rigth;font-size: 10px;font-weight: bold;' }
-      ],
-      cardContainerClass: computed(() => {
-        return $q.screen.gt.xs
-          ? 'grid-masonry grid-masonry--' + ($q.screen.gt.sm ? '3' : '2')
-          : null
-      }),
-
-      rowsPerPageOptions: computed(() => {
-        return $q.screen.gt.xs
-          ? $q.screen.gt.sm ? [3, 6, 9] : [3, 6]
-          : [3]
-      })
+      ]
     }
   },
   methods: {
@@ -219,7 +191,10 @@ export default defineComponent({
     gotoIndex () {
       this.$q.localStorage.remove('usuarioreporte')
       this.$q.localStorage.remove('nombrereporte')
-      if (this.usuario.toString().toUpperCase() === 'ADMIN') {
+      this.$q.localStorage.remove('fechareporte')
+      const USER = this.usuario.toString().toUpperCase()
+      console.log(USER)
+      if (USER === 'ADMIN' || USER === 'SOPORTE') {
         this.$router.push('/vendedores')
       } else {
         this.$router.push('/index')
@@ -233,6 +208,7 @@ export default defineComponent({
       if (USER === 'ADMIN' || USER === 'SOPORTE') {
         usuarioreporte = this.$q.localStorage.getItem('usuarioreporte')
         this.nombrereporte = this.$q.localStorage.getItem('nombrereporte')
+        this.fechaReporte = this.$q.localStorage.getItem('fechareporte')
         const idNombreReporte = document.querySelector('#idNombreReporte')
         if (idNombreReporte) {
           idNombreReporte.textContent = 'de : ' + this.nombrereporte

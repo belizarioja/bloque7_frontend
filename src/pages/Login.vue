@@ -40,7 +40,6 @@
             <q-icon name="lock" color="dark" />
           </template>
       </q-input>
-      <div>IMEI: {{ imei }}</div>
       <div class="q-gutter-sm">
         <q-checkbox v-model="mantener" label="Guardar acceso" />
       </div>

@@ -12,14 +12,13 @@
     </div>
     <q-table
       grid
-      :card-container-class="cardContainerClass"
       :rows="serverData"
       :columns="columns"
       row-key="id"
       :filter="filter"
       hide-header
       v-model:pagination="pagination"
-      :rows-per-page-options="rowsPerPageOptions"
+      :rows-per-page-options="[0]"
     >
       <template v-slot:top-right>
         <q-input borderless dense debounce="300" v-model="filter" placeholder="Buscar">
@@ -55,6 +54,14 @@
                  style="font-size: x-large;margin-right:10px;"
                  @click="hideShow(props.row.status, props.row.id, props.row.nombre)"
                 />
+                <q-icon
+                 v-show="props.row.uuid !== 'S/Inf'"
+                 class="iconApp"
+                 name="phonelink_erase"
+                 color="negative"
+                 style="font-size: x-large;margin-right:10px;"
+                 @click="resetDevice(props.row.id, props.row.nombre)"
+                />
               </div>
             </q-card-section>
           </q-card>
@@ -65,9 +72,8 @@
 </template>
 
 <script>
-import { ref, computed, watch, defineComponent } from 'vue'
+import { ref, defineComponent } from 'vue'
 import authLib from '../logic/auth'
-import { useQuasar } from 'quasar'
 import moment from 'moment'
 
 export default defineComponent({
@@ -78,46 +84,17 @@ export default defineComponent({
     }
   },
   setup () {
-    const $q = useQuasar()
-    function getItemsPerPage () {
-      if ($q.screen.lt.sm) {
-        return 12
-      }
-      if ($q.screen.lt.md) {
-        return 24
-      }
-      return 36
-    }
     const filter = ref('')
-    const pagination = ref({
-      page: 1,
-      rowsPerPage: getItemsPerPage()
-    })
-
-    watch(() => $q.screen.name, () => {
-      pagination.value.rowsPerPage = getItemsPerPage()
-    })
-
     return {
       filter,
-      pagination,
-
+      pagination: {
+        page: 1,
+        rowsPerPage: 0 // 0 means all rows
+      },
       columns: [
         { name: 'nombre', label: 'Nombre', field: 'nombre' },
         { name: 'rif', label: 'Rif', field: 'rif' }
-      ],
-
-      cardContainerClass: computed(() => {
-        return $q.screen.gt.xs
-          ? 'grid-masonry grid-masonry--' + ($q.screen.gt.sm ? '3' : '2')
-          : null
-      }),
-
-      rowsPerPageOptions: computed(() => {
-        return $q.screen.gt.xs
-          ? $q.screen.gt.sm ? [3, 6, 9] : [3, 6]
-          : [3]
-      })
+      ]
     }
   },
   methods: {
@@ -160,6 +137,24 @@ export default defineComponent({
         persistent: true
       }).onOk(async () => {
         await authLib.hideShowUsuarios(valor, id)
+        this.listarUsuarios()
+      })
+    },
+    resetDevice (id, nombre) {
+      this.$q.dialog({
+        title: 'Confirmación!',
+        message: 'Desea RESETEAR el dispositivo de la cuenta de ' + nombre + '?',
+        ok: {
+          color: 'primary',
+          label: 'Sí'
+        },
+        cancel: {
+          color: 'secondary',
+          label: 'No'
+        },
+        persistent: true
+      }).onOk(async () => {
+        await authLib.resetDevice(id)
         this.listarUsuarios()
       })
     }

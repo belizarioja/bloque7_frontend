@@ -25,11 +25,19 @@
           class="menuitem"
            v-show="idrol === 1"
           @click="gotoVendedores()">
-          <q-icon class="iconApp" name="view_list" color="primary" />
-          <div class="tituloApp">REPORTE</div>
+          <q-icon class="iconApp" name="manage_accounts" color="primary" />
+          <div class="tituloApp">VENDEDORES</div>
         </div>
         <div
           class="menuitem"
+           v-show="idrol === 1"
+          @click="gotoProductos()">
+          <q-icon class="iconApp" name="price_change" color="accent" />
+          <div class="tituloApp">PRODUCTOS</div>
+        </div>
+        <div
+          class="menuitem"
+           v-show="idrol > 1"
           @click="gotoCxc()">
           <q-icon class="iconApp" name="paid" color="warning" />
           <div class="tituloApp">CTAS X COBRAR</div>
@@ -73,6 +81,9 @@ export default defineComponent({
     },
     gotoReportePedidos () {
       this.$router.push('/reportepedidos')
+    },
+    gotoProductos () {
+      this.$router.push('/productos')
     }
   }
 })

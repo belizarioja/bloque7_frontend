@@ -265,7 +265,12 @@ export default defineComponent({
   },
   methods: {
     gotoClientes () {
-      this.$router.push('/clientes')
+      const USER = this.usuario.toString().toUpperCase()
+      if (USER === 'ADMIN' || USER === 'SOPORTE') {
+        this.$router.push('/index')
+      } else {
+        this.$router.push('/clientes')
+      }
     },
     async openImagen (id, nombre, precio) {
       this.layoutModalimg = true
@@ -287,16 +292,19 @@ export default defineComponent({
       this.subtituloimg = true
     },
     openSetItems (id, nombre, precio, preciocaj, unixcaja, costoactu, porciva, porkilos, disponible, imagen) {
-      this.idproducto = id
-      this.nombreproducto = nombre
-      this.precioproducto = precio
-      this.disponibleproducto = disponible
-      this.preciocaj = preciocaj
-      this.unixcaja = unixcaja
-      this.costoactu = costoactu
-      this.porciva = porciva
-      this.porkilos = porkilos
-      this.layoutModal = true
+      const USER = this.usuario.toString().toUpperCase()
+      if (USER !== 'ADMIN' && USER !== 'SOPORTE') {
+        this.idproducto = id
+        this.nombreproducto = nombre
+        this.precioproducto = precio
+        this.disponibleproducto = disponible
+        this.preciocaj = preciocaj
+        this.unixcaja = unixcaja
+        this.costoactu = costoactu
+        this.porciva = porciva
+        this.porkilos = porkilos
+        this.layoutModal = true
+      }
     },
     async updateCarrito (idhold) {
       const totalItemHold = document.querySelector('.totalItemHold')

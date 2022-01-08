@@ -7,7 +7,7 @@
           <q-icon name="keyboard_return" color="info" />
         </div>
         <div class="subHeaderItem">
-          Clientes con deudas
+          Clientes <span id="idNombreReporte" v-if="nombrereporte"> de {{ nombrereporte }}</span> con deudas
         </div>
     </div>
     <!-- INICIO NUEVA TABLA EXPANSIVA -->
@@ -136,6 +136,7 @@ export default defineComponent({
       totalcxc: 0,
       nombrecliente: '',
       nombrevendedor: '',
+      nombrereporte: false,
       usuario: this.$q.localStorage.getItem('usuario').toString().toUpperCase(),
       idusuario: this.$q.localStorage.getItem('idusuario'),
       pagination: {
@@ -188,8 +189,19 @@ export default defineComponent({
     async listarCxc () {
       // console.log(this.usuario)
       this.serverData = []
+      let usuarioreporte = this.usuario
+      const USER = this.usuario.toString().toUpperCase()
+      console.log(USER)
+      if (USER === 'ADMIN' || USER === 'SOPORTE') {
+        usuarioreporte = this.$q.localStorage.getItem('usuarioreporte')
+        this.nombrereporte = this.$q.localStorage.getItem('nombrereporte')
+        const idNombreReporte = document.querySelector('#idNombreReporte')
+        if (idNombreReporte) {
+          idNombreReporte.textContent = 'de : ' + this.nombrereporte
+        }
+      }
       this.loading = true
-      const resp = await clientesLib.getcxc(this.usuario)
+      const resp = await clientesLib.getcxc(usuarioreporte)
       // console.log(resp)
       const datos = resp.data
       for (const i in datos) {
@@ -221,7 +233,15 @@ export default defineComponent({
       this.loading = false
     },
     gotoIndex () {
-      this.$router.push('/index')
+      this.$q.localStorage.remove('usuarioreporte')
+      this.$q.localStorage.remove('nombrereporte')
+      const USER = this.usuario.toString().toUpperCase()
+      console.log(USER)
+      if (USER === 'ADMIN' || USER === 'SOPORTE') {
+        this.$router.push('/vendedores')
+      } else {
+        this.$router.push('/index')
+      }
     }
   },
   mounted () {

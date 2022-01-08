@@ -13,7 +13,7 @@
 
         <q-toolbar-title>
           <div style="font-size: 12px;font-weight: bold;">Bloque 7 - V{{ VERSION }}</div>
-          <div style="font-size: 14px;font-weight: bold;">{{ nombreusuario }}</div>
+          <div style="font-size: 12px;font-weight: bold;">{{ nombreusuario }}</div>
         </q-toolbar-title>
         <!-- PEDIDOS GUARDADOS SIN ENVIAR DEL VENDEDOR -->
         <q-dialog v-model="layoutModalSaves">
@@ -307,6 +307,7 @@
           </q-item-section>
         </q-item>
         <q-item
+          v-show="idrol > 1"
           to="/clientes"
           exact
           clickable
@@ -319,6 +320,7 @@
           </q-item-section>
         </q-item>
         <q-item
+          v-show="idrol > 1"
           to="/cuentasxcobrar"
           exact
           clickable
@@ -345,6 +347,19 @@
         </q-item>
         <q-item
           v-show="idrol === 1"
+          to="/productos"
+          exact
+          clickable
+          v-ripple>
+          <q-item-section avatar>
+            <q-icon name="price_change" />
+          </q-item-section>
+          <q-item-section>
+            Productos
+          </q-item-section>
+        </q-item>
+        <q-item
+          v-show="idrol === 1"
           to="/vendedores"
           exact
           clickable
@@ -354,6 +369,19 @@
           </q-item-section>
           <q-item-section>
             Vendedores
+          </q-item-section>
+        </q-item>
+        <q-item
+          v-show="idrol === 1"
+          to="/usuarios"
+          exact
+          clickable
+          v-ripple>
+          <q-item-section avatar>
+            <q-icon name="account_circle" />
+          </q-item-section>
+          <q-item-section>
+            Usuarios
           </q-item-section>
         </q-item>
         <q-item
