@@ -81,6 +81,7 @@
                     v-for="col in props.cols"
                     :key="col.name"
                     :props="props"
+                    style="font-size: 10px;"
                     class="text-italic text-purple"
                   >
                     {{ col.label }}
@@ -92,16 +93,6 @@
                  style="font-size: 10px;font-weight: bold;"
                   color="primary"
                   :label="'Vendedor: ' + props.row.nombrevendedor"
-                  round
-                  dense
-                  flat
-                  :disable="scope.isFirstPage"
-                  @click="scope.prevPage"
-                />
-                <q-btn
-                 style="font-size: 10px;font-weight: bold;margin-left: 20px;"
-                  color="primary"
-                  :label="'Total: $' + props.row.totalcxc.toFixed(2)"
                   round
                   dense
                   flat
@@ -121,8 +112,6 @@
 
 <script>
 import { ref, defineComponent } from 'vue'
-import clientesLib from '../logic/clientes'
-import moment from 'moment'
 
 export default defineComponent({
   name: 'Clientes',
@@ -131,14 +120,10 @@ export default defineComponent({
       expansionsToggled: false,
       hideShowAll: 'Mostrar todos',
       serverData: [],
-      serverDataCxc: [],
-      layoutModalPays: false,
-      totalcxc: 0,
-      nombrecliente: '',
-      nombrevendedor: '',
       nombrereporte: false,
       usuario: this.$q.localStorage.getItem('usuario').toString().toUpperCase(),
       idusuario: this.$q.localStorage.getItem('idusuario'),
+      idrol: this.$q.localStorage.getItem('idrol'),
       pagination: {
         page: 1,
         rowsPerPage: 0 // 0 means all rows
@@ -154,10 +139,12 @@ export default defineComponent({
       columns: [
         { name: 'idcliente', label: 'ID', field: 'idcliente', style: 'text-align: left;font-size: 10px;font-weight: bold;' },
         { name: 'nombrecliente', label: 'Nombre', field: 'nombrecliente', style: 'white-space: pre-wrap;text-align: left;font-size: 10px;font-weight: bold;' },
-        { name: 'rifcliente', label: 'RIF', field: 'rifcliente', style: 'text-align: left;font-size: 10px;font-weight: bold;' }
+        { name: 'cantidadcxc', format: val => val > 1 ? `${val + ' facturas'}` : `${val + ' factura'}`, label: 'Cantidad', field: 'cantidadcxc', style: 'text-align: left;font-size: 10px;font-weight: bold;' },
+        { name: 'totalcxc', format: val => `${'$' + val.toFixed(2)}`, label: 'Total', field: 'totalcxc', style: 'text-align: left;font-size: 10px;font-weight: bold;' }
       ],
       columns2: [
         { name: 'id', label: '# Control', field: 'id', style: 'text-align: rigth;font-size: 10px;font-weight: bold;' },
+        { name: 'tipodoc', label: 'Tipo', field: 'tipodoc', style: 'color: blue;text-align: rigth;font-size: 10px;font-weight: bold;' },
         { name: 'fecha', label: 'Fecha', field: 'fecha', style: 'text-align: rigth;font-size: 10px;font-weight: bold;' },
         { name: 'dias', label: 'Días', field: 'dias', style: 'color: red;text-align: center;font-size: 10px;font-weight: bold;' },
         { name: 'monto', label: 'Monto', field: 'monto', style: 'text-align: rigth;font-size: 10px;font-weight: bold;' },
@@ -179,21 +166,9 @@ export default defineComponent({
       }
       this.$refs.myTable.setExpanded(rowArray)
     },
-    calcDiffHours (fecha) {
-      const now = moment()
-      const end = moment(fecha, 'YYYY-MM-DD')
-      // console.log(now, end)
-      const duration = moment.duration(now.diff(end))
-      return duration.asDays().toFixed(0)
-    },
     async listarCxc () {
-      // console.log(this.usuario)
-      this.serverData = []
-      let usuarioreporte = this.usuario
-      const USER = this.usuario.toString().toUpperCase()
-      console.log(USER)
-      if (USER === 'ADMIN' || USER === 'SOPORTE') {
-        usuarioreporte = this.$q.localStorage.getItem('usuarioreporte')
+      console.log(this.idrol)
+      if (this.idrol === 1) {
         this.nombrereporte = this.$q.localStorage.getItem('nombrereporte')
         const idNombreReporte = document.querySelector('#idNombreReporte')
         if (idNombreReporte) {
@@ -201,43 +176,12 @@ export default defineComponent({
         }
       }
       this.loading = true
-      const resp = await clientesLib.getcxc(usuarioreporte)
-      // console.log(resp)
-      const datos = resp.data
-      for (const i in datos) {
-        const item = datos[i]
-        const obj2 = {}
-        obj2.id = item.id
-        obj2.fecha = moment(item.fecha).format('YYYY-MM-DD')
-        obj2.dias = this.calcDiffHours(item.fecha)
-        obj2.monto = '$' + item.monto.toFixed(2)
-        obj2.saldo = '$' + item.saldo.toFixed(2)
-        const index = this.serverData.findIndex(obj => obj.idcliente === item.idcliente)
-        if (index === -1) {
-          const obj = {}
-          obj.totalcxc = 0
-          obj.details = []
-          obj.idcliente = item.idcliente
-          obj.nombrecliente = item.nombrecliente
-          obj.nombrevendedor = item.nombrevendedor
-          obj.rifcliente = item.rifcliente
-          obj.nombrevendedor = item.nombrevendedor
-          obj.totalcxc += parseFloat(item.saldo)
-          obj.details.push(obj2)
-          this.serverData.push(obj)
-        } else {
-          this.serverData[index].totalcxc += parseFloat(item.saldo)
-          this.serverData[index].details.push(obj2)
-        }
-      }
+      this.serverData = this.$q.localStorage.getItem('cuentasxc')
       this.loading = false
     },
     gotoIndex () {
-      this.$q.localStorage.remove('usuarioreporte')
       this.$q.localStorage.remove('nombrereporte')
-      const USER = this.usuario.toString().toUpperCase()
-      console.log(USER)
-      if (USER === 'ADMIN' || USER === 'SOPORTE') {
+      if (this.idrol === 1) {
         this.$router.push('/vendedores')
       } else {
         this.$router.push('/index')
@@ -274,5 +218,8 @@ export default defineComponent({
   }
   .done{
     background: aquamarine;
+  }
+  table td:first-child {
+    padding-left: 10px;
   }
 </style>

@@ -99,6 +99,7 @@ export default defineComponent({
             const idrol = resp.data[0].idrol
             const idsucursal = resp.data[0].idsucursal
             const status = resp.data[0].status
+            const feultget = resp.data[0].fe_ult_get
             // console.log(resp.data)
             if (status === 1) {
               this.$q.localStorage.set('usuario', this.usuario)
@@ -109,6 +110,7 @@ export default defineComponent({
               this.$q.localStorage.set('idsucursal', idsucursal)
               this.$q.localStorage.set('mantener', this.mantener)
               this.$q.localStorage.set('salida', false)
+              this.$q.localStorage.set('feultget', feultget)
               this.$router.push('/index')
             } else {
               this.$q.dialog({

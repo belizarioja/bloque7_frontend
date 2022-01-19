@@ -4,7 +4,7 @@
        <div
           class="menuitem"
           @click="gotoIndex()">
-          <q-icon name="keyboard_return" color="info" />
+          <q-icon name="keyboard_return"/>
         </div>
         <div class="subHeaderItem">
           Clientes asignados
@@ -32,12 +32,19 @@
       <template v-slot:item="props">
         <div class="q-pa-xs col-xs-12 col-sm-6 col-md-4">
           <q-card>
-            <q-card-section
-              :class="{'done' : props.row.chk }"
-              @click="gotoProductos( props.row.idcliente, props.row.nombrecliente, props.row.rifcliente)">
-              <strong>{{ props.row.nombrecliente }}</strong>
-              <div>RIF {{ props.row.rifcliente }}</div>
-            </q-card-section>
+            <q-item>
+              <q-item-section avatar>
+                <q-avatar>
+                  <div class="circuloName">JB</div>
+                </q-avatar>
+              </q-item-section>
+              <q-item-section
+                :class="{'done' : props.row.chk }"
+                @click="gotoProductos( props.row.idcliente, props.row.nombrecliente, props.row.rifcliente)">
+                <q-item-label>{{ props.row.nombrecliente }}</q-item-label>
+                <q-item-label caption>RIF {{ props.row.rifcliente }}</q-item-label>
+              </q-item-section>
+            </q-item>
           </q-card>
         </div>
       </template>
@@ -46,15 +53,8 @@
 </template>
 
 <script>
-import {
-  ref,
-  // computed,
-  // watch,
-  defineComponent
-} from 'vue'
-import clientesLib from '../logic/clientes'
-import vendedorLib from '../logic/vendedores'
-// import { useQuasar } from 'quasar'
+import moment from 'moment'
+import { ref, defineComponent } from 'vue'
 
 export default defineComponent({
   name: 'Clientes',
@@ -70,69 +70,90 @@ export default defineComponent({
     }
   },
   setup () {
-    // const $q = useQuasar()
     const filter = ref('')
-    /* function getItemsPerPage () {
-      if ($q.screen.lt.sm) {
-        return 12
-      }
-      if ($q.screen.lt.md) {
-        return 24
-      }
-      return 36
-    }
-    const pagination = ref({
-      page: 1,
-      rowsPerPage: getItemsPerPage()
-    })
-
-    watch(() => $q.screen.name, () => {
-      pagination.value.rowsPerPage = getItemsPerPage()
-    }) */
-
     return {
       filter,
-      // pagination,
-
       columns: [
         { name: 'nombrecliente', label: 'Nombre', field: 'nombrecliente' },
         { name: 'rifcliente', label: 'Rif', field: 'rifcliente' }
       ]
-
-      /* cardContainerClass: computed(() => {
-        return $q.screen.gt.xs
-          ? 'grid-masonry grid-masonry--' + ($q.screen.gt.sm ? '3' : '2')
-          : null
-      }),
-
-      rowsPerPageOptions: computed(() => {
-        return $q.screen.gt.xs
-          ? $q.screen.gt.sm ? [3, 6, 9] : [3, 6]
-          : [3]
-      }) */
     }
   },
   methods: {
-    async gotoProductos (idcliente, nombrecliente, rifcliente) {
-      await clientesLib.setupcarrito(this.idusuario, idcliente, nombrecliente, rifcliente)
+    gotoProductos (idcliente, nombrecliente, rifcliente) {
       this.$q.localStorage.set('idcliente', idcliente)
-      this.$router.push('/productos')
+      const totalItemCxc = document.querySelector('.totalItemCxc')
+      const circuloCxcItem = document.querySelector('.totalItemRed')
+      const cuentasxc = this.$q.localStorage.getItem('cuentasxc')
+      const find = cuentasxc.filter(obj => obj.idcliente === idcliente)
+      if (find.length > 0) {
+        this.$q.dialog({
+          title: 'Advertencia!',
+          message: 'Este cliente tiene DEUDAS pendientes!',
+          ok: {
+            color: 'dark',
+            style: 'font-size: 12px;',
+            label: 'Aceptar'
+          },
+          cancel: {
+            color: 'secondary',
+            style: 'font-size: 12px;',
+            label: 'Cancelar'
+          },
+          persistent: true
+        }).onOk(() => {
+          totalItemCxc.classList.remove('invisible')
+          circuloCxcItem.textContent = find.length
+          this.updateClienteCarrito(idcliente, nombrecliente, rifcliente)
+          this.$router.push('/productos')
+        })
+      } else {
+        circuloCxcItem.textContent = 0
+        totalItemCxc.classList.add('invisible')
+        this.updateClienteCarrito(idcliente, nombrecliente, rifcliente)
+        this.$router.push('/productos')
+      }
+    },
+    updateClienteCarrito (id, nombre, rif) {
+      const holds = this.$q.localStorage.getItem('holds')
+      let cantitemscarrito = 0
+      const index = holds.findIndex(obj => obj.status === 1)
+      if (index === -1) {
+        const obj = {}
+        obj.id = null
+        obj.indice = holds.length
+        obj.idcliente = id
+        obj.idusuario = this.idusuario
+        obj.nombrecliente = nombre
+        obj.rifcliente = rif
+        obj.fecha = moment().format('YYYY-MM-DD HH:mm:ss')
+        obj.status = 1
+        obj.subtotal = 0
+        obj.cantitemscarrito = 0
+        holds.push(obj)
+      } else {
+        holds[index].fecha = moment().format('YYYY-MM-DD HH:mm:ss')
+        holds[index].idcliente = id
+        holds[index].nombrecliente = nombre
+        holds[index].rifcliente = rif
+        cantitemscarrito = holds[index].cantitemscarrito
+      }
+      this.$q.localStorage.remove('holds')
+      this.$q.localStorage.set('holds', holds)
+      const totalItemHold = document.querySelector('.totalItemHold')
+      if (totalItemHold.classList.contains('invisible')) {
+        totalItemHold.classList.remove('invisible')
+      }
+      const circuloTotalItem = document.querySelector('.totalItemBlack')
+      circuloTotalItem.textContent = cantitemscarrito
     },
     gotoIndex () {
       this.$router.push('/index')
     },
-    async listarClientes () {
+    listarClientes () {
       this.serverData = []
-      const resp = await clientesLib.getholds(this.idusuario)
-      let chk = 0
-      console.log(resp)
-      if (resp.data.length > 0) {
-        chk = resp.data[0].idcliente
-        // clientesLib.getcarrito(idcliente)
-      }
-      const resp2 = await vendedorLib.listarVendedorClientes(this.usuario)
-      console.log(resp2)
-      const datos = resp2.data
+      const chk = this.$q.localStorage.getItem('idcliente')
+      const datos = this.$q.localStorage.getItem('clientes')
       for (const i in datos) {
         const item = datos[i]
         const obj = {}
@@ -140,7 +161,6 @@ export default defineComponent({
         obj.nombrecliente = item.nombrecliente
         obj.rifcliente = item.rifcliente
         obj.chk = false
-        // console.log(chk, item.id)
         if (chk === item.idcliente) {
           obj.chk = true
         }
@@ -160,23 +180,34 @@ export default defineComponent({
     align-items: center;
   }
   .menuitem {
-    height: 60px;
-    width: 60px;
-    border: 1px solid green;
+    height: 40px;
+    width: 45px;
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: xx-large;
+    font-size: 30px;
+    background: #5eb228;
+    color: white;
   }
   .subHeaderItem{
     text-align: center;
     width: 100%;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: bold;
     text-transform: uppercase;
   }
   .done{
-    background: aquamarine;
+    background: #d6d6d6;
+  }
+  .circuloName {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    color: white;
+    background: #5eb228;
+    display: flex;
+    justify-content: center;
+    padding: 15px 0;
   }
 </style>

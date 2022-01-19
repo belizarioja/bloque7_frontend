@@ -42,11 +42,6 @@ class Pedido {
     return axios.post(ENDPOINT_PATH + 'reportePedidos', data)
   }
 
-  getSaves (usuario) {
-    const data = { usuario }
-    return axios.post(ENDPOINT_PATH + 'getSaves', data)
-  }
-
   savePedido (idhold) {
     const data = { idhold }
     return axios.post(ENDPOINT_PATH + 'savePedido', data)
@@ -55,6 +50,10 @@ class Pedido {
   checkoutSave (idhold, idusuario) {
     const data = { idhold, idusuario }
     return axios.post(ENDPOINT_PATH + 'checkoutSave', data)
+  }
+
+  corregirClientesNull () {
+    return axios.post(ENDPOINT_PATH + 'corregirClientesNull')
   }
 }
 export default new Pedido()

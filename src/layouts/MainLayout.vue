@@ -1,6 +1,6 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header elevated class="bg-secondary text-dark">
+    <q-header class="bg-primary text-white" style="border-radius: 0 0 15px 15px;">
       <q-toolbar>
         <q-btn
           flat
@@ -17,11 +17,11 @@
         </q-toolbar-title>
         <!-- PEDIDOS GUARDADOS SIN ENVIAR DEL VENDEDOR -->
         <q-dialog v-model="layoutModalSaves">
-          <q-layout view="Lhh lpR fff" container class="bg-white">
+          <q-layout view="Lhh lpR fff" container class="bg-white borderdetailt">
             <q-header class="bg-primary">
               <q-toolbar>
                 <q-toolbar-title style="font-size: inherit;display: grid;">
-                  <span style=""> Pedidos guardados sin enviar </span>
+                  <span style=""> PEDIDOS GUARDADOS </span>
                 </q-toolbar-title>
                 <q-btn flat v-close-popup round dense icon="close" />
               </q-toolbar>
@@ -64,20 +64,20 @@
                         {{ row.cantidad }}
                       </td>
                       <td>
-                        {{ row.subtotal.toFixed(2) }}
+                        {{ row.subtotal }}
                       </td>
                       <td style="display: flex;">
                         <q-icon
                          name="add_shopping_cart"
                          color="primary"
                          style="font-size:20px;"
-                         @click="checkoutSaves(row.id)"
+                         @click="checkoutSaves(row.indice)"
                         />
                         <q-icon
                          name="delete"
                          color="red"
                          style="font-size:20px;margin-left: 10px;"
-                         @click="deleteSaves(row.id)"
+                         @click="deleteSaves(row.indice)"
                         />
                       </td>
                     </tr>
@@ -85,7 +85,7 @@
                 </div>
               </q-page>
             </q-page-container>
-            <q-footer class="bg-black text-white">
+            <q-footer class="bg-primary text-white">
               <q-toolbar inset style="width: 100%;justify-content: center;">
                   <div id="idTotalSaves" style="margin: 0 20px;width: -webkit-fill-available;">
                     Total : {{ totalsaves.toFixed(2) }}
@@ -96,7 +96,7 @@
         </q-dialog>
         <!-- CUENTA POR COBRAR DEL CLIENTE -->
         <q-dialog v-model="layoutModalPays">
-          <q-layout view="Lhh lpR fff" container class="bg-white">
+          <q-layout view="Lhh lpR fff" container class="bg-white borderdetailt">
             <q-header class="bg-primary">
               <q-toolbar>
                 <q-toolbar-title style="font-size: inherit;display: grid;">
@@ -109,10 +109,13 @@
             <q-page-container>
               <q-page padding>
                 <div>
-                  <table style="width: -webkit-fill-available;">
+                  <table style="width: -webkit-fill-available;font-size: 12px;">
                     <tr>
                       <td style="border-bottom: 1px dashed #757575;">
                         # Control
+                      </td>
+                      <td style="border-bottom: 1px dashed #757575;">
+                        Tipo
                       </td>
                       <td style="border-bottom: 1px dashed #757575;">
                         Fecha
@@ -127,9 +130,12 @@
                         Saldo
                       </td>
                     </tr>
-                    <tr v-for="row in serverDataCxc" :key="row.id" style="font-size: smaller;">
+                    <tr v-for="row in serverDataCxc" :key="row.id">
                       <td>
                         {{ row.id }}
+                      </td>
+                      <td style="text-align: center;color: blue;">
+                        {{ row.tipodoc }}
                       </td>
                       <td>
                         {{ row.fecha }}
@@ -138,17 +144,17 @@
                         {{ row.dias }}
                       </td>
                       <td>
-                        {{ row.monto.toFixed(2) }}
+                        {{ row.monto }}
                       </td>
                       <td>
-                        {{ row.saldo.toFixed(2) }}
+                        {{ row.saldo }}
                       </td>
                     </tr>
                   </table>
                 </div>
               </q-page>
             </q-page-container>
-            <q-footer class="bg-black text-white">
+            <q-footer class="bg-primary text-white">
               <q-toolbar inset style="width: 100%;justify-content: center;">
                   <div id="idTotalCxc" style="margin: 0 20px;width: -webkit-fill-available;">
                     Total : {{ totalcxc.toFixed(2) }}
@@ -159,7 +165,7 @@
         </q-dialog>
         <!-- CARRITO DE COMPRA PEDIDO DEL CLIENTE -->
         <q-dialog v-model="layoutModal">
-          <q-layout view="Lhh lpR fff" container class="bg-white">
+          <q-layout view="Lhh lpR fff" container class="bg-white borderdetailt">
             <q-header class="bg-primary">
               <q-toolbar>
                 <q-toolbar-title style="font-size: inherit;display: grid;">
@@ -215,7 +221,7 @@
                         {{ row.cantidad }}
                       </td>
                       <td :class="{'bordeotropedido' : row.i === 14 }">
-                        {{ row.precio.toFixed(2) }}
+                        {{ row.precio }}
                       </td>
                       <td :class="{'bordeotropedido' : row.i === 14 }">
                         {{ row.subtotal }}
@@ -228,27 +234,30 @@
                 </div>
               </q-page>
             </q-page-container>
-            <q-footer class="bg-black text-white">
+            <q-footer class="bg-primary text-white">
               <q-toolbar inset style="width: 100%;justify-content: center;">
                   <q-btn
-                    style="font-size: 12px;margin-right: 20px;"
+                    style="font-size: 10px;margin-right: 10px;padding: 0px 7px;"
                     label="Guardar"
                     type="buttom"
-                    color="positive"
+                    color="info"
+                    icon="save"
                     @click="savePedido()"
                   />
                   <q-btn
-                    style="font-size: 12px;margin-right: 20px;"
+                    style="font-size: 10px;margin-right: 10px;padding: 0px 7px;"
                     label="Enviar"
                     type="buttom"
-                    color="primary"
+                    color="dark"
+                    icon="send"
                     @click="createPedido()"
                   />
                   <q-btn
-                    style="font-size: 12px;"
+                    style="font-size: 10px;padding: 0px 7px;"
                     label="Eliminar"
                     type="buttom"
-                    color="negative"
+                    color="secondary"
+                    icon="close"
                     @click="deletePedido()"
                   />
               </q-toolbar>
@@ -256,24 +265,24 @@
           </q-layout>
         </q-dialog>
         <div
-          class="totalItem totalItemSaves"
-          @click="hideShowSaves(idusuario); layoutModalSaves = !layoutModalSaves">
+          class="totalItem invisible totalItemSaves"
+          @click="hideShowSaves(); layoutModalSaves = !layoutModalSaves">
           <div class="circuloTotalItem totalItemBlue">
             {{ totalitemsaves }}
           </div>
-          <q-icon name="point_of_sale" color="primary" style="font-size:35px;" />
+          <q-icon name="point_of_sale" color="info" style="font-size:35px;" />
         </div>
         <div
           class="totalItem invisible totalItemCxc"
-          @click="hideShowCxc(usuario); layoutModalPays = !layoutModalPays">
+          @click="hideShowCxc(); layoutModalPays = !layoutModalPays">
           <div class="circuloTotalItem totalItemRed">
             {{ totalitemscxc }}
           </div>
-          <q-icon name="receipt" color="red" style="font-size:35px;" />
+          <q-icon name="receipt"  color="secondary" style="font-size:35px;" />
         </div>
         <div
           class="totalItem invisible totalItemHold"
-          @click="hideShowCarrito(idusuario); layoutModal = !layoutModal">
+          @click="hideShowCarrito(); layoutModal = !layoutModal">
           <div class="circuloTotalItem totalItemBlack">
             {{ totalitemspedido }}
           </div>
@@ -437,11 +446,11 @@
 <script>
 
 import { defineComponent, ref } from 'vue'
-import clientesLib from '../logic/clientes'
+// import clientesLib from '../logic/clientes'
 import pedidosLib from '../logic/pedidos'
 import moment from 'moment'
 const config = require('../config/endpoints.js')
-const ENDPOINT_PATH = config.endpoint_path
+// const ENDPOINT_PATH = config.endpoint_path
 
 export default defineComponent({
   name: 'MainLayout',
@@ -490,7 +499,7 @@ export default defineComponent({
     }
   },
   methods: {
-    checkoutSaves (idhold) {
+    checkoutSaves (indice) {
       this.$q.dialog({
         title: 'Seguro de ENVIAR este PEDIDO al CARRITO?',
         message: 'Al aceptar, si existe un pedido en el carrito, lo guardará y lo sustituirá por este!',
@@ -504,15 +513,26 @@ export default defineComponent({
         },
         persistent: true
       }).onOk(async () => {
-        console.log(idhold, this.idusuario)
-        await pedidosLib.checkoutSave(idhold, this.idusuario)
         this.cleanCarrito()
-        this.hideShowSaves(this.idusuario)
-        this.hideShowCarrito(this.idusuario)
+        console.log(indice)
+        const holds = this.$q.localStorage.getItem('holds')
+        const index = holds.findIndex(obj => obj.status === 1)
+        console.log(index)
+        if (index !== -1) {
+          holds[index].status = 0
+        }
+        const index2 = holds.findIndex(obj => obj.indice === indice)
+        console.log(index2)
+        holds[index2].status = 1
+        this.$q.localStorage.remove('holds')
+        this.$q.localStorage.set('holds', holds)
+        this.$q.localStorage.set('idcliente', holds[index2].idcliente)
+        this.hideShowSaves()
+        this.hideShowCarrito()
         this.layoutModalSaves = false
       })
     },
-    deleteSaves (idhold) {
+    deleteSaves (indice) {
       this.$q.dialog({
         title: 'CONFIRMACIÓN!',
         message: 'Seguro de ELIMINAR este PEDIDO de GUARDADOS?',
@@ -526,10 +546,14 @@ export default defineComponent({
         },
         persistent: true
       }).onOk(async () => {
-        console.log(idhold)
-        await pedidosLib.deletecarrito(idhold)
-        this.cleanCarrito()
-        this.hideShowSaves(this.idusuario)
+        const holds = this.$q.localStorage.getItem('holds')
+        const index = holds.findIndex(obj => obj.indice === indice)
+        console.log(index)
+        holds[index].status = 2
+        this.$q.localStorage.remove('holds')
+        this.$q.localStorage.set('holds', holds)
+        // this.cleanCarrito()
+        this.hideShowSaves()
         this.layoutModalSaves = false
       })
     },
@@ -547,10 +571,14 @@ export default defineComponent({
         },
         persistent: true
       }).onOk(async () => {
-        console.log(this.idhold)
-        await pedidosLib.savePedido(this.idhold)
+        const holds = this.$q.localStorage.getItem('holds')
+        const index = holds.findIndex(obj => obj.status === 1)
+        console.log(index)
+        holds[index].status = 0
+        this.$q.localStorage.remove('holds')
+        this.$q.localStorage.set('holds', holds)
         this.cleanCarrito()
-        this.hideShowSaves(this.idusuario)
+        this.hideShowSaves()
       })
     },
     createPedido () {
@@ -567,54 +595,33 @@ export default defineComponent({
         },
         persistent: true
       }).onOk(async () => {
-        const arregloOriginal = this.serverData
-        const arregloDeArreglos = []
-        // console.log('Arreglo original: ', arregloOriginal)
-        const LONGITUD_PEDAZOS = 13
-        for (let i = 0; i < arregloOriginal.length; i += LONGITUD_PEDAZOS) {
-          const pedazo = arregloOriginal.slice(i, i + LONGITUD_PEDAZOS)
-          arregloDeArreglos.push(pedazo)
-        }
-        // console.log('Arreglo de arreglos: ', arregloDeArreglos)
-        this.loader = true
-        for (const i in arregloDeArreglos) {
-          const arreglopedido = arregloDeArreglos[i]
-          // console.log(arreglopedido)
-          await pedidosLib.setpedido(this.idusuario, this.usuario, this.idcliente, this.nombrecliente, this.rifcliente, this.totalcarrito, this.idsucursal, arreglopedido, this.comentario)
-        }
-        this.loader = false
+        const holds = this.$q.localStorage.getItem('holds')
+        const index = holds.findIndex(obj => obj.status === 1)
+        console.log(index)
+        holds[index].status = 3
+        this.$q.localStorage.remove('holds')
+        this.$q.localStorage.set('holds', holds)
         this.confirmarEnvioPedido()
       })
     },
     calcDiffHours (fecha) {
       const now = moment()
       const end = moment(fecha, 'YYYY-MM-DD')
-      // console.log(now, end)
       const duration = moment.duration(now.diff(end))
       return duration.asDays().toFixed(0)
     },
-    async hideShowCxc (usuario) {
+    async hideShowCxc () {
       const idcliente = this.$q.localStorage.getItem('idcliente')
       this.serverDataCxc = []
       this.totalcxc = 0
-      // this.layoutModalPays = true
-      console.log(usuario, idcliente)
-      const resp = await clientesLib.getcxchold(usuario, idcliente)
-      console.log(resp)
-      this.totalitemscxc = resp.data.length
-      if (resp.data.length > 0) {
-        for (const i in resp.data) {
-          // this.hidecxc = true
-          const item = resp.data[i]
-          const obj2 = {}
-          obj2.id = item.id
-          obj2.fecha = moment(item.fecha).format('YYYY-MM-DD')
-          obj2.dias = this.calcDiffHours(item.fecha)
-          obj2.monto = item.monto
-          obj2.saldo = item.saldo
-          this.totalcxc += parseFloat(obj2.saldo)
-          this.serverDataCxc.push(obj2)
-        }
+      console.log(idcliente)
+      const cuentasxc = this.$q.localStorage.getItem('cuentasxc')
+      const find = cuentasxc.filter(obj => obj.idcliente === idcliente)
+      if (find.length > 0) {
+        this.totalitemscxc = find[0].details.length
+        this.totalcxc = find[0].totalcxc
+        this.nombrecliente = find[0].nombrecliente
+        this.serverDataCxc = find[0].details
         const idTotalCxc = document.querySelector('#idTotalCxc')
         const circuloCxcItem = document.querySelector('.totalItemRed')
         const totalItemCxc = document.querySelector('.totalItemCxc')
@@ -625,71 +632,68 @@ export default defineComponent({
         circuloCxcItem.textContent = this.totalitemscxc
       }
     },
-    async hideShowCarrito (idusuario) {
+    async hideShowCarrito () {
       this.serverData = []
       this.totalcarrito = 0
-      // this.layoutModal = true
-      const resp = await clientesLib.getholds(idusuario)
-      console.log(resp)
-      if (resp.data.length > 0) {
-        this.$q.localStorage.set('idcliente', resp.data[0].idcliente)
-        this.nombrecliente = resp.data[0].nombrecliente
-        this.rifcliente = resp.data[0].rifcliente
-        this.idhold = resp.data[0].id
-        const resp2 = await pedidosLib.getitemcarrito(this.idhold)
-        const datos = resp2.data
-        this.totalitemspedido = resp2.data.length
-        for (const i in datos) {
-          const item = datos[i]
-          const obj = {}
-          obj.i = parseInt(i) + 1
-          obj.id = item.id
-          obj.idproducto = item.idproducto
-          obj.nombreproducto = item.nombreproducto
-          obj.precio = item.precio
-          obj.cantidad = item.cantidad
-          obj.subtotal = item.subtotal.toFixed(2)
-          obj.preciocaj = item.preciocaj
-          obj.unixcaja = item.unixcaja
-          obj.costoactu = item.costoactu
-          obj.porciva = item.porciva
-          obj.porkilos = item.porkilos
-          this.totalcarrito += parseFloat(obj.subtotal)
-          this.serverData.push(obj)
-        }
-        const idTotalCarrito = document.querySelector('#idTotalCarrito')
-        const circuloTotalItem = document.querySelector('.totalItemBlack')
-        const totalItemHold = document.querySelector('.totalItemHold')
-
-        if (totalItemHold.classList.contains('invisible')) {
-          totalItemHold.classList.remove('invisible')
-        }
-        if (idTotalCarrito) {
-          idTotalCarrito.textContent = 'Total : $' + this.totalcarrito.toFixed(2)
-        }
-        if (circuloTotalItem) {
-          circuloTotalItem.textContent = this.totalitemspedido
-        }
-        this.hideShowCxc(this.usuario)
-      }
-    },
-    async hideShowSaves (idusuario) {
-      this.serverDataSaves = []
-      this.totalsaves = 0
-      const resp = await pedidosLib.getSaves(idusuario)
-      console.log(resp)
-      const datos = resp.data
-      this.totalitemsaves = resp.data.length
+      const holds = this.$q.localStorage.getItem('holds')
+      const itemsholds = this.$q.localStorage.getItem('itemsholds')
+      const find = holds.find(obj => obj.status === 1)
+      console.log('Find 1 ', find)
+      this.nombrecliente = find.nombrecliente
+      const indice = find.indice
+      const datos = itemsholds.filter(obj => obj.indice === indice)
+      this.totalitemspedido = datos.length
+      console.log('Find 2 ', datos)
       for (const i in datos) {
         const item = datos[i]
         const obj = {}
         obj.i = parseInt(i) + 1
         obj.id = item.id
+        obj.idproducto = item.idproducto
+        obj.nombreproducto = item.nombreproducto
+        obj.precio = parseFloat(item.precio).toFixed(2)
+        obj.cantidad = item.cantidad
+        obj.subtotal = parseFloat(item.subtotal).toFixed(2)
+        obj.preciocaj = item.preciocaj
+        obj.unixcaja = item.unixcaja
+        obj.costoactu = item.costoactu
+        obj.porciva = item.porciva
+        obj.porkilos = item.porkilos
+        this.totalcarrito += parseFloat(obj.subtotal)
+        this.serverData.push(obj)
+      }
+      const idTotalCarrito = document.querySelector('#idTotalCarrito')
+      const circuloTotalItem = document.querySelector('.totalItemBlack')
+      const totalItemHold = document.querySelector('.totalItemHold')
+      if (totalItemHold.classList.contains('invisible')) {
+        totalItemHold.classList.remove('invisible')
+      }
+      if (idTotalCarrito) {
+        idTotalCarrito.textContent = 'Total : $' + this.totalcarrito.toFixed(2)
+      }
+      if (circuloTotalItem) {
+        circuloTotalItem.textContent = this.totalitemspedido
+      }
+      // this.hideShowCxc()
+    },
+    async hideShowSaves (idusuario) {
+      this.serverDataSaves = []
+      this.totalsaves = 0
+      const holds = this.$q.localStorage.getItem('holds')
+      const datos = holds.filter(obj => obj.status === 0)
+      // console.log('Find 2 ', datos)
+      this.totalitemsaves = datos.length
+      for (const i in datos) {
+        const item = datos[i]
+        const obj = {}
+        obj.i = parseInt(i) + 1
+        obj.id = item.id
+        obj.indice = item.indice
         obj.fecha = moment(item.fecha).format('YYYY-MM-DD')
         obj.idcliente = item.idcliente
         obj.nombrecliente = item.nombrecliente
-        obj.cantidad = item.cantidad
-        obj.subtotal = item.subtotal
+        obj.cantidad = item.cantitemscarrito
+        obj.subtotal = item.subtotal.toFixed(2)
         this.totalsaves += parseFloat(obj.subtotal)
         this.serverDataSaves.push(obj)
       }
@@ -701,7 +705,6 @@ export default defineComponent({
       if (circuloTotalSaves) {
         circuloTotalSaves.textContent = this.totalitemsaves
       }
-      console.log(this.serverDataSaves)
     },
     deletePedido () {
       this.$q.dialog({
@@ -716,14 +719,19 @@ export default defineComponent({
           label: 'No'
         },
         persistent: true
-      }).onOk(async () => {
-        await this.deleteCarrito()
+      }).onOk(() => {
+        this.deleteCarrito()
+        this.cleanCarrito()
         // this.$router.go(0)
       })
     },
     async deleteCarrito () {
-      await pedidosLib.deletecarrito(this.idhold)
-      this.cleanCarrito()
+      const holds = this.$q.localStorage.getItem('holds')
+      const index = holds.findIndex(obj => obj.status === 1)
+      console.log(index)
+      holds[index].status = 2
+      this.$q.localStorage.remove('holds')
+      this.$q.localStorage.set('holds', holds)
     },
     cleanCarrito () {
       this.layoutModal = false
@@ -746,7 +754,7 @@ export default defineComponent({
       this.layoutModal = false
       this.$q.dialog({
         title: 'ENHORABUENA!',
-        message: 'Pedido realizado y enviado con éxito!',
+        message: 'Pedido creado y enviado con éxito!',
         ok: {
           color: 'primary',
           label: 'Aceptar'
@@ -754,7 +762,7 @@ export default defineComponent({
         persistent: true
       }).onOk(() => {
         this.deleteCarrito()
-        this.$router.go(0)
+        this.cleanCarrito()
       })
     },
     deleteItem (id) {
@@ -778,10 +786,10 @@ export default defineComponent({
   },
   mounted () {
     console.log('Main Layout')
-    this.hideShowSaves(this.idusuario)
-    this.hideShowCarrito(this.idusuario)
-  },
-  created () {
+    // this.hideShowSaves(this.idusuario)
+    // this.hideShowCarrito(this.idusuario)
+  }
+  /* created () {
     const verificarServidor = setInterval(() => {
       const cadena = ENDPOINT_PATH
       const request = new XMLHttpRequest()
@@ -801,7 +809,7 @@ export default defineComponent({
         })
       }
     }, (1000 * 2))
-  }
+  } */
 })
 </script>
 
@@ -828,11 +836,11 @@ export default defineComponent({
     color: white;
   }
   .totalItemRed{
-    background: red;
-    color: black;
+    background: #707271;
+    color: white;
   }
   .totalItemBlue{
-    background: #1976D2;
+    background: #225401;
     color: white;
   }
   .q-toolbar--inset {
@@ -856,5 +864,8 @@ export default defineComponent({
     align-items: center;
     font-size: 29px;
     color: white;
+  }
+  .borderdetailt {
+    border-radius: 12px;
   }
 </style>

@@ -4,7 +4,7 @@
        <div
           class="menuitem"
           @click="gotoClientes()">
-          <q-icon name="keyboard_return" color="info" />
+          <q-icon name="keyboard_return"/>
         </div>
         <div class="subHeaderItem">
           Productos
@@ -35,9 +35,15 @@
             <q-card-section>
               <div style="display:grid;">
                 <div
-                  class="text-left"
-                  @click="openSetItems( props.row.id, props.row.nombre, props.row.precio, props.row.preciocaj, props.row.unixcaja, props.row.costoactu, props.row.porciva, props.row.porkilos , props.row.disponible, props.row.imagen)">
-                  <strong>{{props.row.id + '  ' + props.row.nombre }}</strong>
+                  style="display: flex;"
+                  class="text-left">
+                  <div
+                    class="menuitem"
+                    @click="openSetItems( props.row.id, props.row.nombre, props.row.precio, props.row.preciocaj, props.row.unixcaja, props.row.costoactu, props.row.porciva, props.row.porkilos , props.row.disponible, props.row.imagen)"
+                  >
+                    <q-icon name="save_alt"/>
+                  </div>
+                  <strong style="font-size: 13px; margin-left: 10px; width: fit-content;">{{props.row.id + '  ' + props.row.nombre }}</strong>
                 </div>
                 <div  style="display:flex;">
                   <div
@@ -103,7 +109,7 @@
       </template>
     </q-table>
     <q-dialog v-model="layoutModal" persistent>
-      <q-card class="my-card" flat bordered>
+      <q-card class="my-card" flat bordered style="border-radius: 15px">
         <q-item>
           <q-item-section avatar>
             <q-avatar>
@@ -114,9 +120,9 @@
           <q-item-section>
             <q-item-label>{{ nombreproducto }}</q-item-label>
             <q-item-label caption>
-              <span style="color: white;background: darkgreen;border-radius: 5px;padding: 1px 4px;"> ${{ precioproducto.toFixed(2) }} </span>
-              <span style="color: red;margin-left:30px;">Disp: {{ disponibleproducto }}</span>
-              <span style="color: blue;margin-left:25px;">UniXcaja: {{ unixcaja }} </span>
+              <span style="color: darkgreen;background: #a2e776;border-radius: 5px;padding: 1px 4px;margin-right: 15px;"> ${{ precioproducto.toFixed(2) }} </span>
+              <span style="color: #995b01;background: #F2C037;border-radius: 5px;padding: 1px 4px;margin-right: 15px;">Disp: {{ disponibleproducto }}</span>
+              <span style="color: #0271c9;background: #9fcff5;border-radius: 5px;padding: 1px 4px;">UniXcaja: {{ unixcaja }} </span>
             </q-item-label>
           </q-item-section>
         </q-item>
@@ -140,13 +146,13 @@
             label="Cancelar"
             type="buttom"
             icon="close"
-            color="negative"
+            color="secondary"
             v-close-popup
           />
           <q-btn
             style="font-size: 11px;"
             label="Agregar al carrito"
-            color="primary"
+            color="dark"
             v-close-popup
             icon="add_shopping_cart"
             @click="setCarrito()"/>
@@ -184,7 +190,7 @@
             style=""
             label="Cerrar"
             type="buttom"
-            color="negative"
+            color="primary"
             icon="close"
             v-close-popup
           />
@@ -204,8 +210,8 @@ import {
 } from 'vue'
 // import VueSocialSharing from 'vue-social-sharing'
 import productosLib from '../logic/productos'
-import pedidosLib from '../logic/pedidos'
-import clientesLib from '../logic/clientes'
+// import pedidosLib from '../logic/pedidos'
+// import clientesLib from '../logic/clientes'
 
 export default defineComponent({
   name: 'PageIndex',
@@ -215,6 +221,7 @@ export default defineComponent({
       categoria: null,
       idusuario: this.$q.localStorage.getItem('idusuario'),
       usuario: this.$q.localStorage.getItem('usuario'),
+      idrol: this.$q.localStorage.getItem('idrol'),
       pagination: {
         page: 1,
         rowsPerPage: 0 // 0 means all rows
@@ -265,8 +272,7 @@ export default defineComponent({
   },
   methods: {
     gotoClientes () {
-      const USER = this.usuario.toString().toUpperCase()
-      if (USER === 'ADMIN' || USER === 'SOPORTE') {
+      if (this.idrol === 1 || this.idrol === 4) {
         this.$router.push('/index')
       } else {
         this.$router.push('/clientes')
@@ -292,8 +298,7 @@ export default defineComponent({
       this.subtituloimg = true
     },
     openSetItems (id, nombre, precio, preciocaj, unixcaja, costoactu, porciva, porkilos, disponible, imagen) {
-      const USER = this.usuario.toString().toUpperCase()
-      if (USER !== 'ADMIN' && USER !== 'SOPORTE') {
+      if (this.idrol === 3) {
         this.idproducto = id
         this.nombreproducto = nombre
         this.precioproducto = precio
@@ -306,22 +311,51 @@ export default defineComponent({
         this.layoutModal = true
       }
     },
-    async updateCarrito (idhold) {
+    async updateCarrito () {
       const totalItemHold = document.querySelector('.totalItemHold')
       totalItemHold.classList.remove('invisible')
-      const resp = await pedidosLib.getitemcarrito(idhold)
-      this.totalitemspedido = resp.data.length
+      const holds = this.$q.localStorage.getItem('holds')
+      const data = holds.find(obj => obj.status === 1)
+      this.totalitemspedido = data.cantitemscarrito
       const circuloTotalItem = document.querySelector('.totalItemBlack')
       circuloTotalItem.textContent = this.totalitemspedido
     },
     async setCarrito () {
-      const resp = await clientesLib.getholds(this.idusuario)
-      if (resp.data.length > 0) {
-        const idhold = resp.data[0].id
-        await pedidosLib.setitemcarrito(idhold, this.idproducto, this.nombreproducto, this.precioproducto, this.cantidad, this.subtotal, this.preciocaj, this.unixcaja, this.costoactu, this.porciva, this.porkilos)
-        this.updateCarrito(idhold)
-        // clientesLib.getcarrito(idcliente)
-        // this.$router.go(0)
+      // const resp = await clientesLib.getholds(this.idusuario)
+      const holds = this.$q.localStorage.getItem('holds')
+      const itemscarrito = this.$q.localStorage.getItem('itemsholds')
+      const index = holds.findIndex(obj => obj.status === 1)
+      if (index !== -1) {
+        console.log(holds[index].id, this.idproducto)
+        const index2 = itemscarrito.findIndex(obj => obj.idhold === holds[index].id && obj.idproducto === this.idproducto)
+        console.log(index2)
+        if (index2 === -1) {
+          const obj = {}
+          obj.id = null
+          obj.idhold = holds[index].id
+          obj.indice = holds[index].indice
+          obj.idproducto = this.idproducto
+          obj.nombreproducto = this.nombreproducto
+          obj.precio = this.precioproducto
+          obj.cantidad = this.cantidad
+          obj.subtotal = this.subtotal
+          obj.preciocaj = this.preciocaj
+          obj.unixcaja = this.unixcaja
+          obj.costoactu = this.costoactu
+          obj.porciva = this.porciva
+          obj.porkilos = this.porkilos
+          itemscarrito.push(obj)
+          holds[index].cantitemscarrito += parseInt(1)
+        } else {
+          itemscarrito[index2].cantidad += parseInt(this.cantidad)
+          itemscarrito[index2].subtotal += parseFloat(this.subtotal)
+        }
+        this.$q.localStorage.remove('itemsholds')
+        this.$q.localStorage.set('itemsholds', itemscarrito)
+        holds[index].subtotal += parseFloat(this.subtotal)
+        this.$q.localStorage.remove('holds')
+        this.$q.localStorage.set('holds', holds)
+        this.updateCarrito()
       } else {
         this.$q.dialog({
           title: 'Oops!',
@@ -331,12 +365,10 @@ export default defineComponent({
         this.gotoClientes()
       }
     },
-    async listarProductos (categoria) {
+    listarProductos (categoria) {
       this.loading = true
-      const resp = await productosLib.listar(categoria)
-      this.loading = false
-      this.serverData = []
-      const datos = resp.data
+      this.serverData = this.$q.localStorage.getItem('productos')
+      /* const datos = this.$q.localStorage.getItem('productos')
       console.log(datos)
       for (const i in datos) {
         const item = datos[i]
@@ -351,14 +383,15 @@ export default defineComponent({
         obj.porciva = item.porciva
         obj.porkilos = item.porkilos
         obj.imagen = item.imagen
-        /* if (item.imagen) {
+        if (item.imagen) {
           console.log(item.imagen)
           const respimg = await productosLib.getimagenproducto(item.imagen)
           console.log(respimg)
           obj.imagen = this.dataUrl(respimg.data[0].imagen)
-        } */
+        }
         this.serverData.push(obj)
-      }
+      } */
+      this.loading = false
       // console.log(this.serverData)
     },
     dataUrl (img) {
@@ -374,64 +407,36 @@ export default defineComponent({
     }
   },
   async mounted () {
-    const totalItemCxc = document.querySelector('.totalItemCxc')
-    const totalItemHold = document.querySelector('.totalItemHold')
-    const circuloCxcItem = document.querySelector('.totalItemRed')
-    const idcliente = this.$q.localStorage.getItem('idcliente')
-    if (idcliente) {
-      const resp = await clientesLib.getcxchold(this.usuario, idcliente)
-      console.log(resp)
-      if (resp.data.length > 0) {
-        this.$q.dialog({
-          title: 'Advertencia!',
-          message: 'Este cliente tiene DEUDAS pendientes!',
-          persistent: true
-        }).onOk(() => {
-          totalItemCxc.classList.remove('invisible')
-          circuloCxcItem.textContent = resp.data.length
-          if (totalItemHold.classList.contains('invisible')) {
-            totalItemHold.classList.remove('invisible')
-            const circuloTotalItem = document.querySelector('.totalItemBlack')
-            circuloTotalItem.textContent = 0
-          }
-          // this.$router.go(0)
-        })
-      } else {
-        circuloCxcItem.textContent = 0
-        totalItemCxc.classList.add('invisible')
-      // this.$router.go(0)
-      // this.$q.localStorage.remove('idcliente')
-      }
-    }
     this.listarProductos(null)
   }
 })
 </script>
 <style scoped>
   .headerItem{
-    margin: 20px;
     display: flex;
     align-items: center;
+    padding: 20px 20px 10px;
   }
   .menuitem {
-    height: 60px;
-    width: 60px;
-    border: 1px solid green;
+    height: 40px;
+    width: 45px;
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: xx-large;
+    font-size: 30px;
+    background: #5eb228;
+    color: white;
   }
   .subHeaderItem{
     text-align: center;
     width: 100%;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: bold;
     text-transform: uppercase;
   }
   .headerTableItems{
-    background: aliceblue;
+    background: #d6d6d6;
     font-weight: bold;
     height: 23px;
     font-size: smaller;
@@ -444,7 +449,7 @@ export default defineComponent({
   .rowTableItemsPrecio{
     font-weight: bold;
     height: 23px;
-    color: crimson;
+    color: #5eb228;
     font-weight: bold;
   }
   .subtitleimagen {
