@@ -4,7 +4,7 @@
       <img src="../assets/logobloque7.png" height="115"/>
     </div>
   </div>
-  <div class="q-pa-md text-dark bg-secondary formLogin">
+  <div class="q-pa-md text-dark bg-primary formLogin">
     <form
       @submit.prevent="enviarLogin">
       <div class="text-weight-bold text-center text-dark" style="height:40px;">LOGIN</div>

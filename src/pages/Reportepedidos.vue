@@ -4,7 +4,7 @@
        <div
           class="menuitem"
           @click="gotoIndex()">
-          <q-icon name="keyboard_return" color="info" />
+          <q-icon name="keyboard_return" />
         </div>
         <div class="subHeaderItem" style="display: grid;">
           <span>Reporte pedidos</span>
@@ -77,7 +77,7 @@
       <template v-slot:body="props">
         <q-tr :props="props">
           <q-td auto-width>
-            <q-btn size="xs" color="accent" round dense @click="props.expand = !props.expand" :icon="props.expand ? 'remove' : 'add'" />
+            <q-btn size="xs" color="primary" round dense @click="props.expand = !props.expand" :icon="props.expand ? 'remove' : 'add'" />
           </q-td>
           <q-td
             auto-width
@@ -106,7 +106,7 @@
                     v-for="col in props.cols"
                     :key="col.name"
                     :props="props"
-                    class="text-italic text-purple"
+                    class="text-italic text-aecondary"
                   >
                     {{ col.label }}
                   </q-th>
@@ -260,14 +260,15 @@ export default defineComponent({
     align-items: center;
   }
   .menuitem {
-    height: 60px;
-    width: 60px;
-    border: 1px solid green;
+    height: 40px;
+    width: 45px;
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: xx-large;
+    font-size: 30px;
+    background: #5eb228;
+    color: white;
   }
   .subHeaderItem{
     text-align: center;
