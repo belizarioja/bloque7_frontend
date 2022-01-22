@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-transparent text-center"  style="padding-top: 20px;">
+  <div class="bg-transparent text-center"  style="padding-top: 75px;">
     <span style="font-size:x-large"> Enhorabuena!</span>
     <p>Gracias por usar nuestra App!</p>
     <div class="bannerlogout">

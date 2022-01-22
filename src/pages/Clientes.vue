@@ -7,7 +7,7 @@
           <q-icon name="keyboard_return"/>
         </div>
         <div class="subHeaderItem">
-          Clientes asignados
+          Seleccione cliente
         </div>
     </div>
     <q-table
@@ -32,15 +32,16 @@
       <template v-slot:item="props">
         <div class="q-pa-xs col-xs-12 col-sm-6 col-md-4">
           <q-card>
-            <q-item>
+            <q-item
+              :class="{'done' : props.row.chk }"
+              @click="gotoProductos( props.row.idcliente, props.row.nombrecliente, props.row.rifcliente)"
+              clickable v-ripple>
               <q-item-section avatar>
-                <q-avatar>
-                  <div class="circuloName">JB</div>
+                <q-avatar color="primary" text-color="white">
+                  {{ iniciales(props.row.nombrecliente) }}
                 </q-avatar>
               </q-item-section>
-              <q-item-section
-                :class="{'done' : props.row.chk }"
-                @click="gotoProductos( props.row.idcliente, props.row.nombrecliente, props.row.rifcliente)">
+              <q-item-section style="text-align: left;">
                 <q-item-label>{{ props.row.nombrecliente }}</q-item-label>
                 <q-item-label caption>RIF {{ props.row.rifcliente }}</q-item-label>
               </q-item-section>
@@ -80,6 +81,11 @@ export default defineComponent({
     }
   },
   methods: {
+    iniciales (nombre) {
+      const primer = nombre.split(' ')[0].charAt(0)
+      const segundo = nombre.split(' ')[1].charAt(0)
+      return primer + segundo
+    },
     gotoProductos (idcliente, nombrecliente, rifcliente) {
       this.$q.localStorage.set('idcliente', idcliente)
       const totalItemCxc = document.querySelector('.totalItemCxc')

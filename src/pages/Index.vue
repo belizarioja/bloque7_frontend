@@ -206,6 +206,58 @@ export default defineComponent({
       this.$q.localStorage.remove('clientes')
       this.$q.localStorage.set('clientes', serverData)
     },
+    async getUsuarios () {
+      const serverData = []
+      if (this.idrol === 1) {
+        console.log('Aqui usuarios')
+        /* const resp = await productosLib.listar(null)
+        const datos = resp.data
+        console.log(datos)
+        for (const i in datos) {
+          const item = datos[i]
+          const obj = {}
+          obj.id = item.id
+          obj.nombre = item.nombre
+          obj.precio = item.porkilos === 1 ? item.precio : parseFloat(item.precio / item.unixcaja)
+          obj.disponible = item.disponible
+          obj.preciocaj = item.preciocaj
+          obj.unixcaja = item.unixcaja
+          obj.costoactu = item.costoactu
+          obj.porciva = item.porciva
+          obj.porkilos = item.porkilos
+          obj.imagen = item.imagen
+          serverData.push(obj)
+        } */
+        this.$q.localStorage.remove('usuarios')
+        this.$q.localStorage.set('usuarios', serverData)
+      }
+    },
+    async getVendedores () {
+      const serverData = []
+      if (this.idrol === 1) {
+        console.log('Aqui vendedores')
+        /* const resp = await productosLib.listar(null)
+        const datos = resp.data
+        console.log(datos)
+        for (const i in datos) {
+          const item = datos[i]
+          const obj = {}
+          obj.id = item.id
+          obj.nombre = item.nombre
+          obj.precio = item.porkilos === 1 ? item.precio : parseFloat(item.precio / item.unixcaja)
+          obj.disponible = item.disponible
+          obj.preciocaj = item.preciocaj
+          obj.unixcaja = item.unixcaja
+          obj.costoactu = item.costoactu
+          obj.porciva = item.porciva
+          obj.porkilos = item.porkilos
+          obj.imagen = item.imagen
+          serverData.push(obj)
+        } */
+        this.$q.localStorage.remove('vendedores')
+        this.$q.localStorage.set('vendedores', serverData)
+      }
+    },
     async getProductos () {
       const resp = await productosLib.listar(null)
       const serverData = []
@@ -317,6 +369,10 @@ export default defineComponent({
       this.loader = true
       this.setPedidos().then(
         this.getProductos()
+      ).then(
+        this.getUsuarios()
+      ).then(
+        this.getVendedores()
       ).then(
         this.getCxc()
       ).then(

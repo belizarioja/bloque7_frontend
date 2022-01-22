@@ -294,9 +294,26 @@
       <q-toolbar>
         <q-toolbar inset style="width: 100%;justify-content: space-around;font-size:35px;">
           <q-icon
-            v-show="idrol > 1"
             @click="gotoIndex()"
             name="home"
+            style=""
+          />
+          <q-icon
+            v-show="idrol === 1"
+            @click="gotoUsuarios()"
+            name="account_circle"
+            style=""
+          />
+          <q-icon
+            v-show="idrol === 1"
+            @click="gotoVendedores()"
+            name="manage_accounts"
+            style=""
+          />
+          <q-icon
+            v-show="idrol === 1"
+            @click="gotoProductos()"
+            name="price_change"
             style=""
           />
           <q-icon
