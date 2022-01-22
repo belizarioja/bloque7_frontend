@@ -290,6 +290,53 @@
         </div>
       </q-toolbar>
     </q-header>
+    <q-footer  style="border-radius: 15px 15px 0 0;">
+      <q-toolbar>
+        <q-toolbar inset style="width: 100%;justify-content: space-around;font-size:35px;">
+          <q-icon
+            @click="gotoIndex()"
+            name="home"
+            style=""
+          />
+          <q-icon
+            v-show="idrol === 1"
+            @click="gotoUsuarios()"
+            name="account_circle"
+            style=""
+          />
+          <q-icon
+            v-show="idrol === 1"
+            @click="gotoVendedores()"
+            name="manage_accounts"
+            style=""
+          />
+          <q-icon
+            v-show="idrol === 1"
+            @click="gotoProductos()"
+            name="price_change"
+            style=""
+          />
+          <q-icon
+            v-show="idrol > 1"
+            @click="gotoClientes()"
+            name="point_of_sale"
+            style=""
+          />
+          <q-icon
+            v-show="idrol > 1"
+            @click="gotoCxc()"
+            name="paid"
+            style=""
+          />
+          <q-icon
+            v-show="idrol > 1"
+            @click="gotoReportePedidos()"
+            name="view_list"
+            style=""
+          />
+        </q-toolbar>
+      </q-toolbar>
+    </q-footer>
 
     <q-drawer
       v-model="leftDrawerOpen"
@@ -432,7 +479,7 @@
       </q-list>
     </q-drawer>
 
-    <q-page-container>
+    <q-page-container style="background: aliceblue;">
       <router-view />
     </q-page-container>
   </q-layout>
@@ -499,6 +546,27 @@ export default defineComponent({
     }
   },
   methods: {
+    gotoIndex () {
+      this.$router.push('/index')
+    },
+    gotoClientes () {
+      this.$router.push('/clientes')
+    },
+    gotoUsuarios () {
+      this.$router.push('/usuarios')
+    },
+    gotoVendedores () {
+      this.$router.push('/vendedores')
+    },
+    gotoCxc () {
+      this.$router.push('/cuentasxcobrar')
+    },
+    gotoReportePedidos () {
+      this.$router.push('/reportepedidos')
+    },
+    gotoProductos () {
+      this.$router.push('/productos')
+    },
     checkoutSaves (indice) {
       this.$q.dialog({
         title: 'Seguro de ENVIAR este PEDIDO al CARRITO?',

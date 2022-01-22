@@ -79,7 +79,7 @@ import { defineComponent } from 'vue'
 import productosLib from '../logic/productos'
 import clientesLib from '../logic/clientes'
 import vendedorLib from '../logic/vendedores'
-import pedidosLib from '../logic/pedidos'
+// import pedidosLib from '../logic/pedidos'
 import moment from 'moment'
 
 export default defineComponent({
@@ -89,6 +89,7 @@ export default defineComponent({
       idrol: this.$q.localStorage.getItem('idrol'),
       usuario: this.$q.localStorage.getItem('usuario'),
       idusuario: this.$q.localStorage.getItem('idusuario'),
+      idsucursal: this.$q.localStorage.getItem('idsucursal'),
       feultget: this.$q.localStorage.getItem('feultget'),
       loader: false
     }
@@ -205,6 +206,58 @@ export default defineComponent({
       this.$q.localStorage.remove('clientes')
       this.$q.localStorage.set('clientes', serverData)
     },
+    async getUsuarios () {
+      const serverData = []
+      if (this.idrol === 1) {
+        console.log('Aqui usuarios')
+        /* const resp = await productosLib.listar(null)
+        const datos = resp.data
+        console.log(datos)
+        for (const i in datos) {
+          const item = datos[i]
+          const obj = {}
+          obj.id = item.id
+          obj.nombre = item.nombre
+          obj.precio = item.porkilos === 1 ? item.precio : parseFloat(item.precio / item.unixcaja)
+          obj.disponible = item.disponible
+          obj.preciocaj = item.preciocaj
+          obj.unixcaja = item.unixcaja
+          obj.costoactu = item.costoactu
+          obj.porciva = item.porciva
+          obj.porkilos = item.porkilos
+          obj.imagen = item.imagen
+          serverData.push(obj)
+        } */
+        this.$q.localStorage.remove('usuarios')
+        this.$q.localStorage.set('usuarios', serverData)
+      }
+    },
+    async getVendedores () {
+      const serverData = []
+      if (this.idrol === 1) {
+        console.log('Aqui vendedores')
+        /* const resp = await productosLib.listar(null)
+        const datos = resp.data
+        console.log(datos)
+        for (const i in datos) {
+          const item = datos[i]
+          const obj = {}
+          obj.id = item.id
+          obj.nombre = item.nombre
+          obj.precio = item.porkilos === 1 ? item.precio : parseFloat(item.precio / item.unixcaja)
+          obj.disponible = item.disponible
+          obj.preciocaj = item.preciocaj
+          obj.unixcaja = item.unixcaja
+          obj.costoactu = item.costoactu
+          obj.porciva = item.porciva
+          obj.porkilos = item.porkilos
+          obj.imagen = item.imagen
+          serverData.push(obj)
+        } */
+        this.$q.localStorage.remove('vendedores')
+        this.$q.localStorage.set('vendedores', serverData)
+      }
+    },
     async getProductos () {
       const resp = await productosLib.listar(null)
       const serverData = []
@@ -277,26 +330,50 @@ export default defineComponent({
       console.log('Error sincronizando')
     },
     async setPedidos () {
-      const arregloOriginal = this.serverData
-      const arregloDeArreglos = []
-      // console.log('Arreglo original: ', arregloOriginal)
-      const LONGITUD_PEDAZOS = 13
-      for (let i = 0; i < arregloOriginal.length; i += LONGITUD_PEDAZOS) {
-        const pedazo = arregloOriginal.slice(i, i + LONGITUD_PEDAZOS)
-        arregloDeArreglos.push(pedazo)
+      const holds = this.$q.localStorage.getItem('holds')
+      const itemspedido = this.$q.localStorage.getItem('itemsholds')
+      const pedidos = holds.filter(obj => obj.status === 3)
+      console.log(pedidos)
+      for (const i in pedidos) {
+        const item = pedidos[i]
+        const idcliente = item.idcliente
+        const idusuario = this.idusuario
+        const usuario = this.usuario
+        const idsucursal = this.idsucursal
+        const nombrecliente = item.nombrecliente
+        const rifcliente = item.rifcliente
+        const totalcarrito = item.subtotal
+        const arregloOriginal = itemspedido.filter(obj => obj.indice === item.indice)
+        console.log(arregloOriginal)
+        const arregloDeArreglos = []
+        // console.log('Arreglo original: ', arregloOriginal)
+        const LONGITUD_PEDAZOS = 13
+        for (let i = 0; i < arregloOriginal.length; i += LONGITUD_PEDAZOS) {
+          const pedazo = arregloOriginal.slice(i, i + LONGITUD_PEDAZOS)
+          arregloDeArreglos.push(pedazo)
+        }
+        // console.log('Arreglo de arreglos: ', arregloDeArreglos)
+        this.loader = true
+        for (const i in arregloDeArreglos) {
+          const arreglopedido = arregloDeArreglos[i]
+          // console.log(arreglopedido)
+          console.log(idusuario, usuario, idcliente, nombrecliente, rifcliente, totalcarrito, idsucursal, arreglopedido)
+          // await pedidosLib.setpedido(idusuario, this.usuario, idcliente, nombrecliente, rifcliente, totalcarrito, idsucursal, arreglopedido)
+        }
       }
-      // console.log('Arreglo de arreglos: ', arregloDeArreglos)
-      this.loader = true
-      for (const i in arregloDeArreglos) {
-        const arreglopedido = arregloDeArreglos[i]
-        // console.log(arreglopedido)
-        await pedidosLib.setpedido(this.idusuario, this.usuario, this.idcliente, this.nombrecliente, this.rifcliente, this.totalcarrito, this.idsucursal, arreglopedido, this.comentario)
-      }
-      this.loader = false
+    },
+    setSincronized () {
+      this.setPedidos()
     },
     getSincronized () {
       this.loader = true
-      this.getProductos().then(
+      this.setPedidos().then(
+        this.getProductos()
+      ).then(
+        this.getUsuarios()
+      ).then(
+        this.getVendedores()
+      ).then(
         this.getCxc()
       ).then(
         this.getHolds()

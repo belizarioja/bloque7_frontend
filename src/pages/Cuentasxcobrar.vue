@@ -4,7 +4,7 @@
        <div
           class="menuitem"
           @click="gotoIndex()">
-          <q-icon name="keyboard_return" color="info" />
+          <q-icon name="keyboard_return"/>
         </div>
         <div class="subHeaderItem">
           Clientes <span id="idNombreReporte" v-if="nombrereporte"> de {{ nombrereporte }}</span> con deudas
@@ -53,7 +53,7 @@
       <template v-slot:body="props">
         <q-tr :props="props">
           <q-td auto-width>
-            <q-btn size="xs" color="accent" round dense @click="props.expand = !props.expand" :icon="props.expand ? 'remove' : 'add'" />
+            <q-btn size="xs" color="primary" round dense @click="props.expand = !props.expand" :icon="props.expand ? 'remove' : 'add'" />
           </q-td>
           <q-td
             auto-width
@@ -65,7 +65,7 @@
           </q-td>
         </q-tr>
         <q-tr v-show="props.expand" :props="props">
-          <q-td colspan="100%">
+          <q-td colspan="100%" style="padding-left: 4px;">
             <q-table
               style="background: #f5f5f5;"
               :rows="props.row.details"
@@ -82,7 +82,7 @@
                     :key="col.name"
                     :props="props"
                     style="font-size: 10px;"
-                    class="text-italic text-purple"
+                    class="text-italic text-secondary"
                   >
                     {{ col.label }}
                   </q-th>
@@ -144,7 +144,7 @@ export default defineComponent({
       ],
       columns2: [
         { name: 'id', label: '# Control', field: 'id', style: 'text-align: rigth;font-size: 10px;font-weight: bold;' },
-        { name: 'tipodoc', label: 'Tipo', field: 'tipodoc', style: 'color: blue;text-align: rigth;font-size: 10px;font-weight: bold;' },
+        { name: 'tipodoc', label: 'Tipo', field: 'tipodoc', style: 'color: #5eb228;text-align: rigth;font-size: 10px;font-weight: bold;' },
         { name: 'fecha', label: 'Fecha', field: 'fecha', style: 'text-align: rigth;font-size: 10px;font-weight: bold;' },
         { name: 'dias', label: 'Días', field: 'dias', style: 'color: red;text-align: center;font-size: 10px;font-weight: bold;' },
         { name: 'monto', label: 'Monto', field: 'monto', style: 'text-align: rigth;font-size: 10px;font-weight: bold;' },
@@ -200,14 +200,15 @@ export default defineComponent({
     align-items: center;
   }
   .menuitem {
-    height: 60px;
-    width: 60px;
-    border: 1px solid green;
+    height: 40px;
+    width: 45px;
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: xx-large;
+    font-size: 30px;
+    background: #5eb228;
+    color: white;
   }
   .subHeaderItem{
     text-align: center;
