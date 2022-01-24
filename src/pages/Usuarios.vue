@@ -4,7 +4,7 @@
        <div
           class="menuitem"
           @click="gotoIndex()">
-          <q-icon name="keyboard_return" color="info" />
+          <q-icon name="keyboard_return"/>
         </div>
         <div class="subHeaderItem">
           Usuarios
@@ -20,7 +20,10 @@
       v-model:pagination="pagination"
       :rows-per-page-options="[0]"
     >
-      <template v-slot:top-right>
+      <template v-slot:top>
+        <q-btn size="xs" color="secondary" round dense @click="actualizar" icon="refresh"></q-btn>
+        <span style="font-size: 12px;margin-left: 6px;">Actualizar</span>
+        <q-space />
         <q-input borderless dense debounce="300" v-model="filter" placeholder="Buscar">
           <template v-slot:append>
             <q-icon name="search" />
@@ -31,19 +34,20 @@
       <template v-slot:item="props">
         <div class="q-pa-xs col-xs-12 col-sm-6 col-md-4">
           <q-card>
-            <q-card-section style="height: 90px;">
+            <q-card-section style="height: 115px;">
               <div style="float: left; margin-right:10px;">
                 <div style="text-align: left;">{{ props.row.usuario }} {{ props.row.nombre }}</div>
                 <div style="text-align: left;font-weight: bold;">Útimo acceso : {{ props.row.fe_ult_acceso }}</div>
+                <div style="text-align: left;font-weight: bold;">Útima sincronización : {{ props.row.fe_ult_get }}</div>
                 <div style="text-align: left;">Dispositivo : {{ props.row.uuid }}</div>
               </div>
-              <div style="float: right;">
+              <div style="display: grid;justify-content: end;">
                 <q-icon
                  v-show="props.row.status"
                  class="iconApp"
                  name="check_circle"
                  color="positive"
-                 style="font-size: x-large;margin-right:10px;"
+                 style=""
                  @click="hideShow(props.row.status, props.row.id, props.row.nombre)"
                 />
                 <q-icon
@@ -51,7 +55,7 @@
                  class="iconApp"
                  name="disabled_by_default"
                  color="negative"
-                 style="font-size: x-large;margin-right:10px;"
+                 style=""
                  @click="hideShow(props.row.status, props.row.id, props.row.nombre)"
                 />
                 <q-icon
@@ -59,7 +63,7 @@
                  class="iconApp"
                  name="phonelink_erase"
                  color="negative"
-                 style="font-size: x-large;margin-right:10px;"
+                 style=""
                  @click="resetDevice(props.row.id, props.row.nombre)"
                 />
               </div>
@@ -75,11 +79,14 @@
 import { ref, defineComponent } from 'vue'
 import authLib from '../logic/auth'
 import moment from 'moment'
+const config = require('../config/endpoints.js')
+const ENDPOINT_PATH = config.endpoint_path
 
 export default defineComponent({
   name: 'Usuarios',
   data () {
     return {
+      idrol: this.$q.localStorage.getItem('idrol'),
       serverData: []
     }
   },
@@ -101,26 +108,51 @@ export default defineComponent({
     gotoIndex () {
       this.$router.push('/index')
     },
-    async listarUsuarios () {
+    listarUsuarios () {
+      this.serverData = this.$q.localStorage.getItem('usuarios') ? this.$q.localStorage.getItem('usuarios') : []
+    },
+    actualizar () {
+      const resp = this.checkNet()
+      if (!resp) {
+        this.mensajeError()
+        return
+      }
+      this.getUsuarios()
+    },
+    async getUsuarios () {
       this.serverData = []
-      const resp = await authLib.usuarios()
-      const datos = resp.data
-      for (const i in datos) {
-        const item = datos[i]
-        const obj = {}
-        obj.id = item.id
-        obj.usuario = item.usuario
-        obj.clave = item.clave
-        obj.nombre = item.nombre
-        obj.idrol = item.idrol
-        obj.rol = item.rol
-        obj.uuid = item.uuid ? item.uuid : 'S/Inf'
-        obj.fe_ult_acceso = item.fe_ult_acceso ? moment(item.fe_ult_acceso).format('DD/MM/YYYY HH:mm:ss') : 'S/Inf'
-        obj.status = item.status
-        this.serverData.push(obj)
+      if (this.idrol === 1) {
+        const resp = await authLib.usuarios()
+        const datos = resp.data
+        for (const i in datos) {
+          const item = datos[i]
+          const obj = {}
+          obj.id = item.id
+          obj.usuario = item.usuario
+          obj.clave = item.clave
+          obj.nombre = item.nombre
+          obj.idrol = item.idrol
+          obj.rol = item.rol
+          obj.uuid = item.uuid ? item.uuid : 'S/Inf'
+          obj.fe_ult_acceso = item.fe_ult_acceso
+            ? moment(item.fe_ult_acceso).format('DD/MM/YYYY HH:mm:ss')
+            : 'S/Inf'
+          obj.fe_ult_get = item.fe_ult_get
+            ? moment(item.fe_ult_get).format('DD/MM/YYYY HH:mm:ss')
+            : 'S/Inf'
+          obj.status = item.status
+          this.serverData.push(obj)
+        }
+        this.$q.localStorage.remove('usuarios')
+        this.$q.localStorage.set('usuarios', this.serverData)
       }
     },
     hideShow (val, id, nombre) {
+      const resp = this.checkNet()
+      if (!resp) {
+        this.mensajeError()
+        return
+      }
       const valor = val === 1 ? 0 : 1
       const msg = val === 0 ? 'HABILITAR' : 'INHABILITAR'
       this.$q.dialog({
@@ -136,11 +168,17 @@ export default defineComponent({
         },
         persistent: true
       }).onOk(async () => {
-        await authLib.hideShowUsuarios(valor, id)
-        this.listarUsuarios()
+        await authLib.hideShowUsuarios(valor, id).then(
+          this.getUsuarios()
+        )
       })
     },
     resetDevice (id, nombre) {
+      const resp = this.checkNet()
+      if (!resp) {
+        this.mensajeError()
+        return
+      }
       this.$q.dialog({
         title: 'Confirmación!',
         message: 'Desea RESETEAR el dispositivo de la cuenta de ' + nombre + '?',
@@ -154,9 +192,30 @@ export default defineComponent({
         },
         persistent: true
       }).onOk(async () => {
-        await authLib.resetDevice(id)
-        this.listarUsuarios()
+        await authLib.resetDevice(id).then(
+          this.getUsuarios()
+        )
       })
+    },
+    mensajeError () {
+      this.$q.dialog({
+        title: '¡Problemas con INTERNET!',
+        message: 'Se requiere BUENA CONEXION para realizar esta acción',
+        persistent: true
+      })
+    },
+    checkNet () {
+      const cadena = ENDPOINT_PATH
+      const request = new XMLHttpRequest()
+      try {
+        request.open('GET', cadena, false)
+        request.send()
+        console.log(' <<< Bien ')
+        return true
+      } catch (error) {
+        console.log(' Mal >>>> ')
+        return false
+      }
     }
   },
   mounted () {
@@ -172,23 +231,27 @@ export default defineComponent({
     align-items: center;
   }
   .menuitem {
-    height: 60px;
-    width: 60px;
-    border: 1px solid green;
+    height: 40px;
+    width: 45px;
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: xx-large;
+    font-size: 30px;
+    background: #5eb228;
+    color: white;
   }
   .subHeaderItem{
     text-align: center;
     width: 100%;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: bold;
     text-transform: uppercase;
   }
   .done{
     background: aquamarine;
+  }
+  .iconApp{
+    font-size: 40px;
   }
 </style>

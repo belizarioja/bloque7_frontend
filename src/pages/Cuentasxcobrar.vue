@@ -168,15 +168,20 @@ export default defineComponent({
     },
     async listarCxc () {
       console.log(this.idrol)
+      this.serverData = []
+      this.loading = true
       if (this.idrol === 1) {
         this.nombrereporte = this.$q.localStorage.getItem('nombrereporte')
+        this.usuarioreporte = this.$q.localStorage.getItem('usuarioreporte')
         const idNombreReporte = document.querySelector('#idNombreReporte')
         if (idNombreReporte) {
           idNombreReporte.textContent = 'de : ' + this.nombrereporte
         }
+        this.serverData = this.$q.localStorage.getItem('cuentasxc').filter(obj => obj.idvendedor === this.usuarioreporte)
+      } else {
+        this.serverData = this.$q.localStorage.getItem('cuentasxc') ? this.$q.localStorage.getItem('cuentasxc') : []
       }
-      this.loading = true
-      this.serverData = this.$q.localStorage.getItem('cuentasxc')
+      console.log(this.serverData)
       this.loading = false
     },
     gotoIndex () {
@@ -213,7 +218,7 @@ export default defineComponent({
   .subHeaderItem{
     text-align: center;
     width: 100%;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: bold;
     text-transform: uppercase;
   }

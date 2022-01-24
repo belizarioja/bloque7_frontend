@@ -334,6 +334,11 @@
             name="view_list"
             style=""
           />
+          <q-icon
+            @click="gotoSalir()"
+            name="logout"
+            style=""
+          />
         </q-toolbar>
       </q-toolbar>
     </q-footer>
@@ -566,6 +571,9 @@ export default defineComponent({
     },
     gotoProductos () {
       this.$router.push('/productos')
+    },
+    gotoSalir () {
+      this.$router.push('/logout')
     },
     checkoutSaves (indice) {
       this.$q.dialog({

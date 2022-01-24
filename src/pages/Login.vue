@@ -57,6 +57,8 @@
 <script>
 import { ref, defineComponent } from 'vue'
 import auth from '../logic/auth'
+import moment from 'moment'
+
 const config = require('../config/endpoints.js')
 const ENDPOINT_PATH = config.endpoint_path
 
@@ -100,6 +102,8 @@ export default defineComponent({
             const idsucursal = resp.data[0].idsucursal
             const status = resp.data[0].status
             const feultget = resp.data[0].fe_ult_get
+              ? moment(resp.data[0].fe_ult_get).format('DD/MM/YYYY HH:mm:ss')
+              : 'S/Inf'
             // console.log(resp.data)
             if (status === 1) {
               this.$q.localStorage.set('usuario', this.usuario)

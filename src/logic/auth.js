@@ -21,5 +21,9 @@ export default {
   resetDevice (id) {
     const data = { id }
     return axios.post(ENDPOINT_PATH + 'resetDevice', data)
+  },
+  updateFechaUltGet (id) {
+    const data = { id }
+    return axios.post(ENDPOINT_PATH + 'updateFechaUltGet', data)
   }
 }

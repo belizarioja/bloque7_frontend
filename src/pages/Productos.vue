@@ -38,6 +38,7 @@
                   style="display: flex;"
                   class="text-left">
                   <div
+                    v-if="idrol === 3"
                     class="menuitem"
                     @click="openSetItems( props.row.id, props.row.nombre, props.row.precio, props.row.preciocaj, props.row.unixcaja, props.row.costoactu, props.row.porciva, props.row.porkilos , props.row.disponible, props.row.imagen)"
                   >
@@ -367,7 +368,9 @@ export default defineComponent({
     },
     listarProductos (categoria) {
       this.loading = true
-      this.serverData = this.$q.localStorage.getItem('productos')
+      // this.serverData = this.$q.localStorage.getItem('productos')
+      this.serverData = this.$q.localStorage.getItem('productos') ? this.$q.localStorage.getItem('productos') : []
+
       /* const datos = this.$q.localStorage.getItem('productos')
       console.log(datos)
       for (const i in datos) {

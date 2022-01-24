@@ -4,7 +4,7 @@
        <div
           class="menuitem"
           @click="gotoIndex()">
-          <q-icon name="keyboard_return" color="info" />
+          <q-icon name="keyboard_return"/>
         </div>
         <div class="subHeaderItem">
           Vendedores
@@ -31,28 +31,33 @@
       <template v-slot:item="props">
         <div class="q-pa-xs col-xs-12 col-sm-6 col-md-4">
           <q-card>
-            <q-card-section style="display:block; height: 90px;">
-              <div style="float: left; margin-right:10px;">
-                <div style="text-align: left;">{{ props.row.id }}</div>
-                <div style="text-align: left; font-weight: bold;">{{ props.row.nombre }}</div>
-                <div v-if="props.row.fecha" style="text-align: left;">Ultimo pedido {{ ultimopedido(props.row.fecha) }}</div>
+            <q-card-section style="height: 93px;">
+              <div style="display: flex;float: left;">
+                <q-item-section avatar style="float: left;">
+                  <q-avatar color="primary" text-color="white">
+                    {{ iniciales(props.row.nombre) }}
+                  </q-avatar>
+                </q-item-section>
+                <div style="float: left; margin-right:10px;">
+                  <div style="text-align: left;">{{ props.row.id }}</div>
+                  <div style="text-align: left; font-weight: bold;">{{ props.row.nombre }}</div>
+                  <div style="text-align: left;">Ultimo pedido {{ ultimopedido(props.row.fecha) }}</div>
+                </div>
               </div>
-              <div style="float: right;">
+              <div style="display: grid;justify-content: end;">
                 <q-icon
                  class="iconApp"
                  name="paid"
-                 color="warning"
-                 style="font-size: 30px;"
+                 color="secondary"
+                 style=""
                  @click="gotoReporteCxc(props.row.id, props.row.nombre)"
                 />
-              </div>
-              <div style="float: right;">
                 <q-icon
                  v-if="props.row.fecha"
                  class="iconApp"
                  name="view_list"
-                 color="primary"
-                 style="font-size: 30px;"
+                 color="info"
+                 style=""
                  @click="gotoReportePedidos(props.row.id, props.row.nombre, props.row.fecha)"
                 />
               </div>
@@ -66,7 +71,6 @@
 
 <script>
 import { ref, defineComponent } from 'vue'
-import vendedorLib from '../logic/vendedores'
 import moment from 'moment'
 
 export default defineComponent({
@@ -93,6 +97,11 @@ export default defineComponent({
     }
   },
   methods: {
+    iniciales (nombre) {
+      const primer = nombre.split(' ')[0].charAt(0)
+      const segundo = nombre.split(' ').length > 1 ? nombre.split(' ')[1].charAt(0) : ''
+      return primer + segundo
+    },
     gotoIndex () {
       this.$router.push('/index')
     },
@@ -108,13 +117,10 @@ export default defineComponent({
       this.$router.push('/reportepedidos')
     },
     async listarVendedores () {
-      this.serverData = []
-      const resp = await vendedorLib.listarVendedores()
-      console.log(resp.data)
-      this.serverData = resp.data
+      this.serverData = this.$q.localStorage.getItem('vendedores') ? this.$q.localStorage.getItem('vendedores') : []
     },
     ultimopedido (fecha) {
-      return moment(fecha).format('YYYY-MM-DD')
+      return fecha ? moment(fecha).format('YYYY-MM-DD') : 'S/Inf'
     }
 
   },
@@ -130,23 +136,24 @@ export default defineComponent({
     align-items: center;
   }
   .menuitem {
-    height: 60px;
-    width: 60px;
-    border: 1px solid green;
+    height: 40px;
+    width: 45px;
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: xx-large;
+    font-size: 30px;
+    background: #5eb228;
+    color: white;
   }
   .subHeaderItem{
     text-align: center;
     width: 100%;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: bold;
     text-transform: uppercase;
   }
-  .done{
-    background: aquamarine;
+  .iconApp{
+    font-size: 33px;
   }
 </style>
