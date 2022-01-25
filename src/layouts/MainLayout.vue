@@ -606,6 +606,7 @@ export default defineComponent({
         this.hideShowSaves()
         this.hideShowCarrito()
         this.layoutModalSaves = false
+        this.gotoProductos()
       })
     },
     deleteSaves (indice) {

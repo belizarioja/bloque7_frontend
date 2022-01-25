@@ -48,8 +48,10 @@
             Último <span id="feultgetId">{{ feultget }}</span>
           </q-item-label>
         </q-item-section>
-        <div>
-          <q-icon class="iconApp" name="pending_actions" color="secondary" />
+        <div @click="viewSincronized()">
+          <q-icon class="iconApp" name="pending_actions" color="secondary">
+            <q-badge color="primary" floating>!</q-badge>
+          </q-icon>
         </div>
       </q-item>
     </q-card>
@@ -59,11 +61,83 @@
         <q-linear-progress indeterminate />
       </span>
     </div>
+    <q-dialog v-model="layoutModal" persistent transition-show="flip-down" transition-hide="flip-up">
+      <q-card>
+        <q-bar  class="bg-primary text-white">
+          <q-icon name="speaker_notes" />
+          <div>Pendientes por sincronizar</div>
+
+          <q-space />
+
+          <q-btn dense flat icon="close" v-close-popup>
+            <q-tooltip class="bg-white text-primary">Cerrar</q-tooltip>
+          </q-btn>
+        </q-bar>
+
+        <q-card-section class="q-pt-none">
+          <!-- shopping_cart
+          add_shopping_cart
+          remove_shopping_cart
+          shopping_cart_checkout -->
+          <q-list bordered padding style="margin-top: 15px">
+            <q-item>
+              <q-item-section top avatar>
+                <q-avatar color="primary" text-color="white" icon="production_quantity_limits" />
+              </q-item-section>
+
+              <q-item-section>
+                <q-item-label>Enviados a ejecutar: </q-item-label>
+                <q-item-label caption lines="2">{{ enviados }} pedidos</q-item-label>
+              </q-item-section>
+            </q-item>
+
+            <q-separator spaced inset="item" />
+
+            <q-item>
+              <q-item-section top avatar>
+                <q-avatar color="info" text-color="white" icon="add_shopping_cart" />
+              </q-item-section>
+
+              <q-item-section>
+                <q-item-label>Guardados para revisar:</q-item-label>
+                <q-item-label caption lines="2">{{ guardados }} pedidos</q-item-label>
+              </q-item-section>
+            </q-item>
+
+            <q-separator spaced inset="item" />
+
+            <q-item>
+              <q-item-section top avatar>
+                <q-avatar color="dark" text-color="white" icon="remove_shopping_cart" />
+              </q-item-section>
+
+              <q-item-section>
+                <q-item-label>Eliminados :</q-item-label>
+                <q-item-label caption lines="2">{{ eliminados }} pedidos</q-item-label>
+              </q-item-section>
+            </q-item>
+
+            <q-separator spaced inset="item" />
+
+            <q-item>
+              <q-item-section top avatar>
+                <q-avatar color="secondary" text-color="white" icon="shopping_cart" />
+              </q-item-section>
+
+              <q-item-section>
+                <q-item-label>Dejado en el carrito:</q-item-label>
+                <q-item-label caption lines="2">{{ carrito }} pedido</q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
 <script>
-import { defineComponent } from 'vue'
+import { defineComponent, ref } from 'vue'
 import productosLib from '../logic/productos'
 import clientesLib from '../logic/clientes'
 import vendedorLib from '../logic/vendedores'
@@ -75,13 +149,23 @@ import moment from 'moment'
 export default defineComponent({
   name: 'PageIndex',
   data () {
+    const layoutModal = ref(false)
+    const enviados = ref(0)
+    const guardados = ref(0)
+    const eliminados = ref(0)
+    const carrito = ref(0)
     return {
       idrol: this.$q.localStorage.getItem('idrol'),
       usuario: this.$q.localStorage.getItem('usuario'),
       idusuario: this.$q.localStorage.getItem('idusuario'),
       idsucursal: this.$q.localStorage.getItem('idsucursal'),
       feultget: this.$q.localStorage.getItem('feultget'),
-      loader: false
+      loader: false,
+      layoutModal,
+      guardados,
+      enviados,
+      eliminados,
+      carrito
     }
   },
   methods: {
@@ -103,9 +187,27 @@ export default defineComponent({
     gotoProductos () {
       this.$router.push('/productos')
     },
+    viewSincronized () {
+      const holds = this.$q.localStorage.getItem('holds')
+
+      const enviados = holds.filter(obj => obj.status === 3)
+      this.enviados = enviados.length
+
+      const guardados = holds.filter(obj => obj.status === 0)
+      this.guardados = guardados.length
+
+      const eliminados = holds.filter(obj => obj.status === 2)
+      this.eliminados = eliminados.length
+
+      const carrito = holds.filter(obj => obj.status === 1)
+      this.carrito = carrito.length
+
+      this.layoutModal = true
+    },
     async getItemsHolds () {
       if (this.idrol !== 1) {
         const resp = await clientesLib.getitemsholds(this.idusuario)
+        console.log('Aqui get itemhols')
         console.log(resp)
         const holds = this.$q.localStorage.getItem('holds')
         const itemsholds = resp.data
@@ -174,6 +276,7 @@ export default defineComponent({
     async getHolds () {
       const serverData = []
       const resp = await clientesLib.getholds(this.idusuario)
+      console.log('Aqui get hols')
       console.log(resp)
       for (const i in resp.data) {
         const item = resp.data[i]
@@ -328,7 +431,7 @@ export default defineComponent({
           obj.id = item.id
           obj.numedocu = item.numedocu
           ultnumedocu = item.numedocu
-          // obj.idcliente = item.idcliente
+          obj.usuario = item.usuario
           obj.nombrecliente = item.idcliente + ' - ' + item.nombrecliente
           obj.fecha = moment(item.fecha).format('YYYY/MM/DD')
           obj.hora = moment(item.fecha).format('HH:mm:ss')
@@ -361,6 +464,7 @@ export default defineComponent({
       const holds = this.$q.localStorage.getItem('holds')
       const itemspedido = this.$q.localStorage.getItem('itemsholds')
       const pedidos = holds.filter((obj) => obj.status === 3)
+      console.log('Set pedidos')
       console.log(pedidos)
       for (const i in pedidos) {
         const item = pedidos[i]
@@ -371,6 +475,7 @@ export default defineComponent({
         const nombrecliente = item.nombrecliente
         const rifcliente = item.rifcliente
         const totalcarrito = item.subtotal
+        const comentario = 'PEDIDO DESDE APP'
         const arregloOriginal = itemspedido.filter(
           (obj) => obj.indice === item.indice
         )
@@ -395,40 +500,77 @@ export default defineComponent({
             rifcliente,
             totalcarrito,
             idsucursal,
-            arreglopedido
+            arreglopedido,
+            comentario
           )
-          // await pedidosLib.setpedido(idusuario, this.usuario, idcliente, nombrecliente, rifcliente, totalcarrito, idsucursal, arreglopedido)
+          await pedidosLib.setpedido(idusuario, usuario, idcliente, nombrecliente, rifcliente, totalcarrito, idsucursal, arreglopedido, comentario)
         }
+      }
+    },
+    async setEliminados () {
+      const holds = this.$q.localStorage.getItem('holds')
+      const pedidos = holds.filter((obj) => obj.status === 2 || obj.status === 3)
+      console.log('Set eliminados')
+      console.log(pedidos)
+      for (const i in pedidos) {
+        const item = pedidos[i]
+        console.log(item)
+        await pedidosLib.deletecarrito(item.id)
+      }
+    },
+    async setGuardados () {
+      const holds = this.$q.localStorage.getItem('holds')
+      const pedidos = holds.filter((obj) => obj.status === 1 || obj.status === 0)
+      const itemspedido = this.$q.localStorage.getItem('itemsholds')
+      console.log('Set guardados')
+      console.log(pedidos)
+      for (const i in pedidos) {
+        const item = pedidos[i]
+        const arreglopedido = itemspedido.filter(
+          (obj) => obj.indice === item.indice
+        )
+        console.log(item, arreglopedido)
+        pedidosLib.savePedido(item, arreglopedido)
       }
     },
     async setSincronized () {
       await authLib.updateFechaUltGet(this.idusuario)
     },
-    getSincronized () {
+    async getSincronized () {
       this.loader = true
-      this.setPedidos()
-        .then(this.getProductos())
-        .then(this.setSincronized())
-        .then(this.getUsuarios())
-        .then(this.getVendedores())
-        .then(this.getCxc())
-        .then(this.getHolds())
-        .then(this.getItemsHolds())
-        .then(this.getPedidos())
-        .then(
-          this.getClientes().then(() => {
-            console.log('Sincronizado finalizó sin problema')
-            this.loader = false
-          })
+      await this.setPedidos()
+        .then(this.setGuardados()
+          .then(this.setEliminados()
+            .then(this.getProductos()
+              .then(this.setSincronized()
+                .then(this.getUsuarios()
+                  .then(this.getVendedores()
+                    .then(this.getCxc()
+                      .then(this.getPedidos()
+                        .then(this.getHolds()
+                          .then(this.getItemsHolds()
+                            .then(this.getClientes()
+                              .then(() => {
+                                console.log('Sincronizado finalizó sin problema')
+                                this.feultget = moment().format('YYYY-MM-DD HH:mm:ss')
+                                this.$q.localStorage.remove('feultget')
+                                this.$q.localStorage.set('feultget', this.feultget)
+                                this.loader = false
+                              })
+                            ).catch(this.falloCallback)
+                          )
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
         )
-        .catch(this.falloCallback)
-      this.feultget = moment().format('YYYY-MM-DD HH:mm:ss')
-      this.$q.localStorage.remove('feultget')
-      this.$q.localStorage.set('feultget', this.feultget)
     }
   },
   mounted () {
-    console.log('Main Layout offline')
     if (this.$q.localStorage.getItem('feultget') === 'null') {
       console.log('Aqui fecha ult null')
     }
@@ -436,8 +578,8 @@ export default defineComponent({
       this.$q.localStorage.getItem('feultget') !== 'null'
         ? this.$q.localStorage.getItem('feultget')
         : 'S/Inf'
-    console.log(this.feultget)
-    console.log(this.usuario)
+    // console.log(this.feultget)
+    // console.log(this.usuario)
     // const resp = pedidosLib.corregirClientesNull()
     // console.log(resp)
   }

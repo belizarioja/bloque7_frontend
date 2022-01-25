@@ -121,9 +121,9 @@
           <q-item-section>
             <q-item-label>{{ nombreproducto }}</q-item-label>
             <q-item-label caption>
-              <span style="color: darkgreen;background: #a2e776;border-radius: 5px;padding: 1px 4px;margin-right: 15px;"> ${{ precioproducto.toFixed(2) }} </span>
-              <span style="color: #995b01;background: #F2C037;border-radius: 5px;padding: 1px 4px;margin-right: 15px;">Disp: {{ disponibleproducto }}</span>
-              <span style="color: #0271c9;background: #9fcff5;border-radius: 5px;padding: 1px 4px;">UniXcaja: {{ unixcaja }} </span>
+              <span style="color: #014201;background: #7dbf82;border-radius: 10px;padding: 4px 7px;margin-right: 15px;"> ${{ precioproducto.toFixed(2) }} </span>
+              <span style="color: #6c4000;background: #F2C037;border-radius: 10px;padding: 4px 7px;margin-right: 15px;">Disp: {{ disponibleproducto }}</span>
+              <span style="color: #004174;background: #a5c3db;border-radius: 10px;padding: 4px 7px;">UniXcaja: {{ unixcaja }} </span>
             </q-item-label>
           </q-item-section>
         </q-item>

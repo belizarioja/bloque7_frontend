@@ -22,14 +22,14 @@
               <q-popup-proxy transition-show="scale" transition-hide="scale">
                 <q-date
                   v-model="fechaReporte"
-                  @change="listarReporte()"
+                  @change="getReporte()"
                   first-day-of-week="1"
                   today-btn
                   :locale="myLocale"
                 >
                   <div class="row items-center justify-end">
                     <q-btn v-close-popup label="Cerrar" color="negative" style="margin-right: 20px;" />
-                    <q-btn v-close-popup label="Buscar" color="primary" @click="listarReporte()" />
+                    <q-btn v-close-popup label="Buscar" color="primary" @click="getReporte()" />
                   </div>
                 </q-date>
               </q-popup-proxy>
@@ -124,7 +124,6 @@
 
 <script>
 import { ref, defineComponent } from 'vue'
-import pedidosLib from '../logic/pedidos'
 import moment from 'moment'
 
 export default defineComponent({
@@ -134,9 +133,9 @@ export default defineComponent({
       expansionsToggled: false,
       hideShowAll: 'Mostrar todos',
       serverData: [],
-      serverDataItems: [],
       nombrereporte: false,
       fechaReporte: moment().format('YYYY/MM/DD'),
+      idrol: this.$q.localStorage.getItem('idrol'),
       usuario: this.$q.localStorage.getItem('usuario'),
       pagination: {
         page: 1,
@@ -162,7 +161,7 @@ export default defineComponent({
       },
       columns: [
         { name: 'numedocu', label: '# documento', field: 'numedocu', style: 'text-align: rigth;font-size: 10px;font-weight: bold;' },
-        { name: 'nombrecliente', label: 'Cliente', field: 'nombrecliente', style: 'white-space: pre-wrap;text-align: left;font-size: 10px;font-weight: bold;' },
+        { name: 'nombrecliente', label: 'Cliente', field: 'nombrecliente', style: 'width: 75px;white-space: pre-wrap;text-align: left;font-size: 10px;font-weight: bold;' },
         { name: 'fecha', label: 'Fecha', field: 'fecha', style: 'text-align: rigth;font-size: 10px;font-weight: bold;' },
         { name: 'hora', label: 'Hora', field: 'hora', style: 'text-align: rigth;font-size: 10px;font-weight: bold;' }
       ],
@@ -192,20 +191,20 @@ export default defineComponent({
       this.$q.localStorage.remove('usuarioreporte')
       this.$q.localStorage.remove('nombrereporte')
       this.$q.localStorage.remove('fechareporte')
-      const USER = this.usuario.toString().toUpperCase()
-      console.log(USER)
-      if (USER === 'ADMIN' || USER === 'SOPORTE') {
+      if (this.idrol === 1) {
         this.$router.push('/vendedores')
       } else {
         this.$router.push('/index')
       }
     },
+    getReporte () {
+      this.$q.localStorage.set('fechareporte', moment(this.fechaReporte).format('YYYY-MM-DD'))
+      this.listarReporte()
+    },
     async listarReporte () {
-      this.serverData = []
+      const pedidos = this.$q.localStorage.getItem('pedidos') ? this.$q.localStorage.getItem('pedidos') : []
       let usuarioreporte = this.usuario
-      const USER = this.usuario.toString().toUpperCase()
-      console.log(USER)
-      if (USER === 'ADMIN' || USER === 'SOPORTE') {
+      if (this.idrol === 1) {
         usuarioreporte = this.$q.localStorage.getItem('usuarioreporte')
         this.nombrereporte = this.$q.localStorage.getItem('nombrereporte')
         this.fechaReporte = this.$q.localStorage.getItem('fechareporte')
@@ -214,38 +213,8 @@ export default defineComponent({
           idNombreReporte.textContent = 'de : ' + this.nombrereporte
         }
       }
-      console.log(usuarioreporte, moment(this.fechaReporte).format('YYYY-MM-DD'))
-      const resp = await pedidosLib.reportePedidos(usuarioreporte, moment(this.fechaReporte).format('YYYY-MM-DD'))
-      const datos = resp.data
-      console.log(datos)
-      for (const i in datos) {
-        const item = datos[i]
-        const obj2 = {}
-        // obj2.idproducto = item.idproducto
-        obj2.nombreproducto = item.idproducto + ' - ' + item.nombreproducto
-        obj2.precio = '$' + item.precio.toFixed(2)
-        obj2.cantidad = item.cantidad
-        obj2.subtotal = '$' + item.subtotal.toFixed(2)
-        const index = this.serverData.findIndex(obj => obj.numedocu === item.numedocu)
-        if (index === -1) {
-          const obj = {}
-          // obj.totalcxc = 0
-          obj.details = []
-          obj.id = item.id
-          obj.numedocu = item.numedocu
-          // obj.idcliente = item.idcliente
-          obj.nombrecliente = item.idcliente + ' - ' + item.nombrecliente
-          obj.fecha = moment(item.fecha).format('YYYY/MM/DD')
-          obj.hora = moment(item.fecha).format('HH:mm:ss')
-          obj.status = true
-          // obj.totalcxc += parseFloat(item.saldo)
-          obj.details.push(obj2)
-          this.serverData.push(obj)
-        } else {
-          // this.serverData[index].totalcxc += parseFloat(item.saldo)
-          this.serverData[index].details.push(obj2)
-        }
-      }
+      console.log(usuarioreporte, moment(this.fechaReporte).format('YYYY/MM/DD'))
+      this.serverData = pedidos.filter(obj => obj.usuario === usuarioreporte && obj.fecha === moment(this.fechaReporte).format('YYYY/MM/DD'))
     }
   },
   mounted () {
@@ -273,7 +242,7 @@ export default defineComponent({
   .subHeaderItem{
     text-align: center;
     width: 100%;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: bold;
     text-transform: uppercase;
   }
