@@ -63,52 +63,51 @@
 </template>
 
 <script>
-/* eslint-disable */
 import { defineComponent } from 'vue'
 import productosLib from '../logic/productos'
 import clientesLib from '../logic/clientes'
-import vendedorLib from "../logic/vendedores"
-import authLib from "../logic/auth"
+import vendedorLib from '../logic/vendedores'
+import authLib from '../logic/auth'
 
-// import pedidosLib from '../logic/pedidos'
+import pedidosLib from '../logic/pedidos'
 import moment from 'moment'
 
 export default defineComponent({
-  name: "PageIndex",
-  data() {
+  name: 'PageIndex',
+  data () {
     return {
-      idrol: this.$q.localStorage.getItem("idrol"),
-      usuario: this.$q.localStorage.getItem("usuario"),
-      idusuario: this.$q.localStorage.getItem("idusuario"),
-      idsucursal: this.$q.localStorage.getItem("idsucursal"),
-      feultget: this.$q.localStorage.getItem("feultget"),
+      idrol: this.$q.localStorage.getItem('idrol'),
+      usuario: this.$q.localStorage.getItem('usuario'),
+      idusuario: this.$q.localStorage.getItem('idusuario'),
+      idsucursal: this.$q.localStorage.getItem('idsucursal'),
+      feultget: this.$q.localStorage.getItem('feultget'),
       loader: false
-    };
+    }
   },
   methods: {
     gotoClientes () {
-      this.$router.push("/clientes")
+      this.$router.push('/clientes')
     },
     gotoUsuarios () {
-      this.$router.push("/usuarios")
+      this.$router.push('/usuarios')
     },
     gotoVendedores () {
-      this.$router.push("/vendedores")
+      this.$router.push('/vendedores')
     },
     gotoCxc () {
-      this.$router.push("/cuentasxcobrar")
+      this.$router.push('/cuentasxcobrar')
     },
     gotoReportePedidos () {
-      this.$router.push("/reportepedidos")
+      this.$router.push('/reportepedidos')
     },
     gotoProductos () {
-      this.$router.push("/productos");
+      this.$router.push('/productos')
     },
     async getItemsHolds () {
       if (this.idrol !== 1) {
         const resp = await clientesLib.getitemsholds(this.idusuario)
         console.log(resp)
-        const holds = this.$q.localStorage.getItem("holds")
+        const holds = this.$q.localStorage.getItem('holds')
         const itemsholds = resp.data
         let cantsaves = 0
         for (const i in holds) {
@@ -120,22 +119,22 @@ export default defineComponent({
               cantitemscarrito = parseInt(cantitemscarrito) + 1
               subtotal += parseFloat(item.subtotal)
             }
-          });
+          })
           holds[i].cantitemscarrito = cantitemscarrito
           holds[i].subtotal = subtotal
           if (holds[i].status === 1) {
-            this.$q.localStorage.set("idcliente", holds[i].idcliente)
+            this.$q.localStorage.set('idcliente', holds[i].idcliente)
 
-            const circuloTotalItem = document.querySelector(".totalItemBlack")
-            const totalItemHold = document.querySelector(".totalItemHold")
+            const circuloTotalItem = document.querySelector('.totalItemBlack')
+            const totalItemHold = document.querySelector('.totalItemHold')
 
-            if (totalItemHold.classList.contains("invisible")) {
-              totalItemHold.classList.remove("invisible")
+            if (totalItemHold.classList.contains('invisible')) {
+              totalItemHold.classList.remove('invisible')
             }
             if (circuloTotalItem) {
               circuloTotalItem.textContent = cantitemscarrito
             }
-            const cuentasxc = this.$q.localStorage.getItem("cuentasxc");
+            const cuentasxc = this.$q.localStorage.getItem('cuentasxc')
             console.log(cuentasxc)
             console.log(holds[i].idcliente)
             if (cuentasxc) {
@@ -143,9 +142,9 @@ export default defineComponent({
                 (obj) => obj.idcliente === holds[i].idcliente
               )
               if (find.length > 0) {
-                const totalItemCxc = document.querySelector(".totalItemCxc")
-                const circuloCxcItem = document.querySelector(".totalItemRed")
-                totalItemCxc.classList.remove("invisible")
+                const totalItemCxc = document.querySelector('.totalItemCxc')
+                const circuloCxcItem = document.querySelector('.totalItemRed')
+                totalItemCxc.classList.remove('invisible')
                 circuloCxcItem.textContent = find[0].details.length
               }
             }
@@ -154,25 +153,25 @@ export default defineComponent({
             cantsaves = parseInt(cantsaves) + 1
           }
         }
-        this.$q.localStorage.remove("holds")
-        this.$q.localStorage.set("holds", holds)
-        this.$q.localStorage.remove("itemsholds")
-        this.$q.localStorage.set("itemsholds", itemsholds)
-        const idTotalSaves = document.querySelector("#idTotalSaves")
-        const totalItemSaves = document.querySelector(".totalItemSaves")
-        const circuloTotalSaves = document.querySelector(".totalItemBlue")
+        this.$q.localStorage.remove('holds')
+        this.$q.localStorage.set('holds', holds)
+        this.$q.localStorage.remove('itemsholds')
+        this.$q.localStorage.set('itemsholds', itemsholds)
+        const idTotalSaves = document.querySelector('#idTotalSaves')
+        const totalItemSaves = document.querySelector('.totalItemSaves')
+        const circuloTotalSaves = document.querySelector('.totalItemBlue')
         if (idTotalSaves) {
-          idTotalSaves.textContent = "Total : $" + this.totalsaves.toFixed(2)
+          idTotalSaves.textContent = 'Total : $' + this.totalsaves.toFixed(2)
         }
         if (circuloTotalSaves) {
           circuloTotalSaves.textContent = cantsaves
         }
-        if (totalItemSaves.classList.contains("invisible")) {
-          totalItemSaves.classList.remove("invisible")
+        if (totalItemSaves.classList.contains('invisible')) {
+          totalItemSaves.classList.remove('invisible')
         }
       }
     },
-    async getHolds() {
+    async getHolds () {
       const serverData = []
       const resp = await clientesLib.getholds(this.idusuario)
       console.log(resp)
@@ -181,10 +180,10 @@ export default defineComponent({
         item.indice = i
         serverData.push(item)
       }
-      this.$q.localStorage.remove("holds")
-      this.$q.localStorage.set("holds", serverData)
+      this.$q.localStorage.remove('holds')
+      this.$q.localStorage.set('holds', serverData)
     },
-    async getClientes() {
+    async getClientes () {
       const serverData = []
       const resp2 = await vendedorLib.listarVendedorClientes(this.usuario)
       console.log(resp2)
@@ -200,7 +199,7 @@ export default defineComponent({
       this.$q.localStorage.remove('clientes')
       this.$q.localStorage.set('clientes', serverData)
     },
-    async getUsuarios() {
+    async getUsuarios () {
       const serverData = []
       if (this.idrol === 1) {
         const resp = await authLib.usuarios()
@@ -215,31 +214,31 @@ export default defineComponent({
           obj.nombre = item.nombre
           obj.idrol = item.idrol
           obj.rol = item.rol
-          obj.uuid = item.uuid ? item.uuid : "S/Inf"
+          obj.uuid = item.uuid ? item.uuid : 'S/Inf'
           obj.fe_ult_acceso = item.fe_ult_acceso
-            ? moment(item.fe_ult_acceso).format("DD/MM/YYYY HH:mm:ss")
-            : "S/Inf"
+            ? moment(item.fe_ult_acceso).format('DD/MM/YYYY HH:mm:ss')
+            : 'S/Inf'
           obj.fe_ult_get = item.fe_ult_get
-            ? moment(item.fe_ult_get).format("DD/MM/YYYY HH:mm:ss")
-            : "S/Inf"
+            ? moment(item.fe_ult_get).format('DD/MM/YYYY HH:mm:ss')
+            : 'S/Inf'
           obj.status = item.status
           serverData.push(obj)
         }
-        this.$q.localStorage.remove("usuarios")
-        this.$q.localStorage.set("usuarios", serverData)
+        this.$q.localStorage.remove('usuarios')
+        this.$q.localStorage.set('usuarios', serverData)
       }
     },
-    async getVendedores() {
+    async getVendedores () {
       if (this.idrol === 1) {
-        console.log("Aqui vendedores")
+        console.log('Aqui vendedores')
         const resp = await vendedorLib.listarVendedores()
         console.log(resp.data)
         const serverData = resp.data
-        this.$q.localStorage.remove("vendedores")
-        this.$q.localStorage.set("vendedores", serverData)
+        this.$q.localStorage.remove('vendedores')
+        this.$q.localStorage.set('vendedores', serverData)
       }
     },
-    async getProductos() {
+    async getProductos () {
       const resp = await productosLib.listar(null)
       const serverData = []
       const datos = resp.data
@@ -252,7 +251,7 @@ export default defineComponent({
         obj.precio =
           item.porkilos === 1
             ? item.precio
-            : parseFloat(item.precio / item.unixcaja);
+            : parseFloat(item.precio / item.unixcaja)
         obj.disponible = item.disponible
         obj.preciocaj = item.preciocaj
         obj.unixcaja = item.unixcaja
@@ -262,10 +261,10 @@ export default defineComponent({
         obj.imagen = item.imagen
         serverData.push(obj)
       }
-      this.$q.localStorage.remove("productos")
-      this.$q.localStorage.set("productos", serverData)
+      this.$q.localStorage.remove('productos')
+      this.$q.localStorage.set('productos', serverData)
     },
-    async getCxc() {
+    async getCxc () {
       const serverData = []
       console.log(this.usuario, this.idrol)
       const resp = await clientesLib.getcxc(this.usuario, this.idrol)
@@ -276,13 +275,13 @@ export default defineComponent({
         const obj2 = {}
         obj2.id = item.id
         obj2.tipodoc = item.tipodoc
-        obj2.fecha = moment(item.fecha).format("YYYY-MM-DD")
+        obj2.fecha = moment(item.fecha).format('YYYY-MM-DD')
         obj2.dias = this.calcDiffHours(item.fecha)
-        obj2.monto = "$" + item.monto.toFixed(2)
-        obj2.saldo = "$" + item.saldo.toFixed(2)
+        obj2.monto = '$' + item.monto.toFixed(2)
+        obj2.saldo = '$' + item.saldo.toFixed(2)
         const index = serverData.findIndex(
           (obj) => obj.idcliente === item.idcliente
-        );
+        )
         if (index === -1) {
           const obj = {}
           obj.totalcxc = 0
@@ -303,24 +302,66 @@ export default defineComponent({
           serverData[index].cantidadcxc += parseInt(1)
         }
       }
-      this.$q.localStorage.remove("cuentasxc")
-      this.$q.localStorage.set("cuentasxc", serverData)
+      this.$q.localStorage.remove('cuentasxc')
+      this.$q.localStorage.set('cuentasxc', serverData)
     },
-    calcDiffHours(fecha) {
+    async getPedidos () {
+      const serverData = this.$q.localStorage.getItem('pedidos') ? this.$q.localStorage.getItem('pedidos') : []
+      let ultnumedocu = this.$q.localStorage.getItem('ultnumedocu') ? this.$q.localStorage.getItem('ultnumedocu') : null
+      const resp = await pedidosLib.reportePedidos(this.usuario, ultnumedocu, this.idrol)
+      const datos = resp.data
+      console.log(' Aqui get pedidos')
+      console.log(datos)
+      for (const i in datos) {
+        const item = datos[i]
+        const obj2 = {}
+        // obj2.idproducto = item.idproducto
+        obj2.nombreproducto = item.idproducto + ' - ' + item.nombreproducto
+        obj2.precio = '$' + item.precio.toFixed(2)
+        obj2.cantidad = item.cantidad
+        obj2.subtotal = '$' + item.subtotal.toFixed(2)
+        const index = serverData.findIndex(obj => obj.numedocu === item.numedocu)
+        if (index === -1) {
+          const obj = {}
+          // obj.totalcxc = 0
+          obj.details = []
+          obj.id = item.id
+          obj.numedocu = item.numedocu
+          ultnumedocu = item.numedocu
+          // obj.idcliente = item.idcliente
+          obj.nombrecliente = item.idcliente + ' - ' + item.nombrecliente
+          obj.fecha = moment(item.fecha).format('YYYY/MM/DD')
+          obj.hora = moment(item.fecha).format('HH:mm:ss')
+          obj.status = true
+          // obj.totalcxc += parseFloat(item.saldo)
+          obj.details.push(obj2)
+          serverData.push(obj)
+        } else {
+          // this.serverData[index].totalcxc += parseFloat(item.saldo)
+          serverData[index].details.push(obj2)
+        }
+        ultnumedocu = serverData.length > 0 ? serverData[0].numedocu : null
+        this.$q.localStorage.remove('ultnumedocu')
+        this.$q.localStorage.set('ultnumedocu', ultnumedocu)
+        this.$q.localStorage.remove('pedidos')
+        this.$q.localStorage.set('pedidos', serverData)
+      }
+    },
+    calcDiffHours (fecha) {
       const now = moment()
-      const end = moment(fecha, "YYYY-MM-DD")
+      const end = moment(fecha, 'YYYY-MM-DD')
       // console.log(now, end)
       const duration = moment.duration(now.diff(end))
       return duration.asDays().toFixed(0)
     },
-    falloCallback() {
-      console.log("Error sincronizando")
+    falloCallback () {
+      console.log('Error sincronizando')
     },
-    async setPedidos() {
-      const holds = this.$q.localStorage.getItem("holds")
-      const itemspedido = this.$q.localStorage.getItem("itemsholds")
+    async setPedidos () {
+      const holds = this.$q.localStorage.getItem('holds')
+      const itemspedido = this.$q.localStorage.getItem('itemsholds')
       const pedidos = holds.filter((obj) => obj.status === 3)
-      console.log(pedidos);
+      console.log(pedidos)
       for (const i in pedidos) {
         const item = pedidos[i]
         const idcliente = item.idcliente
@@ -332,7 +373,7 @@ export default defineComponent({
         const totalcarrito = item.subtotal
         const arregloOriginal = itemspedido.filter(
           (obj) => obj.indice === item.indice
-        );
+        )
         console.log(arregloOriginal)
         const arregloDeArreglos = []
         // console.log('Arreglo original: ', arregloOriginal)
@@ -342,7 +383,7 @@ export default defineComponent({
           arregloDeArreglos.push(pedazo)
         }
         // console.log('Arreglo de arreglos: ', arregloDeArreglos)
-        this.loader = true;
+        this.loader = true
         for (const i in arregloDeArreglos) {
           const arreglopedido = arregloDeArreglos[i]
           // console.log(arreglopedido)
@@ -355,16 +396,16 @@ export default defineComponent({
             totalcarrito,
             idsucursal,
             arreglopedido
-          );
+          )
           // await pedidosLib.setpedido(idusuario, this.usuario, idcliente, nombrecliente, rifcliente, totalcarrito, idsucursal, arreglopedido)
         }
       }
     },
-    async setSincronized() {
+    async setSincronized () {
       await authLib.updateFechaUltGet(this.idusuario)
     },
-    getSincronized() {
-      this.loader = true;
+    getSincronized () {
+      this.loader = true
       this.setPedidos()
         .then(this.getProductos())
         .then(this.setSincronized())
@@ -373,36 +414,34 @@ export default defineComponent({
         .then(this.getCxc())
         .then(this.getHolds())
         .then(this.getItemsHolds())
+        .then(this.getPedidos())
         .then(
           this.getClientes().then(() => {
-            console.log("Sincronizado finalizó sin problema")
+            console.log('Sincronizado finalizó sin problema')
             this.loader = false
           })
         )
         .catch(this.falloCallback)
-      this.feultget = moment().format("YYYY-MM-DD HH:mm:ss")
-      this.$q.localStorage.remove("feultget")
-      this.$q.localStorage.set("feultget", this.feultget)
-      // const feultgetId = document.querySelector('#feultgetId')
-      // feultgetId.textContent = this.feultget
-      // this.$router.go(0)
-    },
+      this.feultget = moment().format('YYYY-MM-DD HH:mm:ss')
+      this.$q.localStorage.remove('feultget')
+      this.$q.localStorage.set('feultget', this.feultget)
+    }
   },
-  mounted() {
-    console.log("Main Layout offline")
-    if (this.$q.localStorage.getItem("feultget") === "null") {
-      console.log("Aqui fecha ult null")
+  mounted () {
+    console.log('Main Layout offline')
+    if (this.$q.localStorage.getItem('feultget') === 'null') {
+      console.log('Aqui fecha ult null')
     }
     this.feultget =
-      this.$q.localStorage.getItem("feultget") !== "null"
-        ? this.$q.localStorage.getItem("feultget")
-        : "S/Inf"
+      this.$q.localStorage.getItem('feultget') !== 'null'
+        ? this.$q.localStorage.getItem('feultget')
+        : 'S/Inf'
     console.log(this.feultget)
     console.log(this.usuario)
     // const resp = pedidosLib.corregirClientesNull()
     // console.log(resp)
-  },
-});
+  }
+})
 </script>
 <style scoped>
 .headerItem {
