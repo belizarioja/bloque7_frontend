@@ -48,7 +48,12 @@
           style="width: -webkit-fill-available;"
           label="Login"
           type="submit"
-          color="dark"/>
+          :loading="loading"
+          color="dark">
+          <template v-slot:loading>
+            <q-spinner-facebook />
+          </template>
+        </q-btn>
       </div>
     </form>
   </div>
@@ -70,8 +75,10 @@ export default defineComponent({
         ? '11111111111111111111'
         : window.device.uuid
     )
+    const loading = ref(false)
     return {
       imei,
+      loading,
       usuario: ref(''),
       clave: ref(''),
       mantener: ref(false)
@@ -106,6 +113,7 @@ export default defineComponent({
     },
     async enviarLogin () {
       try {
+        this.loading = true
         // console.log(this.usuario)
         // console.log(this.clave)
         console.log(this.mantener)
@@ -148,12 +156,15 @@ export default defineComponent({
                   this.feultget = moment().format('YYYY-MM-DD HH:mm:ss')
                   this.$q.localStorage.remove('feultget')
                   this.$q.localStorage.set('feultget', this.feultget)
+                  this.loading = false
                   this.$router.push('/productos')
                 })
               } else {
+                this.loading = false
                 this.$router.push('/index')
               }
             } else {
+              this.loading = false
               this.$q.dialog({
                 title: 'Oops! No tiene acceso!',
                 message: 'Contacte a la adminstración de BLOQUE 7!',
@@ -161,6 +172,7 @@ export default defineComponent({
               })
             }
           } else {
+            this.loading = false
             // SI LAS CREDENCIALES NO SON VALIDAS
             this.$q.dialog({
               title: 'Oops! Advertencia!',
@@ -171,6 +183,7 @@ export default defineComponent({
           }
         }
       } catch (error) {
+        this.loading = false
         // console.log(error)
         this.$q.dialog({
           title: 'Oops! Problemas con INTERNET',
