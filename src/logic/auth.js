@@ -25,5 +25,9 @@ export default {
   updateFechaUltGet (id) {
     const data = { id }
     return axios.post(ENDPOINT_PATH + 'updateFechaUltGet', data)
+  },
+  addUser (usuario, nombre) {
+    const data = { usuario, nombre }
+    return axios.post(ENDPOINT_PATH + 'addUser', data)
   }
 }

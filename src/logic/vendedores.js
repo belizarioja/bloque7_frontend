@@ -6,8 +6,8 @@ export default {
   listarVendedores () {
     return axios.get(ENDPOINT_PATH + 'listarVendedores')
   },
-  listarVendedorClientes (idvendedor) {
-    const data = { idvendedor }
+  listarVendedorClientes (idvendedor, idrol) {
+    const data = { idvendedor, idrol }
     return axios.post(ENDPOINT_PATH + 'listarVendedorClientes', data)
   }
 }

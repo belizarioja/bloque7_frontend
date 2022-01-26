@@ -1,9 +1,9 @@
 <template>
   <q-page class="text-center">
     <div class="headerItem">
-      <div class="subHeaderItem">Módulos</div>
+      <div class="subHeaderItem">BIENVENIDO</div>
     </div>
-    <q-card class="my-card" style="margin: 20px">
+    <q-card class="my-card borderdetailt" style="margin: 20px">
       <q-card-section
         style="
           display: flex;
@@ -16,7 +16,10 @@
           <q-icon class="iconApp" name="point_of_sale" color="primary" />
           <div class="tituloApp">PEDIDOS</div>
         </div>
-        <div class="menuitem" v-show="idrol === 1" @click="gotoUsuarios()">
+        <div
+          class="menuitem "
+          v-show="idrol === 1"
+          @click="gotoUsuarios()">
           <q-icon class="iconApp" name="account_circle" color="primary" />
           <div class="tituloApp">USUARIOS</div>
         </div>
@@ -62,7 +65,7 @@
       </span>
     </div>
     <q-dialog v-model="layoutModal" persistent transition-show="flip-down" transition-hide="flip-up">
-      <q-card>
+      <q-card class="borderdetailt">
         <q-bar  class="bg-primary text-white">
           <q-icon name="speaker_notes" />
           <div>Pendientes por sincronizar</div>
@@ -142,9 +145,10 @@ import productosLib from '../logic/productos'
 import clientesLib from '../logic/clientes'
 import vendedorLib from '../logic/vendedores'
 import authLib from '../logic/auth'
-
 import pedidosLib from '../logic/pedidos'
 import moment from 'moment'
+const config = require('../config/endpoints.js')
+const ENDPOINT_PATH = config.endpoint_path
 
 export default defineComponent({
   name: 'PageIndex',
@@ -170,25 +174,99 @@ export default defineComponent({
   },
   methods: {
     gotoClientes () {
-      this.$router.push('/clientes')
+      const datos = this.$q.localStorage.getItem('clientes') ? this.$q.localStorage.getItem('clientes') : []
+      if (datos.length > 0) {
+        this.$router.push('/clientes')
+      } else {
+        this.$q.dialog({
+          title: 'No tiene CLIENTES para realizar pedidos!',
+          message: 'Debe sincronizar!',
+          persistent: true
+        })
+      }
     },
     gotoUsuarios () {
-      this.$router.push('/usuarios')
+      const datos = this.$q.localStorage.getItem('usuarios') ? this.$q.localStorage.getItem('usuarios') : []
+      if (datos.length > 0) {
+        this.$router.push('/usuarios')
+      } else {
+        this.$q.dialog({
+          title: 'No tiene USUARIOS!',
+          message: 'Debe sincronizar!',
+          persistent: true
+        })
+      }
     },
     gotoVendedores () {
-      this.$router.push('/vendedores')
+      const datos = this.$q.localStorage.getItem('vendedores') ? this.$q.localStorage.getItem('vendedores') : []
+      if (datos.length > 0) {
+        this.$router.push('/vendedores')
+      } else {
+        this.$q.dialog({
+          title: 'No tiene VENDEDORES!',
+          message: 'Debe sincronizar!',
+          persistent: true
+        })
+      }
     },
     gotoCxc () {
-      this.$router.push('/cuentasxcobrar')
+      const datos = this.$q.localStorage.getItem('cuentasxc') ? this.$q.localStorage.getItem('cuentasxc') : []
+      if (datos.length > 0) {
+        this.$router.push('/cuentasxcobrar')
+      } else {
+        this.$q.dialog({
+          title: 'No tiene CUENTAS POR COBRAR!',
+          message: 'Debe sincronizar!',
+          persistent: true
+        })
+      }
     },
     gotoReportePedidos () {
-      this.$router.push('/reportepedidos')
+      const datos = this.$q.localStorage.getItem('pedidos') ? this.$q.localStorage.getItem('pedidos') : []
+      if (datos.length > 0) {
+        this.$router.push('/reportepedidos')
+      } else {
+        this.$q.dialog({
+          title: 'No tiene PEDIDOS!',
+          message: 'Debe sincronizar!',
+          persistent: true
+        })
+      }
     },
     gotoProductos () {
-      this.$router.push('/productos')
+      const datos = this.$q.localStorage.getItem('productos') ? this.$q.localStorage.getItem('productos') : []
+      if (datos.length > 0) {
+        this.$router.push('/productos')
+      } else {
+        this.$q.dialog({
+          title: 'No tiene PRODUCTOS!',
+          message: 'Debe sincronizar!',
+          persistent: true
+        })
+      }
+    },
+    mensajeError () {
+      this.$q.dialog({
+        title: '¡Problemas con INTERNET!',
+        message: 'Se requiere BUENA CONEXION para realizar esta acción',
+        persistent: true
+      })
+    },
+    checkNet () {
+      const cadena = ENDPOINT_PATH
+      const request = new XMLHttpRequest()
+      try {
+        request.open('GET', cadena, false)
+        request.send()
+        console.log(' <<< Bien ')
+        return true
+      } catch (error) {
+        console.log(' Mal >>>> ')
+        return false
+      }
     },
     viewSincronized () {
-      const holds = this.$q.localStorage.getItem('holds')
+      const holds = this.$q.localStorage.getItem('holds') ? this.$q.localStorage.getItem('holds') : []
 
       const enviados = holds.filter(obj => obj.status === 3)
       this.enviados = enviados.length
@@ -268,8 +346,10 @@ export default defineComponent({
         if (circuloTotalSaves) {
           circuloTotalSaves.textContent = cantsaves
         }
-        if (totalItemSaves.classList.contains('invisible')) {
-          totalItemSaves.classList.remove('invisible')
+        if (cantsaves > 0) {
+          if (totalItemSaves.classList.contains('invisible')) {
+            totalItemSaves.classList.remove('invisible')
+          }
         }
       }
     },
@@ -288,7 +368,7 @@ export default defineComponent({
     },
     async getClientes () {
       const serverData = []
-      const resp2 = await vendedorLib.listarVendedorClientes(this.usuario)
+      const resp2 = await vendedorLib.listarVendedorClientes(this.usuario, this.idrol)
       console.log(resp2)
       const datos = resp2.data
       for (const i in datos) {
@@ -438,7 +518,7 @@ export default defineComponent({
           obj.status = true
           // obj.totalcxc += parseFloat(item.saldo)
           obj.details.push(obj2)
-          serverData.push(obj)
+          serverData.unshift(obj)
         } else {
           // this.serverData[index].totalcxc += parseFloat(item.saldo)
           serverData[index].details.push(obj2)
@@ -537,8 +617,13 @@ export default defineComponent({
       await authLib.updateFechaUltGet(this.idusuario)
     },
     async getSincronized () {
+      const resp = this.checkNet()
+      if (!resp) {
+        this.mensajeError()
+        return
+      }
       this.loader = true
-      await this.setPedidos()
+      this.setPedidos()
         .then(this.setGuardados()
           .then(this.setEliminados()
             .then(this.getProductos()
@@ -578,16 +663,21 @@ export default defineComponent({
       this.$q.localStorage.getItem('feultget') !== 'null'
         ? this.$q.localStorage.getItem('feultget')
         : 'S/Inf'
-    // console.log(this.feultget)
-    // console.log(this.usuario)
-    // const resp = pedidosLib.corregirClientesNull()
-    // console.log(resp)
+    if (this.idrol === 4) {
+      this.getProductos().then(() => {
+        console.log('Sincronizado finalizó sin problema')
+        // this.feultget = moment().format('YYYY-MM-DD HH:mm:ss')
+        // this.$q.localStorage.remove('feultget')
+        this.$q.localStorage.set('feultget', this.feultget)
+        this.gotoProductos()
+      })
+    }
   }
 })
 </script>
 <style scoped>
 .headerItem {
-  margin: 30px;
+  margin: 20px;
   display: flex;
   align-items: center;
 }
@@ -608,7 +698,7 @@ export default defineComponent({
 .subHeaderItem {
   text-align: center;
   width: 100%;
-  font-size: x-large;
+  font-size: 16px;
 }
 .iconApp {
   font-size: 50px;
@@ -626,4 +716,7 @@ export default defineComponent({
   font-size: 25px;
   color: white;
 }
+.borderdetailt {
+    border-radius: 12px;
+  }
 </style>

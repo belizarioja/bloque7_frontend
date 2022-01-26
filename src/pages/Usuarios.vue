@@ -9,6 +9,11 @@
         <div class="subHeaderItem">
           Usuarios
         </div>
+        <div
+          class="menuitem"
+          @click="openAddUser()">
+          <q-icon name="add"/>
+        </div>
     </div>
     <q-table
       grid
@@ -38,7 +43,7 @@
               <div style="float: left; margin-right:10px;">
                 <div style="text-align: left;">{{ props.row.usuario }} {{ props.row.nombre }}</div>
                 <div style="text-align: left;font-weight: bold;">Útimo acceso : {{ props.row.fe_ult_acceso }}</div>
-                <div style="text-align: left;font-weight: bold;">Útima sincronización : {{ props.row.fe_ult_get }}</div>
+                <div style="text-align: left;font-weight: bold;">Útimo update : {{ props.row.fe_ult_get }}</div>
                 <div style="text-align: left;">Dispositivo : {{ props.row.uuid }}</div>
               </div>
               <div style="display: grid;justify-content: end;">
@@ -63,7 +68,7 @@
                  class="iconApp"
                  name="phonelink_erase"
                  color="negative"
-                 style=""
+                 style="margin-top: 20px;"
                  @click="resetDevice(props.row.id, props.row.nombre)"
                 />
               </div>
@@ -72,6 +77,60 @@
         </div>
       </template>
     </q-table>
+    <q-dialog v-model="layoutModalAdd">
+      <q-layout view="Lhh lpR fff" container class="bg-white borderdetailt">
+        <q-header class="bg-primary">
+          <q-toolbar>
+            <q-toolbar-title style="font-size: inherit;display: grid;">
+              <span style=""> AGREGAR CLIENTE COMO USUARIO </span>
+            </q-toolbar-title>
+            <q-btn flat v-close-popup round dense icon="close" />
+          </q-toolbar>
+        </q-header>
+        <q-page-container>
+          <q-page padding>
+            <q-table
+              grid
+              :rows="serverDataClientes"
+              row-key="id"
+              :filter="filter"
+              v-model:pagination="pagination"
+              :rows-per-page-options="[0]"
+              hide-header
+              hide-bottom
+            >
+              <template v-slot:top-right>
+                <q-input borderless dense debounce="300" v-model="filter" placeholder="Buscar">
+                  <template v-slot:append>
+                    <q-icon name="search" />
+                  </template>
+                </q-input>
+              </template>
+
+              <template v-slot:item="props">
+                <div class="q-pa-xs col-xs-12 col-sm-6 col-md-4">
+                  <q-card>
+                    <q-item
+                      @click="addUser(props.row.idcliente, props.row.nombrecliente)"
+                      clickable v-ripple>
+                      <q-item-section avatar>
+                        <q-avatar color="primary" text-color="white">
+                          {{ iniciales(props.row.nombrecliente) }}
+                        </q-avatar>
+                      </q-item-section>
+                      <q-item-section style="text-align: left;">
+                        <q-item-label>{{ props.row.nombrecliente }}</q-item-label>
+                        <q-item-label caption>ID {{ props.row.idcliente }}</q-item-label>
+                      </q-item-section>
+                    </q-item>
+                  </q-card>
+                </div>
+              </template>
+            </q-table>
+          </q-page>
+        </q-page-container>
+      </q-layout>
+    </q-dialog>
   </q-page>
 </template>
 
@@ -87,18 +146,25 @@ export default defineComponent({
   data () {
     return {
       idrol: this.$q.localStorage.getItem('idrol'),
-      serverData: []
+      serverData: [],
+      serverDataClientes: []
     }
   },
   setup () {
     const filter = ref('')
+    const layoutModalAdd = ref(false)
     return {
       filter,
+      layoutModalAdd,
       pagination: {
         page: 1,
         rowsPerPage: 0 // 0 means all rows
       },
       columns: [
+        { name: 'nombre', label: 'Nombre', field: 'nombre' },
+        { name: 'usuario', label: 'Usuario', field: 'usuario' }
+      ],
+      columns2: [
         { name: 'nombre', label: 'Nombre', field: 'nombre' },
         { name: 'rif', label: 'Rif', field: 'rif' }
       ]
@@ -107,6 +173,43 @@ export default defineComponent({
   methods: {
     gotoIndex () {
       this.$router.push('/index')
+    },
+    openAddUser () {
+      const resp = this.checkNet()
+      if (!resp) {
+        this.mensajeError()
+        return
+      }
+      this.layoutModalAdd = true
+    },
+    iniciales (nombre) {
+      const primer = nombre.split(' ')[0].charAt(0)
+      const segundo = nombre.split(' ').length > 1 ? nombre.split(' ')[1].charAt(0) : ''
+      return primer + segundo
+    },
+    addUser (idcliente, nombrecliente) {
+      this.$q.dialog({
+        title: 'CONFIRMACIÓN!',
+        message: 'Desea agregar a ' + nombrecliente + ', como usuario del sistema?',
+        ok: {
+          color: 'primary',
+          label: 'Sí'
+        },
+        cancel: {
+          color: 'secondary',
+          label: 'No'
+        },
+        persistent: true
+      }).onOk(() => {
+        const resp = authLib.addUser(idcliente, nombrecliente)
+        console.log(resp)
+        // this.hideShowCarrito(this.idusuario)
+        this.layoutModalAdd = false
+      })
+      // this.layoutModalAdd = false
+    },
+    listarClientes () {
+      this.serverDataClientes = this.$q.localStorage.getItem('clientes') ? this.$q.localStorage.getItem('clientes') : []
     },
     listarUsuarios () {
       this.serverData = this.$q.localStorage.getItem('usuarios') ? this.$q.localStorage.getItem('usuarios') : []
@@ -221,6 +324,7 @@ export default defineComponent({
   mounted () {
     this.idusuario = this.$q.localStorage.getItem('idusuario')
     this.listarUsuarios()
+    this.listarClientes()
   }
 })
 </script>
@@ -243,7 +347,7 @@ export default defineComponent({
   }
   .subHeaderItem{
     text-align: center;
-    width: 100%;
+    width: 80%;
     font-size: 14px;
     font-weight: bold;
     text-transform: uppercase;
@@ -252,6 +356,9 @@ export default defineComponent({
     background: aquamarine;
   }
   .iconApp{
-    font-size: 40px;
+    font-size: 30px;
+  }
+  .borderdetailt {
+    border-radius: 12px;
   }
 </style>

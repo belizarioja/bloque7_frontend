@@ -2,12 +2,14 @@
   <q-page class="text-center">
     <div class="headerItem">
        <div
+          v-if="idrol !== 4"
           class="menuitem"
           @click="gotoClientes()">
           <q-icon name="keyboard_return"/>
         </div>
         <div class="subHeaderItem">
-          Productos
+          <span>Productos</span>
+          <span style="color: darkgray;font-size: 10px;">Ultima actualización : {{ feultget }} </span>
         </div>
     </div>
     <q-table
@@ -121,8 +123,8 @@
           <q-item-section>
             <q-item-label>{{ nombreproducto }}</q-item-label>
             <q-item-label caption>
-              <span style="color: #014201;background: #7dbf82;border-radius: 10px;padding: 4px 7px;margin-right: 15px;"> ${{ precioproducto.toFixed(2) }} </span>
-              <span style="color: #6c4000;background: #F2C037;border-radius: 10px;padding: 4px 7px;margin-right: 15px;">Disp: {{ disponibleproducto }}</span>
+              <span style="color: #014201;background: #7dbf82;border-radius: 10px;padding: 4px 7px;margin-right: 5px;"> ${{ precioproducto.toFixed(2) }} </span>
+              <span style="color: #6c4000;background: #F2C037;border-radius: 10px;padding: 4px 7px;margin-right: 5px;">Disp: {{ disponibleproducto }}</span>
               <span style="color: #004174;background: #a5c3db;border-radius: 10px;padding: 4px 7px;">UniXcaja: {{ unixcaja }} </span>
             </q-item-label>
           </q-item-section>
@@ -211,8 +213,8 @@ import {
 } from 'vue'
 // import VueSocialSharing from 'vue-social-sharing'
 import productosLib from '../logic/productos'
-// import pedidosLib from '../logic/pedidos'
-// import clientesLib from '../logic/clientes'
+const config = require('../config/endpoints.js')
+const ENDPOINT_PATH = config.endpoint_path
 
 export default defineComponent({
   name: 'PageIndex',
@@ -223,6 +225,7 @@ export default defineComponent({
       idusuario: this.$q.localStorage.getItem('idusuario'),
       usuario: this.$q.localStorage.getItem('usuario'),
       idrol: this.$q.localStorage.getItem('idrol'),
+      feultget: this.$q.localStorage.getItem('feultget'),
       pagination: {
         page: 1,
         rowsPerPage: 0 // 0 means all rows
@@ -280,14 +283,19 @@ export default defineComponent({
       }
     },
     async openImagen (id, nombre, precio) {
+      const resp = this.checkNet()
+      if (!resp) {
+        this.mensajeError()
+        return
+      }
       this.layoutModalimg = true
       this.loaderimg = true
       this.noimg = false
       this.subtituloimg = false
       this.imagenproductoimg = false
-      const resp = await productosLib.getimagenproducto(id)
-      console.log(resp)
-      this.imagenproductoimg = resp.data.length > 0 ? this.dataUrl(resp.data[0].imagen) : null
+      const resp2 = await productosLib.getimagenproducto(id)
+      console.log(resp2)
+      this.imagenproductoimg = resp2.data.length > 0 ? this.dataUrl(resp2.data[0].imagen) : null
       console.log(this.imagenproductoimg)
       if (!this.imagenproductoimg) {
         this.noimg = true
@@ -297,6 +305,26 @@ export default defineComponent({
       this.nombreproductoimg = nombre
       this.precioproductoimg = precio
       this.subtituloimg = true
+    },
+    mensajeError () {
+      this.$q.dialog({
+        title: '¡Problemas con INTERNET!',
+        message: 'Se requiere BUENA CONEXION para realizar esta acción',
+        persistent: true
+      })
+    },
+    checkNet () {
+      const cadena = ENDPOINT_PATH
+      const request = new XMLHttpRequest()
+      try {
+        request.open('GET', cadena, false)
+        request.send()
+        console.log(' <<< Bien ')
+        return true
+      } catch (error) {
+        console.log(' Mal >>>> ')
+        return false
+      }
     },
     openSetItems (id, nombre, precio, preciocaj, unixcaja, costoactu, porciva, porkilos, disponible, imagen) {
       if (this.idrol === 3) {
@@ -416,9 +444,9 @@ export default defineComponent({
 </script>
 <style scoped>
   .headerItem{
+    margin: 20px;
     display: flex;
     align-items: center;
-    padding: 20px 20px 10px;
   }
   .menuitem {
     height: 40px;
@@ -437,6 +465,7 @@ export default defineComponent({
     font-size: 14px;
     font-weight: bold;
     text-transform: uppercase;
+    display: grid;
   }
   .headerTableItems{
     background: #d6d6d6;

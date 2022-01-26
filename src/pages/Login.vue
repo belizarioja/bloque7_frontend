@@ -57,6 +57,7 @@
 <script>
 import { ref, defineComponent } from 'vue'
 import auth from '../logic/auth'
+import productosLib from '../logic/productos'
 import moment from 'moment'
 
 const config = require('../config/endpoints.js')
@@ -77,6 +78,32 @@ export default defineComponent({
     }
   },
   methods: {
+    async getProductos () {
+      const resp = await productosLib.listar(null)
+      const serverData = []
+      const datos = resp.data
+      console.log(datos)
+      for (const i in datos) {
+        const item = datos[i]
+        const obj = {}
+        obj.id = item.id
+        obj.nombre = item.nombre
+        obj.precio =
+          item.porkilos === 1
+            ? item.precio
+            : parseFloat(item.precio / item.unixcaja)
+        obj.disponible = item.disponible
+        obj.preciocaj = item.preciocaj
+        obj.unixcaja = item.unixcaja
+        obj.costoactu = item.costoactu
+        obj.porciva = item.porciva
+        obj.porkilos = item.porkilos
+        obj.imagen = item.imagen
+        serverData.push(obj)
+      }
+      this.$q.localStorage.remove('productos')
+      this.$q.localStorage.set('productos', serverData)
+    },
     async enviarLogin () {
       try {
         // console.log(this.usuario)
@@ -115,7 +142,17 @@ export default defineComponent({
               this.$q.localStorage.set('mantener', this.mantener)
               this.$q.localStorage.set('salida', false)
               this.$q.localStorage.set('feultget', feultget)
-              this.$router.push('/index')
+              if (idrol === 4) {
+                this.getProductos().then(() => {
+                  console.log('Sincronizado finalizó sin problema')
+                  this.feultget = moment().format('YYYY-MM-DD HH:mm:ss')
+                  this.$q.localStorage.remove('feultget')
+                  this.$q.localStorage.set('feultget', this.feultget)
+                  this.$router.push('/productos')
+                })
+              } else {
+                this.$router.push('/index')
+              }
             } else {
               this.$q.dialog({
                 title: 'Oops! No tiene acceso!',
@@ -149,9 +186,14 @@ export default defineComponent({
       this.mantener = this.$q.localStorage.getItem('mantener')
       this.usuario = this.$q.localStorage.getItem('usuario')
       this.clave = this.$q.localStorage.getItem('clave')
+      this.idrol = this.$q.localStorage.getItem('idrol')
       if (!this.$q.localStorage.getItem('salida')) {
         // console.log('Entrar sin logueo de una :', this.salida)
-        this.$router.push('/index')
+        if (this.idrol === 4) {
+          this.$router.push('/productos')
+        } else {
+          this.$router.push('/index')
+        }
       }
     } else {
       this.mantener = false

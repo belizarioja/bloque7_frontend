@@ -83,7 +83,7 @@ export default defineComponent({
   methods: {
     iniciales (nombre) {
       const primer = nombre.split(' ')[0].charAt(0)
-      const segundo = nombre.split(' ')[1].charAt(0)
+      const segundo = nombre.split(' ').length > 1 ? nombre.split(' ')[1].charAt(0) : ''
       return primer + segundo
     },
     gotoProductos (idcliente, nombrecliente, rifcliente) {

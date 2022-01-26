@@ -2,14 +2,14 @@
   <q-layout view="lHh Lpr lFf">
     <q-header class="bg-primary text-white" style="border-radius: 0 0 15px 15px;">
       <q-toolbar>
-        <q-btn
+        <!-- <q-btn
           flat
           dense
           round
           icon="menu"
           aria-label="Menu"
           @click="toggleLeftDrawer"
-        />
+        /> -->
 
         <q-toolbar-title>
           <div style="font-size: 12px;font-weight: bold;">Bloque 7 - V{{ VERSION }}</div>
@@ -227,7 +227,16 @@
                         {{ row.subtotal }}
                       </td>
                       <td :class="{'bordeotropedido' : row.i === 14 }">
-                        <q-icon name="delete" color="red" style="font-size:x-large;" @click="deleteItem(row.id)" />
+                        <q-icon name="delete" color="red" style="font-size:x-large;" @click="deleteItem(row.indice, row.idproducto)" />
+                      </td>
+                    </tr>
+                    <tr
+                      v-if="serverData.length === 0"
+                    >
+                      <td colspan="8" style="text-align: center;padding-top: 40px;">
+                        <span>
+                          <q-icon name="production_quantity_limits" color="secondary" style="font-size:200px;" />
+                        </span>
                       </td>
                     </tr>
                   </table>
@@ -288,12 +297,18 @@
           </div>
           <q-icon name="shopping_cart" color="dark" style="font-size:35px;" />
         </div>
+        <q-icon
+          @click="gotoSalir()"
+          name="logout"
+          style="font-size: 30px;"
+        />
       </q-toolbar>
     </q-header>
     <q-footer  style="border-radius: 15px 15px 0 0;">
       <q-toolbar>
         <q-toolbar inset style="width: 100%;justify-content: space-around;font-size:35px;">
           <q-icon
+            v-show="idrol !== 4"
             @click="gotoIndex()"
             name="home"
             style=""
@@ -311,32 +326,39 @@
             style=""
           />
           <q-icon
-            v-show="idrol === 1"
+            v-show="idrol === 1 || idrol === 4"
             @click="gotoProductos()"
             name="price_change"
             style=""
           />
           <q-icon
-            v-show="idrol > 1"
+            v-show="idrol === 3"
             @click="gotoClientes()"
             name="point_of_sale"
             style=""
           />
           <q-icon
-            v-show="idrol > 1"
+            v-show="idrol === 3"
             @click="gotoCxc()"
             name="paid"
             style=""
           />
           <q-icon
-            v-show="idrol > 1"
+            v-show="idrol === 3"
             @click="gotoReportePedidos()"
             name="view_list"
             style=""
           />
           <q-icon
-            @click="gotoSalir()"
-            name="logout"
+            v-show="idrol === 3 || idrol === 4"
+            @click="gotoCambiarclave()"
+            name="lock_clock"
+            style=""
+          />
+          <q-icon
+            v-show="idrol === 3 || idrol === 4"
+            @click="gotoAyuda()"
+            name="help"
             style=""
           />
         </q-toolbar>
@@ -356,6 +378,7 @@
       </q-list>
       <q-list padding>
         <q-item
+          v-show="idrol === 1 || idrol === 3"
           to="/index"
           exact
           clickable
@@ -368,7 +391,7 @@
           </q-item-section>
         </q-item>
         <q-item
-          v-show="idrol > 1"
+          v-show="idrol === 3"
           to="/clientes"
           exact
           clickable
@@ -381,7 +404,7 @@
           </q-item-section>
         </q-item>
         <q-item
-          v-show="idrol > 1"
+          v-show="idrol === 3"
           to="/cuentasxcobrar"
           exact
           clickable
@@ -394,7 +417,7 @@
           </q-item-section>
         </q-item>
         <q-item
-          v-show="idrol > 1"
+          v-show="idrol === 3"
           to="/reportepedidos"
           exact
           clickable
@@ -407,7 +430,7 @@
           </q-item-section>
         </q-item>
         <q-item
-          v-show="idrol === 1"
+          v-show="idrol === 1 || idrol === 4"
           to="/productos"
           exact
           clickable
@@ -499,10 +522,10 @@
 
 import { defineComponent, ref } from 'vue'
 // import clientesLib from '../logic/clientes'
-import pedidosLib from '../logic/pedidos'
+// import pedidosLib from '../logic/pedidos'
 import moment from 'moment'
 const config = require('../config/endpoints.js')
-// const ENDPOINT_PATH = config.endpoint_path
+const ENDPOINT_PATH = config.endpoint_path
 
 export default defineComponent({
   name: 'MainLayout',
@@ -555,25 +578,124 @@ export default defineComponent({
       this.$router.push('/index')
     },
     gotoClientes () {
-      this.$router.push('/clientes')
+      const datos = this.$q.localStorage.getItem('clientes') ? this.$q.localStorage.getItem('clientes') : []
+      if (datos.length > 0) {
+        this.$router.push('/clientes')
+      } else {
+        this.$q.dialog({
+          title: 'No tiene CLIENTES para realizar pedidos!',
+          message: 'Debe sincronizar!',
+          persistent: true
+        })
+      }
     },
     gotoUsuarios () {
-      this.$router.push('/usuarios')
+      const holds = this.$q.localStorage.getItem('usuarios') ? this.$q.localStorage.getItem('usuarios') : []
+      if (holds.length > 0) {
+        this.$router.push('/usuarios')
+      } else {
+        this.$q.dialog({
+          title: 'No tiene USUARIOS!',
+          message: 'Debe sincronizar!',
+          persistent: true
+        })
+      }
     },
     gotoVendedores () {
-      this.$router.push('/vendedores')
+      const holds = this.$q.localStorage.getItem('vendedores') ? this.$q.localStorage.getItem('vendedores') : []
+      if (holds.length > 0) {
+        this.$router.push('/vendedores')
+      } else {
+        this.$q.dialog({
+          title: 'No tiene VENDEDORES!',
+          message: 'Debe sincronizar!',
+          persistent: true
+        })
+      }
     },
     gotoCxc () {
-      this.$router.push('/cuentasxcobrar')
+      const datos = this.$q.localStorage.getItem('cuentasxc') ? this.$q.localStorage.getItem('cuentasxc') : []
+      if (datos.length > 0) {
+        this.$router.push('/cuentasxcobrar')
+      } else {
+        this.$q.dialog({
+          title: 'No tiene CUENTAS POR COBRAR!',
+          message: 'Debe sincronizar!',
+          persistent: true
+        })
+      }
     },
     gotoReportePedidos () {
-      this.$router.push('/reportepedidos')
+      const datos = this.$q.localStorage.getItem('pedidos') ? this.$q.localStorage.getItem('pedidos') : []
+      if (datos.length > 0) {
+        this.$router.push('/reportepedidos')
+      } else {
+        this.$q.dialog({
+          title: 'No tiene PEDIDOS!',
+          message: 'Debe sincronizar!',
+          persistent: true
+        })
+      }
     },
     gotoProductos () {
-      this.$router.push('/productos')
+      const holds = this.$q.localStorage.getItem('productos') ? this.$q.localStorage.getItem('productos') : []
+      if (holds.length > 0) {
+        this.$router.push('/productos')
+      } else {
+        this.$q.dialog({
+          title: 'No tiene PRODUCTOS!',
+          message: 'Debe sincronizar!',
+          persistent: true
+        })
+      }
+    },
+    gotoCambiarclave () {
+      const resp = this.checkNet()
+      if (!resp) {
+        this.mensajeError()
+        return
+      }
+      this.$router.push('/cambiarclave')
+    },
+    gotoAyuda () {
+      this.$router.push('/ayuda')
+    },
+    mensajeError () {
+      this.$q.dialog({
+        title: '¡Problemas con INTERNET!',
+        message: 'Se requiere BUENA CONEXION para realizar esta acción',
+        persistent: true
+      })
+    },
+    checkNet () {
+      const cadena = ENDPOINT_PATH
+      const request = new XMLHttpRequest()
+      try {
+        request.open('GET', cadena, false)
+        request.send()
+        console.log(' <<< Bien ')
+        return true
+      } catch (error) {
+        console.log(' Mal >>>> ')
+        return false
+      }
     },
     gotoSalir () {
-      this.$router.push('/logout')
+      this.$q.dialog({
+        title: 'CONFIRMACIÓN!',
+        message: '¿Seguro que desea SALIR de la aplicación?',
+        ok: {
+          color: 'primary',
+          label: 'Sí'
+        },
+        cancel: {
+          color: 'secondary',
+          label: 'No'
+        },
+        persistent: true
+      }).onOk(async () => {
+        this.$router.push('/logout')
+      })
     },
     checkoutSaves (indice) {
       this.$q.dialog({
@@ -606,7 +728,7 @@ export default defineComponent({
         this.hideShowSaves()
         this.hideShowCarrito()
         this.layoutModalSaves = false
-        this.gotoProductos()
+        this.$router.push('/productos')
       })
     },
     deleteSaves (indice) {
@@ -632,6 +754,7 @@ export default defineComponent({
         // this.cleanCarrito()
         this.hideShowSaves()
         this.layoutModalSaves = false
+        this.$router.push('/index')
       })
     },
     savePedido () {
@@ -650,12 +773,15 @@ export default defineComponent({
       }).onOk(async () => {
         const holds = this.$q.localStorage.getItem('holds')
         const index = holds.findIndex(obj => obj.status === 1)
-        console.log(index)
-        holds[index].status = 0
+        // console.log(index)
+        if (index >= 0) {
+          holds[index].status = 0
+        }
         this.$q.localStorage.remove('holds')
         this.$q.localStorage.set('holds', holds)
         this.cleanCarrito()
         this.hideShowSaves()
+        this.$router.push('/index')
       })
     },
     createPedido () {
@@ -727,6 +853,7 @@ export default defineComponent({
         obj.i = parseInt(i) + 1
         obj.id = item.id
         obj.idproducto = item.idproducto
+        obj.indice = item.indice
         obj.nombreproducto = item.nombreproducto
         obj.precio = parseFloat(item.precio).toFixed(2)
         obj.cantidad = item.cantidad
@@ -775,12 +902,20 @@ export default defineComponent({
         this.serverDataSaves.push(obj)
       }
       const idTotalSaves = document.querySelector('#idTotalSaves')
+      const totalItemSaves = document.querySelector('.totalItemSaves')
       const circuloTotalSaves = document.querySelector('.totalItemBlue')
       if (idTotalSaves) {
         idTotalSaves.textContent = 'Total : $' + this.totalsaves.toFixed(2)
       }
       if (circuloTotalSaves) {
         circuloTotalSaves.textContent = this.totalitemsaves
+      }
+      if (this.totalitemsaves > 0) {
+        if (totalItemSaves.classList.contains('invisible')) {
+          totalItemSaves.classList.remove('invisible')
+        }
+      } else {
+        totalItemSaves.classList.add('invisible')
       }
     },
     deletePedido () {
@@ -806,7 +941,9 @@ export default defineComponent({
       const holds = this.$q.localStorage.getItem('holds')
       const index = holds.findIndex(obj => obj.status === 1)
       console.log(index)
-      holds[index].status = 2
+      if (index >= 0) {
+        holds[index].status = 2
+      }
       this.$q.localStorage.remove('holds')
       this.$q.localStorage.set('holds', holds)
     },
@@ -840,12 +977,13 @@ export default defineComponent({
       }).onOk(() => {
         this.deleteCarrito()
         this.cleanCarrito()
+        this.$router.push('/index')
       })
     },
-    deleteItem (id) {
+    deleteItem (indice, idproducto) {
       this.$q.dialog({
         title: 'CONFIRMACIÓN!',
-        message: 'Desea eliminar este item al pedido?' + id,
+        message: 'Desea eliminar este item al pedido?',
         ok: {
           color: 'primary',
           label: 'Sí'
@@ -856,8 +994,15 @@ export default defineComponent({
         },
         persistent: true
       }).onOk(() => {
-        pedidosLib.deleteitemcarrito(id)
-        this.hideShowCarrito(this.idusuario)
+        // pedidosLib.deleteitemcarrito(id)
+        console.log(indice, idproducto)
+        const itemsholds = this.$q.localStorage.getItem('itemsholds')
+        const index = itemsholds.findIndex(obj => obj.indice === indice && obj.idproducto === idproducto)
+        console.log(index)
+        itemsholds.splice(index, 1)
+        this.$q.localStorage.remove('itemsholds')
+        this.$q.localStorage.set('itemsholds', itemsholds)
+        this.hideShowCarrito()
       })
     }
   },

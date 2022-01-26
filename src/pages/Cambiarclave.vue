@@ -1,17 +1,12 @@
 <template>
   <div class="bg-transparent">
     <div class="headerItem">
-       <div
-          class="menuitem"
-          @click="gotoIndex()">
-          <q-icon name="keyboard_return" color="info" />
-        </div>
-        <div class="subHeaderItem">
-          Cambiar clave
-        </div>
+      <div class="subHeaderItem">
+        Cambiar clave
+      </div>
     </div>
   </div>
-  <div class="q-pa-md text-dark bg-secondary formCambiar">
+  <div class="q-pa-md text-dark bg-primary formCambiar">
     <form
       @submit.prevent="enviarLogin">
       <q-input
@@ -165,7 +160,7 @@ export default defineComponent({
     border-radius: 10px 10px 0 0;
     padding: 20px;
     position: absolute;
-    top: 90px;
+    top: 115px;
     left: 0;
     right: 0;
     height: 100%;
@@ -188,7 +183,7 @@ export default defineComponent({
   .subHeaderItem{
     text-align: center;
     width: 100%;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: bold;
     text-transform: uppercase;
   }

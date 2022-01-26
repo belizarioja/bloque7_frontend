@@ -1,7 +1,6 @@
 
 const routes = [
   { path: '/', component: () => import('pages/Login.vue') },
-  { path: '/cambiarclave', component: () => import('pages/Cambiarclave.vue') },
   { path: '/logout', component: () => import('pages/Logout.vue') },
   {
     path: '/index',
@@ -16,7 +15,8 @@ const routes = [
       { path: '/vendedoresclientes', component: () => import('pages/Vendedoresclientes.vue') },
       { path: '/usuarios', component: () => import('pages/Usuarios.vue') },
       { path: '/cuentasxcobrar', component: () => import('pages/Cuentasxcobrar.vue') },
-      { path: '/reportepedidos', component: () => import('pages/Reportepedidos.vue') }
+      { path: '/reportepedidos', component: () => import('pages/Reportepedidos.vue') },
+      { path: '/cambiarclave', component: () => import('pages/Cambiarclave.vue') }
     ]
   },
 
