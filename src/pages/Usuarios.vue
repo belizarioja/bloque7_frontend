@@ -9,11 +9,16 @@
         <div class="subHeaderItem">
           Usuarios
         </div>
-        <div
-          class="menuitem"
-          @click="openAddUser()">
-          <q-icon name="add"/>
-        </div>
+        <q-btn
+          class="menuitem2"
+          type="buttom"
+          :loading="loading"
+          icon="add"
+          @click="loading = !loading; openAddUser()">
+          <template v-slot:loading>
+            <q-spinner-facebook />
+          </template>
+        </q-btn>
     </div>
     <q-table
       grid
@@ -147,7 +152,8 @@ export default defineComponent({
     return {
       idrol: this.$q.localStorage.getItem('idrol'),
       serverData: [],
-      serverDataClientes: []
+      serverDataClientes: [],
+      loading: false
     }
   },
   setup () {
@@ -175,12 +181,16 @@ export default defineComponent({
       this.$router.push('/index')
     },
     openAddUser () {
+      // this.loading = true
+      // console.log(this.loading)
       const resp = this.checkNet()
       if (!resp) {
         this.mensajeError()
         return
       }
       this.layoutModalAdd = true
+      this.loading = false
+      // console.log(this.loading)
     },
     iniciales (nombre) {
       const primer = nombre.split(' ')[0].charAt(0)
@@ -200,13 +210,13 @@ export default defineComponent({
           label: 'No'
         },
         persistent: true
-      }).onOk(() => {
-        const resp = authLib.addUser(idcliente, nombrecliente)
-        console.log(resp)
-        // this.hideShowCarrito(this.idusuario)
+      }).onOk(async () => {
+        await authLib.addUser(idcliente, nombrecliente).then(
+          this.getUsuarios()
+        )
+        // console.log(resp)
         this.layoutModalAdd = false
       })
-      // this.layoutModalAdd = false
     },
     listarClientes () {
       this.serverDataClientes = this.$q.localStorage.getItem('clientes') ? this.$q.localStorage.getItem('clientes') : []
@@ -342,6 +352,18 @@ export default defineComponent({
     align-items: center;
     justify-content: center;
     font-size: 30px;
+    background: #5eb228;
+    color: white;
+  }
+  .menuitem2 {
+    height: 40px;
+    width: 45px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: bold;
     background: #5eb228;
     color: white;
   }

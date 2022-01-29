@@ -208,13 +208,22 @@ export default defineComponent({
         usuarioreporte = this.$q.localStorage.getItem('usuarioreporte')
         this.nombrereporte = this.$q.localStorage.getItem('nombrereporte')
         this.fechaReporte = this.$q.localStorage.getItem('fechareporte')
+        console.log(usuarioreporte, this.fechaReporte, this.nombrereporte)
         const idNombreReporte = document.querySelector('#idNombreReporte')
         if (idNombreReporte) {
           idNombreReporte.textContent = 'de : ' + this.nombrereporte
         }
+        if (!this.fechaReporte) {
+          this.fechaReporte = moment().format('YYYY-MM-DD')
+        }
+        if (usuarioreporte) {
+          this.serverData = pedidos.filter(obj => obj.usuario === usuarioreporte && obj.fecha === moment(this.fechaReporte).format('YYYY/MM/DD'))
+        } else {
+          this.serverData = pedidos.filter(obj => obj.fecha === moment(this.fechaReporte).format('YYYY/MM/DD'))
+        }
+      } else {
+        this.serverData = pedidos.filter(obj => obj.fecha === moment(this.fechaReporte).format('YYYY/MM/DD'))
       }
-      console.log(usuarioreporte, moment(this.fechaReporte).format('YYYY/MM/DD'))
-      this.serverData = pedidos.filter(obj => obj.usuario === usuarioreporte && obj.fecha === moment(this.fechaReporte).format('YYYY/MM/DD'))
     }
   },
   mounted () {

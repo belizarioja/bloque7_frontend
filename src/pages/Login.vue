@@ -121,6 +121,7 @@ export default defineComponent({
         const resp = await auth.login(this.usuario, this.clave, this.imei)
         // console.log(resp)
         if (resp.data.status === 500) {
+          this.loading = false
           // SI HAY ALGUN ERROR EN LAS CONSULTAS
           this.$q.dialog({
             title: 'Advertencia!',

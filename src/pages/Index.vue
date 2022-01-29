@@ -6,13 +6,11 @@
     <q-card class="my-card borderdetailt" style="margin: 20px">
       <q-card-section
         style="
-          display: flex;
           padding: 7px;
-          height: 200px;
-          justify-content: center;
+          height: 250px;
         "
       >
-        <div class="menuitem" v-show="idrol > 1" @click="gotoClientes()">
+        <div class="menuitem" v-show="idrol === 3" @click="gotoClientes()">
           <q-icon class="iconApp" name="point_of_sale" color="primary" />
           <div class="tituloApp">PEDIDOS</div>
         </div>
@@ -31,11 +29,11 @@
           <q-icon class="iconApp" name="price_change" color="primary" />
           <div class="tituloApp">PRODUCTOS</div>
         </div>
-        <div class="menuitem" v-show="idrol > 1" @click="gotoCxc()">
+        <div class="menuitem" v-show="idrol === 1 || idrol === 3" @click="gotoCxc()">
           <q-icon class="iconApp" name="paid" color="primary" />
           <div class="tituloApp">CTAS X COBRAR</div>
         </div>
-        <div class="menuitem" v-show="idrol > 1" @click="gotoReportePedidos()">
+        <div class="menuitem" v-show="idrol === 1 || idrol === 3" @click="gotoReportePedidos()">
           <q-icon class="iconApp" name="view_list" color="primary" />
           <div class="tituloApp">REPORTE</div>
         </div>
@@ -210,6 +208,8 @@ export default defineComponent({
       }
     },
     gotoCxc () {
+      this.$q.localStorage.remove('usuarioreporte')
+      this.$q.localStorage.remove('nombrereporte')
       const datos = this.$q.localStorage.getItem('cuentasxc') ? this.$q.localStorage.getItem('cuentasxc') : []
       if (datos.length > 0) {
         this.$router.push('/cuentasxcobrar')
@@ -222,6 +222,9 @@ export default defineComponent({
       }
     },
     gotoReportePedidos () {
+      this.$q.localStorage.remove('usuarioreporte')
+      this.$q.localStorage.remove('nombrereporte')
+      this.$q.localStorage.remove('fechareporte')
       const datos = this.$q.localStorage.getItem('pedidos') ? this.$q.localStorage.getItem('pedidos') : []
       if (datos.length > 0) {
         this.$router.push('/reportepedidos')
@@ -656,6 +659,7 @@ export default defineComponent({
     }
   },
   mounted () {
+    pedidosLib.corregirClientesNull()
     if (this.$q.localStorage.getItem('feultget') === 'null') {
       console.log('Aqui fecha ult null')
     }
@@ -694,6 +698,7 @@ export default defineComponent({
   margin: 9px;
   padding-top: 5px;
   line-height: 12px;
+  float: left;
 }
 .subHeaderItem {
   text-align: center;

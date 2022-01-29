@@ -173,11 +173,17 @@ export default defineComponent({
       if (this.idrol === 1) {
         this.nombrereporte = this.$q.localStorage.getItem('nombrereporte')
         this.usuarioreporte = this.$q.localStorage.getItem('usuarioreporte')
+        console.log(this.usuarioreporte, this.nombrereporte)
+
         const idNombreReporte = document.querySelector('#idNombreReporte')
         if (idNombreReporte) {
           idNombreReporte.textContent = 'de : ' + this.nombrereporte
         }
-        this.serverData = this.$q.localStorage.getItem('cuentasxc').filter(obj => obj.idvendedor === this.usuarioreporte)
+        if (this.usuarioreporte) {
+          this.serverData = this.$q.localStorage.getItem('cuentasxc').filter(obj => obj.idvendedor === this.usuarioreporte)
+        } else {
+          this.serverData = this.$q.localStorage.getItem('cuentasxc') ? this.$q.localStorage.getItem('cuentasxc') : []
+        }
       } else {
         this.serverData = this.$q.localStorage.getItem('cuentasxc') ? this.$q.localStorage.getItem('cuentasxc') : []
       }

@@ -12,6 +12,13 @@
           <span style="color: darkgray;font-size: 10px;">Ultima actualización : {{ feultget }} </span>
         </div>
     </div>
+    <div class="buscartop">
+      <q-input borderless dense debounce="300" v-model="filter" placeholder="Buscar">
+        <template v-slot:append>
+          <q-icon name="search" />
+        </template>
+      </q-input>
+    </div>
     <q-table
       grid
       :rows="serverData"
@@ -24,13 +31,6 @@
       hide-bottom
       :loading="loading"
     >
-      <template v-slot:top-right>
-        <q-input borderless dense debounce="300" v-model="filter" placeholder="Buscar">
-          <template v-slot:append>
-            <q-icon name="search" />
-          </template>
-        </q-input>
-      </template>
       <template v-slot:item="props">
         <div class="q-pa-xs col-xs-12 col-sm-6 col-md-4">
           <q-card>
@@ -519,5 +519,13 @@ export default defineComponent({
     right: 50px;
     left: 50px;
     border-radius: 10px;
+  }
+  .buscartop {
+    padding: 12px 16px;
+    position: sticky;
+    top: 60px;
+    z-index: 1000;
+    background: aliceblue;
+    border-bottom: 1px solid #757575;
   }
 </style>

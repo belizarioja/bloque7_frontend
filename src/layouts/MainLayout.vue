@@ -1,7 +1,7 @@
 <template>
   <q-layout view="lHh Lpr lFf">
     <q-header class="bg-primary text-white" style="border-radius: 0 0 15px 15px;">
-      <q-toolbar>
+      <q-toolbar style="height: 65px;">
         <!-- <q-btn
           flat
           dense
@@ -306,61 +306,97 @@
     </q-header>
     <q-footer  style="border-radius: 15px 15px 0 0;">
       <q-toolbar>
-        <q-toolbar inset style="width: 100%;justify-content: space-around;font-size:35px;">
-          <q-icon
-            v-show="idrol !== 4"
-            @click="gotoIndex()"
-            name="home"
-            style=""
-          />
-          <q-icon
-            v-show="idrol === 1"
-            @click="gotoUsuarios()"
-            name="account_circle"
-            style=""
-          />
-          <q-icon
-            v-show="idrol === 1"
-            @click="gotoVendedores()"
-            name="manage_accounts"
-            style=""
-          />
-          <q-icon
-            v-show="idrol === 1 || idrol === 4"
-            @click="gotoProductos()"
-            name="price_change"
-            style=""
-          />
-          <q-icon
-            v-show="idrol === 3"
-            @click="gotoClientes()"
-            name="point_of_sale"
-            style=""
-          />
-          <q-icon
-            v-show="idrol === 3"
-            @click="gotoCxc()"
-            name="paid"
-            style=""
-          />
-          <q-icon
-            v-show="idrol === 3"
-            @click="gotoReportePedidos()"
-            name="view_list"
-            style=""
-          />
-          <q-icon
-            v-show="idrol === 3 || idrol === 4"
-            @click="gotoCambiarclave()"
-            name="lock_clock"
-            style=""
-          />
-          <q-icon
-            v-show="idrol === 3 || idrol === 4"
-            @click="gotoAyuda()"
-            name="help"
-            style=""
-          />
+        <q-toolbar inset style="width: 100%;justify-content: space-around;font-size:35px;height: 65px;">
+          <div v-show="idrol !== 4" class="divMenuAbajo">
+            <span class="iconMenuAbajo">
+                <q-icon
+                @click="gotoIndex()"
+                name="home"
+                style=""
+              />
+            </span>
+            <span class="textoMenuAbajo">Inicio</span>
+          </div>
+          <div v-show="idrol === 1" class="divMenuAbajo">
+            <span class="iconMenuAbajo">
+              <q-icon
+                @click="gotoUsuarios()"
+                name="account_circle"
+                style=""
+              />
+            </span>
+            <span class="textoMenuAbajo">Usuarios</span>
+          </div>
+          <div v-show="idrol === 1" class="divMenuAbajo">
+            <span class="iconMenuAbajo">
+              <q-icon
+                @click="gotoVendedores()"
+                name="manage_accounts"
+                style=""
+              />
+            </span>
+            <span class="textoMenuAbajo">Vendedores</span>
+          </div>
+          <div v-show="idrol === 1 || idrol === 4" class="divMenuAbajo">
+            <span class="iconMenuAbajo">
+              <q-icon
+                @click="gotoProductos()"
+                name="price_change"
+                style=""
+              />
+            </span>
+            <span class="textoMenuAbajo">Precios</span>
+          </div>
+          <div v-show="idrol === 3" class="divMenuAbajo">
+            <span class="iconMenuAbajo">
+              <q-icon
+                @click="gotoClientes()"
+                name="point_of_sale"
+                style=""
+              />
+            </span>
+            <span class="textoMenuAbajo">Pedidos</span>
+          </div>
+          <div v-show="idrol === 3" class="divMenuAbajo">
+            <span class="iconMenuAbajo">
+              <q-icon
+                @click="gotoCxc()"
+                name="paid"
+                style=""
+              />
+            </span>
+            <span class="textoMenuAbajo">Pedidos</span>
+          </div>
+          <div v-show="idrol === 3" class="divMenuAbajo">
+            <span class="iconMenuAbajo">
+              <q-icon
+                @click="gotoReportePedidos()"
+                name="view_list"
+                style=""
+              />
+            </span>
+            <span class="textoMenuAbajo">Reporte</span>
+          </div>
+          <div v-show="idrol === 3 || idrol === 4" class="divMenuAbajo">
+            <span class="iconMenuAbajo">
+              <q-icon
+                @click="gotoCambiarclave()"
+                name="lock_clock"
+                style=""
+              />
+            </span>
+            <span class="textoMenuAbajo">Cambio clave</span>
+          </div>
+          <div v-show="idrol === 3 || idrol === 4" class="divMenuAbajo">
+            <span class="iconMenuAbajo">
+              <q-icon
+                @click="gotoAyuda()"
+                name="help"
+                style=""
+              />
+            </span>
+            <span class="textoMenuAbajo">Ayuda</span>
+          </div>
         </q-toolbar>
       </q-toolbar>
     </q-footer>
@@ -626,6 +662,9 @@ export default defineComponent({
       }
     },
     gotoReportePedidos () {
+      this.$q.localStorage.remove('usuarioreporte')
+      this.$q.localStorage.remove('nombrereporte')
+      this.$q.localStorage.remove('fechareporte')
       const datos = this.$q.localStorage.getItem('pedidos') ? this.$q.localStorage.getItem('pedidos') : []
       if (datos.length > 0) {
         this.$router.push('/reportepedidos')
@@ -1089,5 +1128,17 @@ export default defineComponent({
   }
   .borderdetailt {
     border-radius: 12px;
+  }
+  .divMenuAbajo {
+    display: grid;
+  }
+  .textoMenuAbajo {
+    text-align: center;
+    font-size: 10px;
+  }
+  .iconMenuAbajo {
+    align-items: center;
+    display: flex;
+    justify-content: center;
   }
 </style>
