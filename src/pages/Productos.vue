@@ -13,6 +13,26 @@
         </div>
     </div>
     <div class="buscartop">
+      <div style="height: 50px;">
+        <q-btn
+          style="float: left;"
+          label="Categorias"
+          type="buttom"
+          color="primary"
+          icon="filter_alt"
+          @click="layoutModalFilter = !layoutModalFilter"
+          v-close-popup
+        />
+        <q-btn
+          style="float: right;"
+          label="Ordenar"
+          type="buttom"
+          color="primary"
+          icon="sort"
+          @click="layoutModalOrder = !layoutModalOrder"
+          v-close-popup
+        />
+      </div>
       <q-input borderless dense debounce="300" v-model="filter" placeholder="Buscar">
         <template v-slot:append>
           <q-icon name="search" />
@@ -200,6 +220,48 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
+    <q-dialog v-model="layoutModalFilter" persistent transition-show="flip-down" transition-hide="flip-up">
+      <q-card class="borderdetailt" style="width: 100%;">
+        <q-bar  class="bg-primary text-white" style="position: sticky;;top: 0;z-index: 999;">
+          <q-icon name="speaker_notes" />
+          <div>Filtrar por categorías</div>
+          <q-space />
+          <q-btn dense flat icon="close" v-close-popup>
+            <q-tooltip class="bg-white text-primary">Cerrar</q-tooltip>
+          </q-btn>
+        </q-bar>
+        <q-card-section class="q-pt-none" style="margin-top: 120px;">
+          <div class="q-pa-md q-gutter-sm">
+            <div class="buscadorFixed">
+              <q-btn
+                style=""
+                label="Limpiar"
+                type="buttom"
+                color="primary"
+                icon="subtitles_off"
+                @click="unselectAll"
+              />
+              <div style="margin-top: 10px;">
+                <div class="divselections" v-for="group in selection" :key="group">
+                  {{nameCategoria(group)}}
+                </div>
+              </div>
+            </div>
+            <div class="divitemgroups" v-for="group in serverDataGroups" :key="group.id">
+              <q-checkbox
+                keep-color
+                :value="group"
+                v-model="selection"
+                :label="group.nombre"
+                color="primary"
+                :val="group.id"
+                @click="clickHandler"
+                />
+            </div>
+          </div>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
@@ -221,6 +283,7 @@ export default defineComponent({
   data () {
     return {
       serverData: [],
+      serverDataGroups: [],
       categoria: null,
       idusuario: this.$q.localStorage.getItem('idusuario'),
       usuario: this.$q.localStorage.getItem('usuario'),
@@ -229,12 +292,15 @@ export default defineComponent({
       pagination: {
         page: 1,
         rowsPerPage: 0 // 0 means all rows
-      }
+      },
+      selection: []
     }
   },
   setup () {
     const layoutModal = ref(false)
     const layoutModalimg = ref(false)
+    const layoutModalOrder = ref(false)
+    const layoutModalFilter = ref(false)
     const noimg = ref(false)
     const loaderimg = ref(false)
     const imagenproducto = ref(false)
@@ -264,6 +330,8 @@ export default defineComponent({
       unixcaja,
       layoutModal,
       layoutModalimg,
+      layoutModalOrder,
+      layoutModalFilter,
       imagenproductoimg,
       loading,
       columns: [
@@ -275,6 +343,15 @@ export default defineComponent({
     }
   },
   methods: {
+    clickHandler () {
+      console.log(this.selection)
+      this.listarProductos(this.selection)
+    },
+    unselectAll () {
+      this.selection = []
+      console.log(this.selection)
+      this.listarProductos(this.selection)
+    },
     gotoClientes () {
       if (this.idrol === 1 || this.idrol === 4) {
         this.$router.push('/index')
@@ -394,11 +471,31 @@ export default defineComponent({
         this.gotoClientes()
       }
     },
-    listarProductos (categoria) {
+    listarCategorias () {
+      this.serverDataGroups = this.$q.localStorage.getItem('categorias') ? this.$q.localStorage.getItem('categorias') : []
+      // console.log(this.serverDataGroups)
+    },
+    nameCategoria (item) {
+      const find = this.serverDataGroups.find(obj => obj.id === item)
+      return find.nombre
+    },
+    esCategoria (elemento) {
+      // console.log(elemento)
+      const find = this.selection.filter(function (item) {
+        console.log(item, elemento)
+        return item === elemento.idcategoria
+      })
+      return find.length > 0
+    },
+    listarProductos (categorias) {
       this.loading = true
       // this.serverData = this.$q.localStorage.getItem('productos')
-      this.serverData = this.$q.localStorage.getItem('productos') ? this.$q.localStorage.getItem('productos') : []
-
+      const arreglo = this.$q.localStorage.getItem('productos') ? this.$q.localStorage.getItem('productos') : []
+      if (categorias.length > 0) {
+        this.serverData = arreglo.filter(this.esCategoria)
+      } else {
+        this.serverData = arreglo
+      }
       /* const datos = this.$q.localStorage.getItem('productos')
       console.log(datos)
       for (const i in datos) {
@@ -438,7 +535,8 @@ export default defineComponent({
     }
   },
   async mounted () {
-    this.listarProductos(null)
+    this.listarProductos([])
+    this.listarCategorias()
   }
 })
 </script>
@@ -527,5 +625,27 @@ export default defineComponent({
     z-index: 1000;
     background: aliceblue;
     border-bottom: 1px solid #757575;
+  }
+  .divitemgroups {
+    height: 30px;
+  }
+  .buscadorFixed {
+    position: fixed;
+    top: 49px;
+    background: white;
+    z-index: 999;
+    padding: 10px;
+    width: 72%;
+    border-bottom: 1px solid #9e9e9e;
+  }
+  .divselections {
+    border-radius: 10px;
+    background: #e7e3e3;
+    color: #707271;
+    border: 1px solid #707271;
+    width: fit-content;
+    padding: 3px 7px;
+    margin: 3px;
+    float: left;
   }
 </style>

@@ -74,12 +74,7 @@
             <q-tooltip class="bg-white text-primary">Cerrar</q-tooltip>
           </q-btn>
         </q-bar>
-
         <q-card-section class="q-pt-none">
-          <!-- shopping_cart
-          add_shopping_cart
-          remove_shopping_cart
-          shopping_cart_checkout -->
           <q-list bordered padding style="margin-top: 15px">
             <q-item>
               <q-item-section top avatar>
@@ -140,6 +135,7 @@
 <script>
 import { defineComponent, ref } from 'vue'
 import productosLib from '../logic/productos'
+import categoriasLib from '../logic/categorias'
 import clientesLib from '../logic/clientes'
 import vendedorLib from '../logic/vendedores'
 import authLib from '../logic/auth'
@@ -424,6 +420,14 @@ export default defineComponent({
         this.$q.localStorage.set('vendedores', serverData)
       }
     },
+    async getCategorias () {
+      console.log('Aqui categorias')
+      const resp = await categoriasLib.listarcategorias()
+      console.log(resp.data)
+      const serverData = resp.data
+      this.$q.localStorage.remove('categorias')
+      this.$q.localStorage.set('categorias', serverData)
+    },
     async getProductos () {
       const resp = await productosLib.listar(null)
       const serverData = []
@@ -441,6 +445,7 @@ export default defineComponent({
         obj.disponible = item.disponible
         obj.preciocaj = item.preciocaj
         obj.unixcaja = item.unixcaja
+        obj.idcategoria = item.idcategoria
         obj.costoactu = item.costoactu
         obj.porciva = item.porciva
         obj.porkilos = item.porkilos
@@ -638,14 +643,16 @@ export default defineComponent({
                         .then(this.getHolds()
                           .then(this.getItemsHolds()
                             .then(this.getClientes()
-                              .then(() => {
-                                console.log('Sincronizado finalizó sin problema')
-                                this.feultget = moment().format('YYYY-MM-DD HH:mm:ss')
-                                this.$q.localStorage.remove('feultget')
-                                this.$q.localStorage.set('feultget', this.feultget)
-                                this.loader = false
-                              })
-                            ).catch(this.falloCallback)
+                              .then(this.getCategorias()
+                                .then(() => {
+                                  console.log('Sincronizado finalizó sin problema')
+                                  this.feultget = moment().format('YYYY-MM-DD HH:mm:ss')
+                                  this.$q.localStorage.remove('feultget')
+                                  this.$q.localStorage.set('feultget', this.feultget)
+                                  this.loader = false
+                                })
+                              ).catch(this.falloCallback)
+                            )
                           )
                         )
                       )
@@ -659,7 +666,7 @@ export default defineComponent({
     }
   },
   mounted () {
-    pedidosLib.corregirClientesNull()
+    // pedidosLib.corregirClientesNull()
     if (this.$q.localStorage.getItem('feultget') === 'null') {
       console.log('Aqui fecha ult null')
     }
