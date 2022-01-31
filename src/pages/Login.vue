@@ -49,6 +49,7 @@
           label="Login"
           type="submit"
           :loading="loading"
+          :disable="isDisabled"
           color="dark">
           <template v-slot:loading>
             <q-spinner-facebook />
@@ -81,6 +82,7 @@ export default defineComponent({
       loading,
       usuario: ref(''),
       clave: ref(''),
+      isDisabled: ref(false),
       mantener: ref(false)
     }
   },
@@ -112,16 +114,21 @@ export default defineComponent({
       this.$q.localStorage.set('productos', serverData)
     },
     async enviarLogin () {
+      this.loading = true
+      this.isDisabled = true
       try {
-        this.loading = true
+        const respnet = this.checkNet()
+        if (!respnet) {
+          this.mensajeError()
+          return
+        }
         // console.log(this.usuario)
         // console.log(this.clave)
-        console.log(this.mantener)
+        // console.log(this.mantener)
         // alert(this.mantener)
         const resp = await auth.login(this.usuario, this.clave, this.imei)
         // console.log(resp)
         if (resp.data.status === 500) {
-          this.loading = false
           // SI HAY ALGUN ERROR EN LAS CONSULTAS
           this.$q.dialog({
             title: 'Advertencia!',
@@ -129,6 +136,8 @@ export default defineComponent({
             cancel: true,
             persistent: true
           })
+          this.loading = false
+          this.isDisabled = false
         } else {
           if (resp.data.length > 0) {
             // SI LAS CREDENCIALES SON VALIDAS
@@ -158,14 +167,17 @@ export default defineComponent({
                   this.$q.localStorage.remove('feultget')
                   this.$q.localStorage.set('feultget', this.feultget)
                   this.loading = false
+                  this.isDisabled = false
                   this.$router.push('/productos')
                 })
               } else {
                 this.loading = false
+                this.isDisabled = false
                 this.$router.push('/index')
               }
             } else {
               this.loading = false
+              this.isDisabled = false
               this.$q.dialog({
                 title: 'Oops! No tiene acceso!',
                 message: 'Contacte a la adminstración de BLOQUE 7!',
@@ -174,6 +186,7 @@ export default defineComponent({
             }
           } else {
             this.loading = false
+            this.isDisabled = false
             // SI LAS CREDENCIALES NO SON VALIDAS
             this.$q.dialog({
               title: 'Oops! Advertencia!',
@@ -184,13 +197,30 @@ export default defineComponent({
           }
         }
       } catch (error) {
+        this.mensajeError()
+      }
+    },
+    mensajeError () {
+      this.$q.dialog({
+        title: '¡Problemas con INTERNET!',
+        message: 'Se requiere BUENA CONEXION para realizar esta acción',
+        persistent: true
+      }).onOk(async () => {
         this.loading = false
-        // console.log(error)
-        this.$q.dialog({
-          title: 'Oops! Problemas con INTERNET',
-          message: 'Revise conexión e intente ingresar de nuevo!',
-          persistent: true
-        })
+        this.isDisabled = false
+      })
+    },
+    checkNet () {
+      const cadena = ENDPOINT_PATH
+      const request = new XMLHttpRequest()
+      try {
+        request.open('GET', cadena, false)
+        request.send()
+        console.log(' <<< Bien ')
+        return true
+      } catch (error) {
+        console.log(' Mal >>>> ')
+        return false
       }
     }
   },
@@ -214,7 +244,7 @@ export default defineComponent({
     }
     console.log(this.mantener)
     console.log(this.imei)
-    const cadena = ENDPOINT_PATH
+    /* const cadena = ENDPOINT_PATH
     const request = new XMLHttpRequest()
     try {
       request.open('GET', cadena, false)
@@ -225,7 +255,7 @@ export default defineComponent({
         message: 'Revise conexión e intente ingresar de nuevo!',
         persistent: true
       })
-    }
+    } */
   }
 })
 </script>

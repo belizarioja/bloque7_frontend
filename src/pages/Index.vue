@@ -429,6 +429,7 @@ export default defineComponent({
       this.$q.localStorage.set('categorias', serverData)
     },
     async getProductos () {
+      const arreglo = this.$q.localStorage.getItem('productos') ? this.$q.localStorage.getItem('productos') : []
       const resp = await productosLib.listar(null)
       const serverData = []
       const datos = resp.data
@@ -449,7 +450,13 @@ export default defineComponent({
         obj.costoactu = item.costoactu
         obj.porciva = item.porciva
         obj.porkilos = item.porkilos
-        obj.imagen = item.imagen
+        const index = arreglo.findIndex(obj => obj.id === item.id && obj.imagen?.length > 10)
+        if (index > -1) {
+          // console.log(arreglo[index].imagen)
+          obj.imagen = arreglo[index].imagen
+        } else {
+          obj.imagen = item.imagen
+        }
         serverData.push(obj)
       }
       this.$q.localStorage.remove('productos')

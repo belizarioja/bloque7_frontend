@@ -78,12 +78,13 @@
                       @click="openImagen(props.row.id, props.row.nombre, props.row.precio)">
                       <q-icon name="zoom_in" style="font-size: 24px;" /> ver imagen
                     </div>
-                    <!-- <img
-                      v-if="props.row.imagen"
-                      :src="props.row.imagen"
-                      height="100"
-                    /> -->
                     <img
+                      v-if="checkImage(props.row.imagen)"
+                      :src="props.row.imagen"
+                      height="95"
+                    />
+                    <img
+                      v-else
                       src="../assets/default.svg"
                       height="40"
                     />
@@ -220,6 +221,7 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
+    <!-- MODAL DE FILTROS POR CATEGORIA -->
     <q-dialog v-model="layoutModalFilter" persistent transition-show="flip-down" transition-hide="flip-up">
       <q-card class="borderdetailt" style="width: 100%;">
         <q-bar  class="bg-primary text-white" style="position: sticky;;top: 0;z-index: 999;">
@@ -238,7 +240,7 @@
                 label="Limpiar"
                 type="buttom"
                 color="primary"
-                icon="subtitles_off"
+                icon="search_off"
                 @click="unselectAll"
               />
               <div style="margin-top: 10px;">
@@ -262,6 +264,31 @@
         </q-card-section>
       </q-card>
     </q-dialog>
+    <!-- MODAL DE OEDENAR -->
+    <q-dialog v-model="layoutModalOrder" persistent transition-show="flip-down" transition-hide="flip-up">
+      <q-card class="borderdetailt" style="width: 100%;">
+        <q-bar  class="bg-primary text-white" style="position: sticky;;top: 0;z-index: 999;">
+          <q-icon name="speaker_notes" />
+          <div>Ordenar productos</div>
+          <q-space />
+          <q-btn dense flat icon="close" v-close-popup>
+            <q-tooltip class="bg-white text-primary">Cerrar</q-tooltip>
+          </q-btn>
+        </q-bar>
+        <q-card-section class="q-pt-none" style="">
+          <div class="q-pa-md q-gutter-sm">
+            Ordenar de forma:
+            <q-radio v-model="orderBy" val="nameAsc" label="Ascendente por nombre de producto (A...Z)" @input="clickHandlerOrder" />
+            <q-radio v-model="orderBy" val="nameDesc" label="Descendente por nombre de producto (Z...A)" />
+            <q-radio v-model="orderBy" val="codeAsc" label="Ascendente por código de producto (A...Z)(0...9)" />
+            <q-radio v-model="orderBy" val="codeDesc" label="Descendente por código de producto (Z...A)(9...0)" />
+          </div>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
+    <q-page-sticky position="bottom-right" :offset="[18, 18]">
+      <q-btn fab icon="arrow_upward" color="primary" @click="gotoUp"/>
+    </q-page-sticky>
   </q-page>
 </template>
 
@@ -294,6 +321,7 @@ export default defineComponent({
         rowsPerPage: 0 // 0 means all rows
       },
       selection: []
+
     }
   },
   setup () {
@@ -315,8 +343,10 @@ export default defineComponent({
     const disponibleproducto = ref(0)
     const cantidad = ref(1)
     const unixcaja = ref(1)
+    const orderBy = ref('nameAsc')
     return {
       filter,
+      orderBy,
       cantidad,
       nombreproducto,
       nombreproductoimg,
@@ -343,6 +373,21 @@ export default defineComponent({
     }
   },
   methods: {
+    checkImage (cad) {
+      if (cad?.length > 10) {
+        return true
+      } else {
+        return false
+      }
+    },
+    gotoUp () {
+      this.$router.push('/productos')
+    },
+    clickHandlerOrder (val) {
+      console.log('this.selectionOrder')
+      console.log(val)
+      // this.listarProductos(this.selection)
+    },
     clickHandler () {
       console.log(this.selection)
       this.listarProductos(this.selection)
@@ -360,8 +405,8 @@ export default defineComponent({
       }
     },
     async openImagen (id, nombre, precio) {
-      const resp = this.checkNet()
-      if (!resp) {
+      const respnet = this.checkNet()
+      if (!respnet) {
         this.mensajeError()
         return
       }
@@ -370,12 +415,25 @@ export default defineComponent({
       this.noimg = false
       this.subtituloimg = false
       this.imagenproductoimg = false
-      const resp2 = await productosLib.getimagenproducto(id)
-      console.log(resp2)
-      this.imagenproductoimg = resp2.data.length > 0 ? this.dataUrl(resp2.data[0].imagen) : null
-      console.log(this.imagenproductoimg)
-      if (!this.imagenproductoimg) {
-        this.noimg = true
+      const index = this.serverData.findIndex(obj => obj.id === id)
+      if (index > -1) {
+        const img = this.serverData[index].imagen
+        console.log(img)
+        if (img.length < 10) {
+          const resp = await productosLib.getimagenproducto(id)
+          console.log(resp)
+          this.imagenproductoimg = resp.data.length > 0 ? this.dataUrl(resp.data[0].imagen) : null
+          console.log(this.imagenproductoimg)
+          if (!this.imagenproductoimg) {
+            this.noimg = true
+          }
+          this.serverData[index].imagen = this.imagenproductoimg
+          this.$q.localStorage.remove('productos')
+          this.$q.localStorage.set('productos', this.serverData)
+          this.listarProductos(this.selection)
+        } else {
+          this.imagenproductoimg = this.serverData[index].imagen
+        }
       }
       this.loaderimg = false
       this.idproductoimg = id
@@ -473,14 +531,12 @@ export default defineComponent({
     },
     listarCategorias () {
       this.serverDataGroups = this.$q.localStorage.getItem('categorias') ? this.$q.localStorage.getItem('categorias') : []
-      // console.log(this.serverDataGroups)
     },
     nameCategoria (item) {
       const find = this.serverDataGroups.find(obj => obj.id === item)
       return find.nombre
     },
     esCategoria (elemento) {
-      // console.log(elemento)
       const find = this.selection.filter(function (item) {
         console.log(item, elemento)
         return item === elemento.idcategoria
@@ -489,7 +545,6 @@ export default defineComponent({
     },
     listarProductos (categorias) {
       this.loading = true
-      // this.serverData = this.$q.localStorage.getItem('productos')
       const arreglo = this.$q.localStorage.getItem('productos') ? this.$q.localStorage.getItem('productos') : []
       if (categorias.length > 0) {
         this.serverData = arreglo.filter(this.esCategoria)
@@ -532,6 +587,48 @@ export default defineComponent({
   computed: {
     subtotal () {
       return (this.cantidad * this.precioproducto).toFixed(2)
+    }
+  },
+  watch: {
+    orderBy () {
+      console.log(this.orderBy)
+      const order = this.orderBy
+      this.serverData.sort(function (a, b) {
+        if (order === 'nameAsc') {
+          if (a.nombre > b.nombre) {
+            return 1
+          }
+          if (a.nombre < b.nombre) {
+            return -1
+          }
+        }
+        if (order === 'nameDesc') {
+          if (a.nombre < b.nombre) {
+            return 1
+          }
+          if (a.nombre > b.nombre) {
+            return -1
+          }
+        }
+        if (order === 'codeAsc') {
+          if (a.id > b.id) {
+            return 1
+          }
+          if (a.id < b.id) {
+            return -1
+          }
+        }
+        if (order === 'codeDesc') {
+          if (a.id < b.id) {
+            return 1
+          }
+          if (a.id > b.id) {
+            return -1
+          }
+        }
+        // a must be equal to b
+        return 0
+      })
     }
   },
   async mounted () {
@@ -631,7 +728,7 @@ export default defineComponent({
   }
   .buscadorFixed {
     position: fixed;
-    top: 49px;
+    top: 79px;
     background: white;
     z-index: 999;
     padding: 10px;
@@ -641,11 +738,15 @@ export default defineComponent({
   .divselections {
     border-radius: 10px;
     background: #e7e3e3;
-    color: #707271;
-    border: 1px solid #707271;
+    color: #225401;
+    font-size: 10px;
+    /* border: 1px solid #707271; */
+    width: -webkit-fit-content;
+    width: -moz-fit-content;
     width: fit-content;
     padding: 3px 7px;
     margin: 3px;
     float: left;
+    font-weight: bold;
   }
 </style>
