@@ -246,7 +246,7 @@
             <q-footer class="bg-primary text-white">
               <q-toolbar inset style="width: 100%;justify-content: center;">
                   <q-btn
-                    style="font-size: 10px;margin-right: 10px;padding: 0px 7px;"
+                    style="font-size: 10px;margin-right: 10px;padding: 7px 10px;"
                     label="Guardar"
                     type="buttom"
                     color="info"
@@ -254,7 +254,7 @@
                     @click="savePedido()"
                   />
                   <q-btn
-                    style="font-size: 10px;margin-right: 10px;padding: 0px 7px;"
+                    style="font-size: 10px;margin-right: 10px;padding: 7px 10px;"
                     label="Enviar"
                     type="buttom"
                     color="dark"
@@ -262,7 +262,7 @@
                     @click="createPedido()"
                   />
                   <q-btn
-                    style="font-size: 10px;padding: 0px 7px;"
+                    style="font-size: 10px;padding: 7px 10px;"
                     label="Eliminar"
                     type="buttom"
                     color="secondary"
@@ -297,11 +297,14 @@
           </div>
           <q-icon name="shopping_cart" color="dark" style="font-size:35px;" />
         </div>
-        <q-icon
-          @click="gotoSalir()"
-          name="logout"
-          style="font-size: 30px;"
-        />
+        <div style="display:grid;margin-left: 10px;">
+          <q-icon
+            @click="gotoSalir()"
+            name="logout"
+            style="font-size: 30px;"
+          />
+          <span style="font-size: 12px;">Salir</span>
+        </div>
       </q-toolbar>
     </q-header>
     <q-footer  style="border-radius: 15px 15px 0 0;">
@@ -337,7 +340,7 @@
             </span>
             <span class="textoMenuAbajo">Vendedores</span>
           </div>
-          <div v-show="idrol === 1 || idrol === 4" class="divMenuAbajo">
+          <div v-show="idrol === 1 || idrol === 3 || idrol === 4" class="divMenuAbajo">
             <span class="iconMenuAbajo">
               <q-icon
                 @click="gotoProductos()"
@@ -365,7 +368,7 @@
                 style=""
               />
             </span>
-            <span class="textoMenuAbajo">Pedidos</span>
+            <span class="textoMenuAbajo">Deudores</span>
           </div>
           <div v-show="idrol === 3" class="divMenuAbajo">
             <span class="iconMenuAbajo">
@@ -377,7 +380,7 @@
             </span>
             <span class="textoMenuAbajo">Reporte</span>
           </div>
-          <div v-show="idrol === 3 || idrol === 4" class="divMenuAbajo">
+          <div v-show="idrol === 1 || idrol === 3 || idrol === 4" class="divMenuAbajo">
             <span class="iconMenuAbajo">
               <q-icon
                 @click="gotoCambiarclave()"
@@ -387,7 +390,7 @@
             </span>
             <span class="textoMenuAbajo">Cambio clave</span>
           </div>
-          <div v-show="idrol === 3 || idrol === 4" class="divMenuAbajo">
+          <div v-show="idrol === 4" class="divMenuAbajo">
             <span class="iconMenuAbajo">
               <q-icon
                 @click="gotoAyuda()"

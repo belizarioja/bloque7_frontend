@@ -25,7 +25,7 @@
           <q-icon class="iconApp" name="manage_accounts" color="primary" />
           <div class="tituloApp">VENDEDORES</div>
         </div>
-        <div class="menuitem" v-show="idrol === 1" @click="gotoProductos()">
+        <div class="menuitem" v-show="idrol === 1 || idrol === 3" @click="gotoProductos()">
           <q-icon class="iconApp" name="price_change" color="primary" />
           <div class="tituloApp">PRODUCTOS</div>
         </div>
@@ -429,7 +429,6 @@ export default defineComponent({
       this.$q.localStorage.set('categorias', serverData)
     },
     async getProductos () {
-      const arreglo = this.$q.localStorage.getItem('productos') ? this.$q.localStorage.getItem('productos') : []
       const resp = await productosLib.listar(null)
       const serverData = []
       const datos = resp.data
@@ -450,13 +449,7 @@ export default defineComponent({
         obj.costoactu = item.costoactu
         obj.porciva = item.porciva
         obj.porkilos = item.porkilos
-        const index = arreglo.findIndex(obj => obj.id === item.id && obj.imagen?.length > 10)
-        if (index > -1) {
-          // console.log(arreglo[index].imagen)
-          obj.imagen = arreglo[index].imagen
-        } else {
-          obj.imagen = item.imagen
-        }
+        obj.imagen = null
         serverData.push(obj)
       }
       this.$q.localStorage.remove('productos')
@@ -556,8 +549,8 @@ export default defineComponent({
       console.log('Error sincronizando')
     },
     async setPedidos () {
-      const holds = this.$q.localStorage.getItem('holds')
-      const itemspedido = this.$q.localStorage.getItem('itemsholds')
+      const holds = this.$q.localStorage.getItem('holds') ? this.$q.localStorage.getItem('holds') : []
+      const itemspedido = this.$q.localStorage.getItem('itemsholds') ? this.$q.localStorage.getItem('itemsholds') : []
       const pedidos = holds.filter((obj) => obj.status === 3)
       console.log('Set pedidos')
       console.log(pedidos)
@@ -603,7 +596,7 @@ export default defineComponent({
       }
     },
     async setEliminados () {
-      const holds = this.$q.localStorage.getItem('holds')
+      const holds = this.$q.localStorage.getItem('holds') ? this.$q.localStorage.getItem('holds') : []
       const pedidos = holds.filter((obj) => obj.status === 2 || obj.status === 3)
       console.log('Set eliminados')
       console.log(pedidos)
@@ -614,7 +607,7 @@ export default defineComponent({
       }
     },
     async setGuardados () {
-      const holds = this.$q.localStorage.getItem('holds')
+      const holds = this.$q.localStorage.getItem('holds') ? this.$q.localStorage.getItem('holds') : []
       const pedidos = holds.filter((obj) => obj.status === 1 || obj.status === 0)
       const itemspedido = this.$q.localStorage.getItem('itemsholds')
       console.log('Set guardados')
@@ -632,6 +625,33 @@ export default defineComponent({
       await authLib.updateFechaUltGet(this.idusuario)
     },
     async getSincronized () {
+      const resp = this.checkNet()
+      if (!resp) {
+        this.mensajeError()
+        return
+      }
+      this.loader = true
+      await this.setPedidos()
+      await this.setGuardados()
+      await this.setEliminados()
+      await this.getProductos()
+      await this.setSincronized()
+      await this.getUsuarios()
+      await this.getVendedores()
+      await this.getCxc()
+      await this.getPedidos()
+      await this.getHolds()
+      await this.getItemsHolds()
+      await this.getClientes()
+      await this.getCategorias().then(() => {
+        console.log('Sincronizado finalizó sin problema')
+        this.feultget = moment().format('YYYY-MM-DD HH:mm:ss')
+        this.$q.localStorage.remove('feultget')
+        this.$q.localStorage.set('feultget', this.feultget)
+        this.loader = false
+      }).catch(this.falloCallback)
+    }
+    /* async getSincronizedBK () {
       const resp = this.checkNet()
       if (!resp) {
         this.mensajeError()
@@ -670,10 +690,36 @@ export default defineComponent({
             )
           )
         )
-    }
+    } */
+    /* async migrarproductos () {
+      const resp = await productosLib.migrarproductos()
+      console.log(resp)
+      for (const i in resp.data) {
+        const item = resp.data[i]
+        if (item.imagen) {
+          console.log(item.id, item.imagen)
+          const resp2 = await productosLib.getimagenproducto(item.id)
+          // console.log(resp2)
+          // const imagen = this.dataUrl(resp2.data[0].imagen)
+          // const file = new File([resp2.data[0].imagen], 'name')
+          const theBlob = resp2.data[0].imagen
+          const file = new File([theBlob], item.id + '.png', { lastModified: new Date().getTime(), type: theBlob.type })
+          // const resp3 = await productosLib.updateimagenproducto(item.id, imagen)
+          console.log(file)
+        }
+        // const resp2 = await productosLib.listaTemp()
+        // console.log('getImagesProductos')
+      }
+    },
+    dataUrl (img) {
+      return 'data:image/jpeg;base64,' + btoa(
+        new Uint8Array(img.data).reduce((data, byte) => data + String.fromCharCode(byte), '')
+      )
+    } */
   },
   mounted () {
     // pedidosLib.corregirClientesNull()
+    // this.migrarproductos()
     if (this.$q.localStorage.getItem('feultget') === 'null') {
       console.log('Aqui fecha ult null')
     }

@@ -287,7 +287,7 @@
       </q-card>
     </q-dialog>
     <q-page-sticky position="bottom-right" :offset="[18, 18]">
-      <q-btn fab icon="arrow_upward" color="primary" @click="gotoUp"/>
+      <q-btn fab icon="arrow_upward" color="primary" @click="gotoUp" style="border-radius: 50%;"/>
     </q-page-sticky>
   </q-page>
 </template>
@@ -486,8 +486,9 @@ export default defineComponent({
     },
     async setCarrito () {
       // const resp = await clientesLib.getholds(this.idusuario)
-      const holds = this.$q.localStorage.getItem('holds')
-      const itemscarrito = this.$q.localStorage.getItem('itemsholds')
+      const holds = this.$q.localStorage.getItem('holds') ? this.$q.localStorage.getItem('holds') : []
+      const itemscarrito = this.$q.localStorage.getItem('itemsholds') ? this.$q.localStorage.getItem('itemsholds') : []
+      // const itemscarrito = this.$q.localStorage.getItem('itemsholds')
       const index = holds.findIndex(obj => obj.status === 1)
       if (index !== -1) {
         console.log(holds[index].id, this.idproducto)
