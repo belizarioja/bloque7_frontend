@@ -450,10 +450,19 @@ export default defineComponent({
         obj.porciva = item.porciva
         obj.porkilos = item.porkilos
         obj.imagen = null
+        if (this.fileExists(ENDPOINT_PATH + 'files/' + item.id + '.png')) {
+          obj.imagen = ENDPOINT_PATH + 'files/' + item.id + '.png'
+        }
         serverData.push(obj)
       }
       this.$q.localStorage.remove('productos')
       this.$q.localStorage.set('productos', serverData)
+    },
+    fileExists (path) {
+      const http = new XMLHttpRequest()
+      http.open('HEAD', path, false)
+      http.send()
+      return http.status !== 404
     },
     async getCxc () {
       const serverData = []
