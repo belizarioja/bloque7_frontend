@@ -97,7 +97,8 @@ module.exports = configure(function (ctx) {
       plugins: [
         'Dialog',
         'Notify',
-        'LocalStorage'
+        'LocalStorage',
+        'AddressbarColor'
       ]
     },
 

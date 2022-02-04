@@ -83,7 +83,7 @@
       </template>
     </q-table>
     <q-dialog v-model="layoutModalAdd">
-      <q-layout view="Lhh lpR fff" container class="bg-white borderdetailt">
+      <q-layout view="Lhh lpR fff" container class="bg-white borderdetailt" style="height:90%;">
         <q-header class="bg-primary">
           <q-toolbar>
             <q-toolbar-title style="font-size: inherit;display: grid;">

@@ -285,7 +285,6 @@ export default defineComponent({
       if (this.idrol !== 1) {
         const resp = await clientesLib.getitemsholds(this.idusuario)
         console.log('Aqui get itemhols')
-        console.log(resp)
         const holds = this.$q.localStorage.getItem('holds')
         const itemsholds = resp.data
         let cantsaves = 0
@@ -314,8 +313,7 @@ export default defineComponent({
               circuloTotalItem.textContent = cantitemscarrito
             }
             const cuentasxc = this.$q.localStorage.getItem('cuentasxc')
-            console.log(cuentasxc)
-            console.log(holds[i].idcliente)
+            console.log('cuentasxc')
             if (cuentasxc) {
               const find = cuentasxc.filter(
                 (obj) => obj.idcliente === holds[i].idcliente
@@ -356,7 +354,6 @@ export default defineComponent({
       const serverData = []
       const resp = await clientesLib.getholds(this.idusuario)
       console.log('Aqui get hols')
-      console.log(resp)
       for (const i in resp.data) {
         const item = resp.data[i]
         item.indice = i
@@ -368,7 +365,7 @@ export default defineComponent({
     async getClientes () {
       const serverData = []
       const resp2 = await vendedorLib.listarVendedorClientes(this.usuario, this.idrol)
-      console.log(resp2)
+      console.log('getClientes')
       const datos = resp2.data
       for (const i in datos) {
         const item = datos[i]
@@ -386,7 +383,7 @@ export default defineComponent({
       if (this.idrol === 1) {
         const resp = await authLib.usuarios()
         const datos = resp.data
-        console.log(datos)
+        console.log('getUsuarios')
         for (const i in datos) {
           const item = datos[i]
           const obj = {}
@@ -412,18 +409,16 @@ export default defineComponent({
     },
     async getVendedores () {
       if (this.idrol === 1) {
-        console.log('Aqui vendedores')
         const resp = await vendedorLib.listarVendedores()
-        console.log(resp.data)
+        console.log('getVendedores')
         const serverData = resp.data
         this.$q.localStorage.remove('vendedores')
         this.$q.localStorage.set('vendedores', serverData)
       }
     },
     async getCategorias () {
-      console.log('Aqui categorias')
       const resp = await categoriasLib.listarcategorias()
-      console.log(resp.data)
+      console.log('getCategorias')
       const serverData = resp.data
       this.$q.localStorage.remove('categorias')
       this.$q.localStorage.set('categorias', serverData)
@@ -432,7 +427,7 @@ export default defineComponent({
       const resp = await productosLib.listar(null)
       const serverData = []
       const datos = resp.data
-      console.log(datos)
+      console.log('getProductos')
       for (const i in datos) {
         const item = datos[i]
         const obj = {}
@@ -450,7 +445,8 @@ export default defineComponent({
         obj.porciva = item.porciva
         obj.porkilos = item.porkilos
         obj.imagen = null
-        if (this.fileExists(ENDPOINT_PATH + 'files/' + item.id + '.png')) {
+        const resp = await productosLib.getfile(item.id)
+        if (resp.status === 200) {
           obj.imagen = ENDPOINT_PATH + 'files/' + item.id + '.png'
         }
         serverData.push(obj)
@@ -458,17 +454,10 @@ export default defineComponent({
       this.$q.localStorage.remove('productos')
       this.$q.localStorage.set('productos', serverData)
     },
-    fileExists (path) {
-      const http = new XMLHttpRequest()
-      http.open('HEAD', path, false)
-      http.send()
-      return http.status !== 404
-    },
     async getCxc () {
       const serverData = []
-      console.log(this.usuario, this.idrol)
       const resp = await clientesLib.getcxc(this.usuario, this.idrol)
-      console.log(resp)
+      console.log('getCxc')
       const datos = resp.data
       for (const i in datos) {
         const item = datos[i]
@@ -492,12 +481,20 @@ export default defineComponent({
           obj.idvendedor = item.idvendedor
           obj.rifcliente = item.rifcliente
           obj.nombrevendedor = item.nombrevendedor
-          obj.totalcxc += parseFloat(item.saldo)
+          if (item.tipodoc === 'PA') {
+            obj.totalcxc -= parseFloat(item.saldo)
+          } else {
+            obj.totalcxc += parseFloat(item.saldo)
+          }
           obj.cantidadcxc = 1
           obj.details.push(obj2)
           serverData.push(obj)
         } else {
-          serverData[index].totalcxc += parseFloat(item.saldo)
+          if (item.tipodoc === 'PA') {
+            serverData[index].totalcxc -= parseFloat(item.saldo)
+          } else {
+            serverData[index].totalcxc += parseFloat(item.saldo)
+          }
           serverData[index].details.push(obj2)
           serverData[index].cantidadcxc += parseInt(1)
         }
@@ -511,7 +508,6 @@ export default defineComponent({
       const resp = await pedidosLib.reportePedidos(this.usuario, ultnumedocu, this.idrol)
       const datos = resp.data
       console.log(' Aqui get pedidos')
-      console.log(datos)
       for (const i in datos) {
         const item = datos[i]
         const obj2 = {}
@@ -562,7 +558,6 @@ export default defineComponent({
       const itemspedido = this.$q.localStorage.getItem('itemsholds') ? this.$q.localStorage.getItem('itemsholds') : []
       const pedidos = holds.filter((obj) => obj.status === 3)
       console.log('Set pedidos')
-      console.log(pedidos)
       for (const i in pedidos) {
         const item = pedidos[i]
         const idcliente = item.idcliente
@@ -589,7 +584,7 @@ export default defineComponent({
         for (const i in arregloDeArreglos) {
           const arreglopedido = arregloDeArreglos[i]
           // console.log(arreglopedido)
-          console.log(
+          /* console.log(
             idusuario,
             usuario,
             idcliente,
@@ -599,7 +594,7 @@ export default defineComponent({
             idsucursal,
             arreglopedido,
             comentario
-          )
+          ) */
           await pedidosLib.setpedido(idusuario, usuario, idcliente, nombrecliente, rifcliente, totalcarrito, idsucursal, arreglopedido, comentario)
         }
       }
@@ -608,7 +603,6 @@ export default defineComponent({
       const holds = this.$q.localStorage.getItem('holds') ? this.$q.localStorage.getItem('holds') : []
       const pedidos = holds.filter((obj) => obj.status === 2 || obj.status === 3)
       console.log('Set eliminados')
-      console.log(pedidos)
       for (const i in pedidos) {
         const item = pedidos[i]
         console.log(item)
@@ -620,13 +614,11 @@ export default defineComponent({
       const pedidos = holds.filter((obj) => obj.status === 1 || obj.status === 0)
       const itemspedido = this.$q.localStorage.getItem('itemsholds')
       console.log('Set guardados')
-      console.log(pedidos)
       for (const i in pedidos) {
         const item = pedidos[i]
         const arreglopedido = itemspedido.filter(
           (obj) => obj.indice === item.indice
         )
-        console.log(item, arreglopedido)
         pedidosLib.savePedido(item, arreglopedido)
       }
     },

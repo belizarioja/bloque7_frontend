@@ -1,7 +1,7 @@
 <template>
   <q-layout view="lHh Lpr lFf">
     <q-header class="bg-primary text-white" style="border-radius: 0 0 15px 15px;">
-      <q-toolbar style="height: 65px;">
+      <q-toolbar style="height: 85px;padding-top:30px;">
         <!-- <q-btn
           flat
           dense
@@ -17,7 +17,7 @@
         </q-toolbar-title>
         <!-- PEDIDOS GUARDADOS SIN ENVIAR DEL VENDEDOR -->
         <q-dialog v-model="layoutModalSaves">
-          <q-layout view="Lhh lpR fff" container class="bg-white borderdetailt">
+          <q-layout view="Lhh lpR fff" container class="bg-white borderdetailt" style="height:90%;">
             <q-header class="bg-primary">
               <q-toolbar>
                 <q-toolbar-title style="font-size: inherit;display: grid;">
@@ -96,7 +96,7 @@
         </q-dialog>
         <!-- CUENTA POR COBRAR DEL CLIENTE -->
         <q-dialog v-model="layoutModalPays">
-          <q-layout view="Lhh lpR fff" container class="bg-white borderdetailt">
+          <q-layout view="Lhh lpR fff" container class="bg-white borderdetailt" style="height:90%;">
             <q-header class="bg-primary">
               <q-toolbar>
                 <q-toolbar-title style="font-size: inherit;display: grid;">
@@ -165,7 +165,7 @@
         </q-dialog>
         <!-- CARRITO DE COMPRA PEDIDO DEL CLIENTE -->
         <q-dialog v-model="layoutModal">
-          <q-layout view="Lhh lpR fff" container class="bg-white borderdetailt">
+          <q-layout view="Lhh lpR fff" container class="bg-white borderdetailt" style="height:90%;">
             <q-header class="bg-primary">
               <q-toolbar>
                 <q-toolbar-title style="font-size: inherit;display: grid;">
@@ -560,6 +560,7 @@
 <script>
 
 import { defineComponent, ref } from 'vue'
+import { useQuasar } from 'quasar'
 // import clientesLib from '../logic/clientes'
 // import pedidosLib from '../logic/pedidos'
 import moment from 'moment'
@@ -582,6 +583,8 @@ export default defineComponent({
     }
   },
   setup () {
+    const $q = useQuasar()
+    $q.addressbarColor.set('#5eb228')
     const leftDrawerOpen = ref(false)
     // const hidecarrito = ref(false)
     // const hidecxc = ref(false)

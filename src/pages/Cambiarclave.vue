@@ -160,7 +160,7 @@ export default defineComponent({
     border-radius: 10px 10px 0 0;
     padding: 20px;
     position: absolute;
-    top: 115px;
+    top: 155px;
     left: 0;
     right: 0;
     height: 100%;

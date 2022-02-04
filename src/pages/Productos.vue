@@ -223,8 +223,8 @@
     </q-dialog>
     <!-- MODAL DE FILTROS POR CATEGORIA -->
     <q-dialog v-model="layoutModalFilter" persistent transition-show="flip-down" transition-hide="flip-up">
-      <q-card class="borderdetailt" style="width: 100%;">
-        <q-bar  class="bg-primary text-white" style="position: sticky;;top: 0;z-index: 999;">
+      <q-card class="borderdetailt" style="width: 100%;height:90%;">
+        <q-bar  class="bg-primary text-white" style="position: sticky;top: 0px;z-index: 999;">
           <q-icon name="speaker_notes" />
           <div>Filtrar por categorías</div>
           <q-space />
@@ -262,6 +262,16 @@
             </div>
           </div>
         </q-card-section>
+        <q-card-actions align="center" class=" bg-white text-primary" style="position: sticky;bottom: 0;z-index: 999;">
+          <q-btn
+            style=""
+            label="Cerrar"
+            type="buttom"
+            color="primary"
+            icon="close"
+            v-close-popup
+          />
+        </q-card-actions>
       </q-card>
     </q-dialog>
     <!-- MODAL DE OEDENAR -->
@@ -284,6 +294,16 @@
             <q-radio v-model="orderBy" val="codeDesc" label="Descendente por código de producto (Z...A)(9...0)" />
           </div>
         </q-card-section>
+        <q-card-actions align="center" class=" bg-white text-primary" style="position: sticky;bottom: 0;z-index: 999;">
+          <q-btn
+            style=""
+            label="Cerrar"
+            type="buttom"
+            color="primary"
+            icon="close"
+            v-close-popup
+          />
+        </q-card-actions>
       </q-card>
     </q-dialog>
     <q-page-sticky position="bottom-right" :offset="[18, 18]">
@@ -405,11 +425,11 @@ export default defineComponent({
       }
     },
     async openImagen (id, nombre, precio) {
-      const respnet = this.checkNet()
+      /* const respnet = this.checkNet()
       if (!respnet) {
         this.mensajeError()
         return
-      }
+      } */
       this.layoutModalimg = true
       this.loaderimg = true
       this.noimg = false
@@ -664,10 +684,11 @@ export default defineComponent({
     display: grid;
   }
   .headerTableItems{
-    background: #d6d6d6;
-    font-weight: bold;
+    background: #e7e3e3;
+    color: #225401;
+    /* font-weight: bold; */
     height: 23px;
-    font-size: smaller;
+    font-size: 12px;
   }
   .rowTableItems{
     font-weight: bold;
@@ -708,7 +729,7 @@ export default defineComponent({
     pointer-events: all;
     padding: 5px;
     color: #fff;
-    background: #075b6e;
+    background: #225401;
     font-size: 12px;
     position: absolute;
     bottom: 2px;
@@ -719,7 +740,7 @@ export default defineComponent({
   .buscartop {
     padding: 12px 16px;
     position: sticky;
-    top: 60px;
+    top: 85px;
     z-index: 1000;
     background: aliceblue;
     border-bottom: 1px solid #757575;
@@ -729,7 +750,7 @@ export default defineComponent({
   }
   .buscadorFixed {
     position: fixed;
-    top: 79px;
+    top: 85px;
     background: white;
     z-index: 999;
     padding: 10px;

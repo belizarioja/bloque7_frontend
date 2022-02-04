@@ -285,6 +285,7 @@ export default defineComponent({
   }
   .bannerlogin{
     height: 120px;
+    margin-top: 30px;;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -293,7 +294,7 @@ export default defineComponent({
     border-radius: 10px 10px 0 0;
     padding: 20px;
     position: absolute;
-    top: 120px;
+    top: 155px;
     left: 0;
     right: 0;
     height: 100%;

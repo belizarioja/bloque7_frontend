@@ -16,5 +16,9 @@ class Producto {
     const data = { idproducto }
     return axios.post(ENDPOINT_PATH + 'getimagenproducto', data)
   }
+
+  getfile (id) {
+    return axios.get(ENDPOINT_PATH + 'files/' + id + '.png')
+  }
 }
 export default new Producto()
