@@ -14,6 +14,10 @@
           <q-icon class="iconApp" name="point_of_sale" color="primary" />
           <div class="tituloApp">PEDIDOS</div>
         </div>
+        <div class="menuitem" v-show="idrol === 1" @click="gotoClientes()">
+          <q-icon class="iconApp" name="assignment_ind" color="primary" />
+          <div class="tituloApp">CLIENTES</div>
+        </div>
         <div
           class="menuitem "
           v-show="idrol === 1"
@@ -37,6 +41,7 @@
           <q-icon class="iconApp" name="view_list" color="primary" />
           <div class="tituloApp">REPORTE</div>
         </div>
+
       </q-card-section>
       <q-separator />
       <q-item>
@@ -50,7 +55,7 @@
           </q-item-label>
         </q-item-section>
         <div @click="viewSincronized()">
-          <q-icon class="iconApp" name="pending_actions" color="secondary">
+          <q-icon class="iconApp" name="send_to_mobile" color="secondary">
             <q-badge color="primary" floating>!</q-badge>
           </q-icon>
         </div>
@@ -66,7 +71,7 @@
       <q-card class="borderdetailt">
         <q-bar  class="bg-primary text-white">
           <q-icon name="speaker_notes" />
-          <div>Pendientes por sincronizar</div>
+          <div>Resúmen para enviar</div>
 
           <q-space />
 
@@ -126,6 +131,25 @@
               </q-item-section>
             </q-item>
           </q-list>
+          <q-card-actions class="justify-center">
+            <q-btn
+              style="font-size: 10px;padding: 7px 10px;"
+              label="Cancelar"
+              type="buttom"
+              color="secondary"
+              icon="close"
+              v-close-popup
+            />
+            <q-btn
+              style="font-size: 10px;margin-right: 10px;padding: 7px 10px;"
+              label="Enviar"
+              type="buttom"
+              color="primary"
+              icon="send"
+              :disable="btndisableb"
+              @click="setSincronized()"
+            />
+          </q-card-actions>
         </q-card-section>
       </q-card>
     </q-dialog>
@@ -148,6 +172,7 @@ export default defineComponent({
   name: 'PageIndex',
   data () {
     const layoutModal = ref(false)
+    const btndisableb = ref(true)
     const enviados = ref(0)
     const guardados = ref(0)
     const eliminados = ref(0)
@@ -163,6 +188,7 @@ export default defineComponent({
       guardados,
       enviados,
       eliminados,
+      btndisableb,
       carrito
     }
   },
@@ -173,7 +199,7 @@ export default defineComponent({
         this.$router.push('/clientes')
       } else {
         this.$q.dialog({
-          title: 'No tiene CLIENTES para realizar pedidos!',
+          title: 'No tiene CLIENTES!',
           message: 'Debe sincronizar!',
           persistent: true
         })
@@ -257,10 +283,10 @@ export default defineComponent({
       try {
         request.open('GET', cadena, false)
         request.send()
-        console.log(' <<< Bien ')
+        // console.log(' <<< Bien ')
         return true
       } catch (error) {
-        console.log(' Mal >>>> ')
+        // console.log(' Mal >>>> ')
         return false
       }
     },
@@ -280,11 +306,15 @@ export default defineComponent({
       this.carrito = carrito.length
 
       this.layoutModal = true
+      this.btndisableb = true
+      if (this.enviados > 0 || this.guardados > 0 || this.eliminados > 0 || this.carrito > 0) {
+        this.btndisableb = false
+      }
     },
     async getItemsHolds () {
       if (this.idrol !== 1) {
         const resp = await clientesLib.getitemsholds(this.idusuario)
-        console.log('Aqui get itemhols')
+        // console.log('Aqui get itemhols')
         const holds = this.$q.localStorage.getItem('holds')
         const itemsholds = resp.data
         let cantsaves = 0
@@ -313,7 +343,7 @@ export default defineComponent({
               circuloTotalItem.textContent = cantitemscarrito
             }
             const cuentasxc = this.$q.localStorage.getItem('cuentasxc')
-            console.log('cuentasxc')
+            // console.log('cuentasxc')
             if (cuentasxc) {
               const find = cuentasxc.filter(
                 (obj) => obj.idcliente === holds[i].idcliente
@@ -353,7 +383,7 @@ export default defineComponent({
     async getHolds () {
       const serverData = []
       const resp = await clientesLib.getholds(this.idusuario)
-      console.log('Aqui get hols')
+      // console.log('Aqui get hols')
       for (const i in resp.data) {
         const item = resp.data[i]
         item.indice = i
@@ -364,15 +394,19 @@ export default defineComponent({
     },
     async getClientes () {
       const serverData = []
-      const resp2 = await vendedorLib.listarVendedorClientes(this.usuario, this.idrol)
-      console.log('getClientes')
-      const datos = resp2.data
+      const resp = await vendedorLib.listarVendedorClientes(this.usuario, this.idrol)
+      // console.log('getClientes')
+      // console.log(resp)
+      const datos = resp.data
       for (const i in datos) {
         const item = datos[i]
         const obj = {}
         obj.idcliente = item.idcliente
         obj.nombrecliente = item.nombrecliente
         obj.rifcliente = item.rifcliente
+        obj.telefonocliente = item.telefonocliente
+        obj.direccioncliente = item.direccioncliente
+        obj.nombrevendedor = item.nombrevendedor
         serverData.push(obj)
       }
       this.$q.localStorage.remove('clientes')
@@ -383,7 +417,7 @@ export default defineComponent({
       if (this.idrol === 1) {
         const resp = await authLib.usuarios()
         const datos = resp.data
-        console.log('getUsuarios')
+        // console.log('getUsuarios')
         for (const i in datos) {
           const item = datos[i]
           const obj = {}
@@ -410,7 +444,7 @@ export default defineComponent({
     async getVendedores () {
       if (this.idrol === 1) {
         const resp = await vendedorLib.listarVendedores()
-        console.log('getVendedores')
+        // console.log('getVendedores')
         const serverData = resp.data
         this.$q.localStorage.remove('vendedores')
         this.$q.localStorage.set('vendedores', serverData)
@@ -418,7 +452,7 @@ export default defineComponent({
     },
     async getCategorias () {
       const resp = await categoriasLib.listarcategorias()
-      console.log('getCategorias')
+      // console.log('getCategorias')
       const serverData = resp.data
       this.$q.localStorage.remove('categorias')
       this.$q.localStorage.set('categorias', serverData)
@@ -427,7 +461,7 @@ export default defineComponent({
       const resp = await productosLib.listar(null)
       const serverData = []
       const datos = resp.data
-      console.log('getProductos')
+      // console.log('getProductos')
       for (const i in datos) {
         const item = datos[i]
         const obj = {}
@@ -457,7 +491,7 @@ export default defineComponent({
     async getCxc () {
       const serverData = []
       const resp = await clientesLib.getcxc(this.usuario, this.idrol)
-      console.log('getCxc')
+      // console.log('getCxc')
       const datos = resp.data
       for (const i in datos) {
         const item = datos[i]
@@ -504,10 +538,11 @@ export default defineComponent({
     },
     async getPedidos () {
       const serverData = this.$q.localStorage.getItem('pedidos') ? this.$q.localStorage.getItem('pedidos') : []
+      const vendedores = this.$q.localStorage.getItem('vendedores') ? this.$q.localStorage.getItem('vendedores') : []
       let ultnumedocu = this.$q.localStorage.getItem('ultnumedocu') ? this.$q.localStorage.getItem('ultnumedocu') : null
       const resp = await pedidosLib.reportePedidos(this.usuario, ultnumedocu, this.idrol)
       const datos = resp.data
-      console.log(' Aqui get pedidos')
+      // console.log(' Aqui get pedidos')
       for (const i in datos) {
         const item = datos[i]
         const obj2 = {}
@@ -525,6 +560,13 @@ export default defineComponent({
           obj.numedocu = item.numedocu
           ultnumedocu = item.numedocu
           obj.usuario = item.usuario
+          const find = vendedores.filter(obj => obj.id.toUpperCase().trim() === item.usuario.toUpperCase().trim())
+          if (find.length > 0) {
+            // console.log(find[0].nombre)
+            obj.nombrevendedor = find[0].nombre
+          } else {
+            obj.nombrevendedor = 'INDETERMINADO'
+          }
           obj.nombrecliente = item.idcliente + ' - ' + item.nombrecliente
           obj.fecha = moment(item.fecha).format('YYYY/MM/DD')
           obj.hora = moment(item.fecha).format('HH:mm:ss')
@@ -546,7 +588,6 @@ export default defineComponent({
     calcDiffHours (fecha) {
       const now = moment()
       const end = moment(fecha, 'YYYY-MM-DD')
-      // console.log(now, end)
       const duration = moment.duration(now.diff(end))
       return duration.asDays().toFixed(0)
     },
@@ -557,7 +598,7 @@ export default defineComponent({
       const holds = this.$q.localStorage.getItem('holds') ? this.$q.localStorage.getItem('holds') : []
       const itemspedido = this.$q.localStorage.getItem('itemsholds') ? this.$q.localStorage.getItem('itemsholds') : []
       const pedidos = holds.filter((obj) => obj.status === 3)
-      console.log('Set pedidos')
+      // console.log('Set pedidos')
       for (const i in pedidos) {
         const item = pedidos[i]
         const idcliente = item.idcliente
@@ -573,28 +614,14 @@ export default defineComponent({
         )
         console.log(arregloOriginal)
         const arregloDeArreglos = []
-        // console.log('Arreglo original: ', arregloOriginal)
         const LONGITUD_PEDAZOS = 13
         for (let i = 0; i < arregloOriginal.length; i += LONGITUD_PEDAZOS) {
           const pedazo = arregloOriginal.slice(i, i + LONGITUD_PEDAZOS)
           arregloDeArreglos.push(pedazo)
         }
-        // console.log('Arreglo de arreglos: ', arregloDeArreglos)
         this.loader = true
         for (const i in arregloDeArreglos) {
           const arreglopedido = arregloDeArreglos[i]
-          // console.log(arreglopedido)
-          /* console.log(
-            idusuario,
-            usuario,
-            idcliente,
-            nombrecliente,
-            rifcliente,
-            totalcarrito,
-            idsucursal,
-            arreglopedido,
-            comentario
-          ) */
           await pedidosLib.setpedido(idusuario, usuario, idcliente, nombrecliente, rifcliente, totalcarrito, idsucursal, arreglopedido, comentario)
         }
       }
@@ -602,18 +629,17 @@ export default defineComponent({
     async setEliminados () {
       const holds = this.$q.localStorage.getItem('holds') ? this.$q.localStorage.getItem('holds') : []
       const pedidos = holds.filter((obj) => obj.status === 2 || obj.status === 3)
-      console.log('Set eliminados')
+      // console.log('Set eliminados')
       for (const i in pedidos) {
         const item = pedidos[i]
-        console.log(item)
         await pedidosLib.deletecarrito(item.id)
       }
     },
     async setGuardados () {
       const holds = this.$q.localStorage.getItem('holds') ? this.$q.localStorage.getItem('holds') : []
       const pedidos = holds.filter((obj) => obj.status === 1 || obj.status === 0)
-      const itemspedido = this.$q.localStorage.getItem('itemsholds')
-      console.log('Set guardados')
+      const itemspedido = this.$q.localStorage.getItem('itemsholds') ? this.$q.localStorage.getItem('itemsholds') : []
+      // console.log('Set guardados')
       for (const i in pedidos) {
         const item = pedidos[i]
         const arreglopedido = itemspedido.filter(
@@ -622,8 +648,35 @@ export default defineComponent({
         pedidosLib.savePedido(item, arreglopedido)
       }
     },
-    async setSincronized () {
+    async setUpdateFecha () {
+      this.$q.localStorage.remove('holds')
+      this.$q.localStorage.remove('itemsholds')
       await authLib.updateFechaUltGet(this.idusuario)
+    },
+    async setSincronized () {
+      const resp = this.checkNet()
+      if (!resp) {
+        this.mensajeError()
+        return
+      }
+      this.layoutModal = false
+      this.loader = true
+      await this.setPedidos()
+      await this.setGuardados()
+      await this.setEliminados()
+      await this.setUpdateFecha().then(() => {
+        console.log('Enviado de pedidos finalizó sin problema')
+        this.feultget = moment().format('YYYY-MM-DD HH:mm:ss')
+        this.$q.localStorage.remove('feultget')
+        this.$q.localStorage.set('feultget', this.feultget)
+        this.loader = false
+        const totalItemSaves = document.querySelector('.totalItemSaves')
+        totalItemSaves.classList.add('invisible')
+        const totalItemHold = document.querySelector('.totalItemHold')
+        totalItemHold.classList.add('invisible')
+        const totalItemCxc = document.querySelector('.totalItemCxc')
+        totalItemCxc.classList.add('invisible')
+      }).catch(this.falloCallback)
     },
     async getSincronized () {
       const resp = this.checkNet()
@@ -635,21 +688,22 @@ export default defineComponent({
       await this.setPedidos()
       await this.setGuardados()
       await this.setEliminados()
+      await this.setUpdateFecha()
       await this.getProductos()
-      await this.setSincronized()
-      await this.getUsuarios()
       await this.getVendedores()
+      await this.getUsuarios()
       await this.getCxc()
       await this.getPedidos()
       await this.getHolds()
       await this.getItemsHolds()
       await this.getClientes()
       await this.getCategorias().then(() => {
-        console.log('Sincronizado finalizó sin problema')
+        // console.log('Sincronizado finalizó sin problema')
         this.feultget = moment().format('YYYY-MM-DD HH:mm:ss')
         this.$q.localStorage.remove('feultget')
         this.$q.localStorage.set('feultget', this.feultget)
         this.loader = false
+        this.layoutModal = false
       }).catch(this.falloCallback)
     }
     /* async getSincronizedBK () {
@@ -731,8 +785,6 @@ export default defineComponent({
     if (this.idrol === 4) {
       this.getProductos().then(() => {
         console.log('Sincronizado finalizó sin problema')
-        // this.feultget = moment().format('YYYY-MM-DD HH:mm:ss')
-        // this.$q.localStorage.remove('feultget')
         this.$q.localStorage.set('feultget', this.feultget)
         this.gotoProductos()
       })

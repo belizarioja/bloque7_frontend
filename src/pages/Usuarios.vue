@@ -31,7 +31,7 @@
       :rows-per-page-options="[0]"
     >
       <template v-slot:top>
-        <q-btn size="xs" color="secondary" round dense @click="actualizar" icon="refresh"></q-btn>
+        <q-btn size="md" color="secondary" round dense @click="actualizar" icon="refresh"></q-btn>
         <span style="font-size: 12px;margin-left: 6px;">Actualizar</span>
         <q-space />
         <q-input borderless dense debounce="300" v-model="filter" placeholder="Buscar">
@@ -183,11 +183,6 @@ export default defineComponent({
     openAddUser () {
       // this.loading = true
       // console.log(this.loading)
-      const resp = this.checkNet()
-      if (!resp) {
-        this.mensajeError()
-        return
-      }
       this.layoutModalAdd = true
       this.loading = false
       // console.log(this.loading)
@@ -198,6 +193,11 @@ export default defineComponent({
       return primer + segundo
     },
     addUser (idcliente, nombrecliente) {
+      const resp = this.checkNet()
+      if (!resp) {
+        this.mensajeError()
+        return
+      }
       this.$q.dialog({
         title: 'CONFIRMACIÓN!',
         message: 'Desea agregar a ' + nombrecliente + ', como usuario del sistema?',

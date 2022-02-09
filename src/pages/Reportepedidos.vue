@@ -51,7 +51,7 @@
       :rows-per-page-options="[0]"
     >
       <template v-slot:top>
-        <q-btn size="xs" color="secondary" round dense @click="toggleExpansions" :icon="expansionsToggled ? 'remove' : 'add'"></q-btn>
+        <q-btn size="md" color="secondary" round dense @click="toggleExpansions" :icon="expansionsToggled ? 'remove' : 'add'"></q-btn>
         <span style="font-size: 12px;margin-left: 6px;">{{ hideShowAll }}</span>
         <q-space />
         <q-input borderless dense debounce="300" color="primary" v-model="filter" placeholder="Buscar">
@@ -68,7 +68,7 @@
             v-for="col in props.cols"
             style="text-align: left;"
             :key="col.name"
-            :props="props"          >
+            :props="props">
             {{ col.label }}
           </q-th>
         </q-tr>
@@ -98,7 +98,6 @@
               row-key="idproducto"
               v-model:pagination="pagination"
               :rows-per-page-options="[0]"
-              hide-bottom
             >
               <template v-slot:header="props">
                 <q-tr :props="props">
@@ -111,6 +110,18 @@
                     {{ col.label }}
                   </q-th>
                 </q-tr>
+              </template>
+              <template v-slot:pagination="scope">
+                <q-btn
+                 style="font-size: 10px;font-weight: bold;"
+                  color="primary"
+                  :label="'Vendedor: ' + props.row.nombrevendedor"
+                  round
+                  dense
+                  flat
+                  :disable="scope.isFirstPage"
+                  @click="scope.prevPage"
+                />
               </template>
             </q-table>
           </q-td>
@@ -159,6 +170,7 @@ export default defineComponent({
         monthsShort: 'Ene_Feb_Mar_Abr_May_Jun_Jul_Ago_Sep_Oct_Nov_Dic'.split('_'),
         firstDayOfWeek: 1
       },
+      visibleColumns: ref(['numedocu', 'nombrecliente', 'fecha', 'hora']),
       columns: [
         { name: 'numedocu', label: '# documento', field: 'numedocu', style: 'text-align: rigth;font-size: 10px;font-weight: bold;' },
         { name: 'nombrecliente', label: 'Cliente', field: 'nombrecliente', style: 'width: 75px;white-space: pre-wrap;text-align: left;font-size: 10px;font-weight: bold;' },

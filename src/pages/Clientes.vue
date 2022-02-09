@@ -7,8 +7,16 @@
           <q-icon name="keyboard_return"/>
         </div>
         <div class="subHeaderItem">
-          Seleccione cliente
+          <span v-if="idrol === 1">Clientes</span>
+          <span v-else>Seleccione cliente</span>
         </div>
+    </div>
+    <div class="buscartop">
+      <q-input borderless dense debounce="300" v-model="filter" placeholder="Buscar">
+        <template v-slot:append>
+          <q-icon name="search" />
+        </template>
+      </q-input>
     </div>
     <q-table
       grid
@@ -21,14 +29,6 @@
       hide-header
       hide-bottom
     >
-      <template v-slot:top-right>
-        <q-input borderless dense debounce="300" v-model="filter" placeholder="Buscar">
-          <template v-slot:append>
-            <q-icon name="search" />
-          </template>
-        </q-input>
-      </template>
-
       <template v-slot:item="props">
         <div class="q-pa-xs col-xs-12 col-sm-6 col-md-4">
           <q-card>
@@ -43,13 +43,18 @@
               </q-item-section>
               <q-item-section style="text-align: left;">
                 <q-item-label>{{ props.row.nombrecliente }}</q-item-label>
-                <q-item-label caption>RIF {{ props.row.rifcliente }}</q-item-label>
+                <q-item-label caption>RIF {{ props.row.rifcliente }} TELÉFONO {{ props.row.telefonocliente }}</q-item-label>
+                <q-item-label v-if="idrol === 1" caption>{{ props.row.direccioncliente }}</q-item-label>
+                <q-item-label v-if="idrol === 1" >{{ props.row.nombrevendedor }}</q-item-label>
               </q-item-section>
             </q-item>
           </q-card>
         </div>
       </template>
     </q-table>
+    <q-page-sticky position="bottom-right" :offset="[18, 18]">
+      <q-btn fab icon="arrow_upward" color="primary" @click="gotoUp" style="border-radius: 50%;"/>
+    </q-page-sticky>
   </q-page>
 </template>
 
@@ -64,6 +69,7 @@ export default defineComponent({
       serverData: [],
       usuario: this.$q.localStorage.getItem('usuario'),
       idusuario: this.$q.localStorage.getItem('idusuario'),
+      idrol: this.$q.localStorage.getItem('idrol'),
       pagination: {
         page: 1,
         rowsPerPage: 0 // 0 means all rows
@@ -76,17 +82,26 @@ export default defineComponent({
       filter,
       columns: [
         { name: 'nombrecliente', label: 'Nombre', field: 'nombrecliente' },
-        { name: 'rifcliente', label: 'Rif', field: 'rifcliente' }
+        { name: 'rifcliente', label: 'Rif', field: 'rifcliente' },
+        { name: 'telefonocliente', label: 'Rif', field: 'telefonocliente' },
+        { name: 'direccioncliente', label: 'Direccion', field: 'direccioncliente' },
+        { name: 'nombrevendedor', label: 'Vendedor', field: 'nombrevendedor' }
       ]
     }
   },
   methods: {
+    gotoUp () {
+      this.$router.push('/clientes')
+    },
     iniciales (nombre) {
       const primer = nombre.split(' ')[0].charAt(0)
       const segundo = nombre.split(' ').length > 1 ? nombre.split(' ')[1].charAt(0) : ''
       return primer + segundo
     },
     gotoProductos (idcliente, nombrecliente, rifcliente) {
+      if (this.idrol === 1) {
+        return
+      }
       this.$q.localStorage.set('idcliente', idcliente)
       const totalItemCxc = document.querySelector('.totalItemCxc')
       const circuloCxcItem = document.querySelector('.totalItemRed')
@@ -121,7 +136,7 @@ export default defineComponent({
       }
     },
     updateClienteCarrito (id, nombre, rif) {
-      const holds = this.$q.localStorage.getItem('holds')
+      const holds = this.$q.localStorage.getItem('holds') ? this.$q.localStorage.getItem('holds') : []
       let cantitemscarrito = 0
       const index = holds.findIndex(obj => obj.status === 1)
       if (index === -1) {
@@ -166,6 +181,9 @@ export default defineComponent({
         obj.idcliente = item.idcliente
         obj.nombrecliente = item.nombrecliente
         obj.rifcliente = item.rifcliente
+        obj.telefonocliente = item.telefonocliente
+        obj.direccioncliente = item.direccioncliente
+        obj.nombrevendedor = item.nombrevendedor
         obj.chk = false
         if (chk === item.idcliente) {
           obj.chk = true
@@ -215,5 +233,13 @@ export default defineComponent({
     display: flex;
     justify-content: center;
     padding: 15px 0;
+  }
+  .buscartop {
+    padding: 12px 16px;
+    position: sticky;
+    top: 85px;
+    z-index: 1000;
+    background: aliceblue;
+    border-bottom: 1px solid #757575;
   }
 </style>

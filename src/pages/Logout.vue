@@ -47,6 +47,8 @@ export default defineComponent({
       this.$q.localStorage.remove('cuentasxc')
       this.$q.localStorage.remove('feultget')
       this.$q.localStorage.remove('usuario')
+      this.$q.localStorage.remove('categorias')
+      this.$q.localStorage.remove('fechareporte')
     } else {
       this.gotoIndex()
     }

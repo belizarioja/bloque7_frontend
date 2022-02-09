@@ -24,7 +24,7 @@
       :loading="loading"
     >
       <template v-slot:top>
-        <q-btn size="xs" color="secondary" round dense @click="toggleExpansions" :icon="expansionsToggled ? 'remove' : 'add'"></q-btn>
+        <q-btn size="md" color="secondary" round dense @click="toggleExpansions" :icon="expansionsToggled ? 'remove' : 'add'"></q-btn>
         <span style="font-size: 12px;margin-left: 6px;">{{ hideShowAll }}</span>
         <q-space />
         <q-input borderless dense debounce="300" color="primary" v-model="filter" placeholder="Buscar">
