@@ -7,6 +7,12 @@
           @click="gotoClientes()">
           <q-icon name="keyboard_return"/>
         </div>
+        <div
+          v-if="idrol === 4"
+          class="menuitem"
+          @click="updateProductos()">
+          <q-icon name="system_update"/>
+        </div>
         <div class="subHeaderItem">
           <span>Productos</span>
           <span style="color: darkgray;font-size: 10px;">Ultima actualización : {{ feultget }} </span>
@@ -75,11 +81,11 @@
                     <div
                       class="subtitleimagen"
                       v-if="props.row.imagen"
-                      @click="openImagen(props.row.id, props.row.nombre, props.row.precio)">
+                      @click="openImagen(props.row.id, props.row.nombre, props.row.precio, props.row.imagen)">
                       <q-icon name="zoom_in" style="font-size: 24px;" /> ver imagen
                     </div>
                     <img
-                      v-if="checkImage(props.row.imagen)"
+                      v-if="props.row.imagen"
                       :src="props.row.imagen"
                       height="95"
                     />
@@ -294,7 +300,7 @@
             <q-radio v-model="orderBy" val="codeDesc" label="Descendente por código de producto (Z...A)(9...0)" />
           </div>
         </q-card-section>
-        <q-card-actions align="center" class=" bg-white text-primary" style="position: sticky;bottom: 0;z-index: 999;">
+        <q-card-actions align="center" class=" bg-white text-primary" style="position: sticky;bottom: 0;z-index: 999; border-top: 1px solid #ccc;">
           <q-btn
             style=""
             label="Cerrar"
@@ -306,6 +312,12 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
+    <div v-if="loader" class="procesando">
+      <span style="display: grid"
+        >Actualizando, espere...
+        <q-linear-progress indeterminate />
+      </span>
+    </div>
     <q-page-sticky position="bottom-right" :offset="[18, 18]">
       <q-btn fab icon="arrow_upward" color="primary" @click="gotoUp" style="border-radius: 50%;"/>
     </q-page-sticky>
@@ -321,6 +333,7 @@ import {
   , defineComponent
 } from 'vue'
 // import VueSocialSharing from 'vue-social-sharing'
+import categoriasLib from '../logic/categorias'
 import productosLib from '../logic/productos'
 const config = require('../config/endpoints.js')
 const ENDPOINT_PATH = config.endpoint_path
@@ -354,6 +367,7 @@ export default defineComponent({
     const imagenproducto = ref(false)
     const imagenproductoimg = ref(false)
     const loading = ref(false)
+    const loader = ref(false)
     const subtituloimg = ref(false)
     const filter = ref('')
     const nombreproducto = ref('')
@@ -384,6 +398,7 @@ export default defineComponent({
       layoutModalFilter,
       imagenproductoimg,
       loading,
+      loader,
       columns: [
         { name: 'nombre', label: 'Nombre', field: 'nombre' },
         { name: 'id', label: 'Código', field: 'id' },
@@ -393,11 +408,10 @@ export default defineComponent({
     }
   },
   methods: {
-    checkImage (cad) {
-      if (cad?.length > 10) {
-        return true
-      } else {
-        return false
+    checkImage (id) {
+      const resp = productosLib.getfile(id)
+      if (resp.status === 200) {
+        return ENDPOINT_PATH + 'files/' + id + '.png'
       }
     },
     gotoUp () {
@@ -406,15 +420,12 @@ export default defineComponent({
     clickHandlerOrder (val) {
       console.log('this.selectionOrder')
       console.log(val)
-      // this.listarProductos(this.selection)
     },
     clickHandler () {
-      console.log(this.selection)
       this.listarProductos(this.selection)
     },
     unselectAll () {
       this.selection = []
-      console.log(this.selection)
       this.listarProductos(this.selection)
     },
     gotoClientes () {
@@ -424,37 +435,12 @@ export default defineComponent({
         this.$router.push('/clientes')
       }
     },
-    async openImagen (id, nombre, precio) {
-      /* const respnet = this.checkNet()
-      if (!respnet) {
-        this.mensajeError()
-        return
-      } */
+    async openImagen (id, nombre, precio, imagen) {
       this.layoutModalimg = true
       this.loaderimg = true
       this.noimg = false
       this.subtituloimg = false
-      this.imagenproductoimg = false
-      const index = this.serverData.findIndex(obj => obj.id === id)
-      if (index > -1) {
-        const img = this.serverData[index].imagen
-        console.log(img)
-        if (img.length < 10) {
-          const resp = await productosLib.getimagenproducto(id)
-          console.log(resp)
-          this.imagenproductoimg = resp.data.length > 0 ? this.dataUrl(resp.data[0].imagen) : null
-          console.log(this.imagenproductoimg)
-          if (!this.imagenproductoimg) {
-            this.noimg = true
-          }
-          this.serverData[index].imagen = this.imagenproductoimg
-          this.$q.localStorage.remove('productos')
-          this.$q.localStorage.set('productos', this.serverData)
-          this.listarProductos(this.selection)
-        } else {
-          this.imagenproductoimg = this.serverData[index].imagen
-        }
-      }
+      this.imagenproductoimg = imagen
       this.loaderimg = false
       this.idproductoimg = id
       this.nombreproductoimg = nombre
@@ -511,9 +497,9 @@ export default defineComponent({
       // const itemscarrito = this.$q.localStorage.getItem('itemsholds')
       const index = holds.findIndex(obj => obj.status === 1)
       if (index !== -1) {
-        console.log(holds[index].id, this.idproducto)
+        // console.log(holds[index].id, this.idproducto)
         const index2 = itemscarrito.findIndex(obj => obj.idhold === holds[index].id && obj.idproducto === this.idproducto)
-        console.log(index2)
+        // console.log(index2)
         if (index2 === -1) {
           const obj = {}
           obj.id = null
@@ -559,7 +545,7 @@ export default defineComponent({
     },
     esCategoria (elemento) {
       const find = this.selection.filter(function (item) {
-        console.log(item, elemento)
+        // console.log(item, elemento)
         return item === elemento.idcategoria
       })
       return find.length > 0
@@ -598,11 +584,29 @@ export default defineComponent({
       this.loading = false
       // console.log(this.serverData)
     },
-    dataUrl (img) {
-      // console.log(img.data)
-      return 'data:image/jpeg;base64,' + btoa(
-        new Uint8Array(img.data).reduce((data, byte) => data + String.fromCharCode(byte), '')
-      )
+    async updateProductos () {
+      const chk = this.checkNet()
+      if (!chk) {
+        this.mensajeError()
+        return
+      }
+      this.loader = true
+      const resp = await productosLib.listar(null)
+      const datos = resp.data
+      const serverData = datos.map(function (obj) {
+        const precio = obj.precio
+        obj.precio = obj.porkilos === 1 ? precio : parseFloat(precio / obj.unixcaja)
+        obj.imagen = obj.imagen ? ENDPOINT_PATH + 'files/' + obj.id + '.png' : null
+        return obj
+      })
+      this.$q.localStorage.remove('productos')
+      this.$q.localStorage.set('productos', serverData)
+      const resp2 = await categoriasLib.listarcategorias()
+      this.$q.localStorage.remove('categorias')
+      this.$q.localStorage.set('categorias', resp2.data)
+      this.listarProductos([])
+      this.listarCategorias()
+      this.loader = false
     }
   },
   computed: {
@@ -612,7 +616,6 @@ export default defineComponent({
   },
   watch: {
     orderBy () {
-      console.log(this.orderBy)
       const order = this.orderBy
       this.serverData.sort(function (a, b) {
         if (order === 'nameAsc') {
@@ -771,4 +774,18 @@ export default defineComponent({
     float: left;
     font-weight: bold;
   }
+
+.procesando {
+  background: #3a4142cc;
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  z-index: 99999;
+  top: 0px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 25px;
+  color: white;
+}
 </style>

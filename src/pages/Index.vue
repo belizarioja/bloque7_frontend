@@ -183,7 +183,10 @@ export default defineComponent({
       idusuario: this.$q.localStorage.getItem('idusuario'),
       idsucursal: this.$q.localStorage.getItem('idsucursal'),
       feultget: this.$q.localStorage.getItem('feultget'),
-      loader: false,
+      // loader: false,
+      loaderproductos: false,
+      loaderclientes: false,
+      loadercxc: false,
       layoutModal,
       guardados,
       enviados,
@@ -458,11 +461,18 @@ export default defineComponent({
       this.$q.localStorage.set('categorias', serverData)
     },
     async getProductos () {
+      // console.log('getProductos antes')
       const resp = await productosLib.listar(null)
-      const serverData = []
+      // const serverData = []
       const datos = resp.data
-      // console.log('getProductos')
-      for (const i in datos) {
+      // console.log('getProductos despues')
+      const serverData = datos.map(function (obj) {
+        const precio = obj.precio
+        obj.precio = obj.porkilos === 1 ? precio : parseFloat(precio / obj.unixcaja)
+        obj.imagen = obj.imagen ? ENDPOINT_PATH + 'files/' + obj.id + '.png' : null
+        return obj
+      })
+      /* for (const i in datos) {
         const item = datos[i]
         const obj = {}
         obj.id = item.id
@@ -478,13 +488,15 @@ export default defineComponent({
         obj.costoactu = item.costoactu
         obj.porciva = item.porciva
         obj.porkilos = item.porkilos
-        obj.imagen = null
-        const resp = await productosLib.getfile(item.id)
-        if (resp.status === 200) {
-          obj.imagen = ENDPOINT_PATH + 'files/' + item.id + '.png'
-        }
+        obj.imagen = item.imagen
+        // const resp = await productosLib.getfile(item.id)
+        // if (resp.status === 200) {
+        //  obj.imagen = ENDPOINT_PATH + 'files/' + item.id + '.png'
+        // }
         serverData.push(obj)
-      }
+      } */
+      // console.log(serverData)
+      this.loaderproductos = false
       this.$q.localStorage.remove('productos')
       this.$q.localStorage.set('productos', serverData)
     },
@@ -533,6 +545,7 @@ export default defineComponent({
           serverData[index].cantidadcxc += parseInt(1)
         }
       }
+      this.loadercxc = false
       this.$q.localStorage.remove('cuentasxc')
       this.$q.localStorage.set('cuentasxc', serverData)
     },
@@ -684,26 +697,29 @@ export default defineComponent({
         this.mensajeError()
         return
       }
-      this.loader = true
+      this.loaderproductos = true
+      this.loaderclientes = true
+      this.loadercxc = true
+      // this.loader = true
       await this.setPedidos()
       await this.setGuardados()
       await this.setEliminados()
       await this.setUpdateFecha()
-      await this.getProductos()
+      this.getProductos()
       await this.getVendedores()
       await this.getUsuarios()
-      await this.getCxc()
+      this.getCxc()
       await this.getPedidos()
       await this.getHolds()
       await this.getItemsHolds()
-      await this.getClientes()
-      await this.getCategorias().then(() => {
-        // console.log('Sincronizado finalizó sin problema')
+      this.getCategorias()
+      this.getClientes().then(() => {
+        console.log('Sincronizado finalizó sin problema')
         this.feultget = moment().format('YYYY-MM-DD HH:mm:ss')
         this.$q.localStorage.remove('feultget')
         this.$q.localStorage.set('feultget', this.feultget)
-        this.loader = false
-        this.layoutModal = false
+        this.loaderclientes = false
+        // this.layoutModal = false
       }).catch(this.falloCallback)
     }
     /* async getSincronizedBK () {
@@ -771,6 +787,15 @@ export default defineComponent({
         new Uint8Array(img.data).reduce((data, byte) => data + String.fromCharCode(byte), '')
       )
     } */
+  },
+  computed: {
+    loader () {
+      if (this.loaderproductos || this.loaderclientes || this.loadercxc) {
+        return true
+      } else {
+        return false
+      }
+    }
   },
   mounted () {
     // pedidosLib.corregirClientesNull()

@@ -64,6 +64,7 @@
 import { ref, defineComponent } from 'vue'
 import auth from '../logic/auth'
 import productosLib from '../logic/productos'
+import categoriasLib from '../logic/categorias'
 import moment from 'moment'
 
 const config = require('../config/endpoints.js')
@@ -89,29 +90,18 @@ export default defineComponent({
   methods: {
     async getProductos () {
       const resp = await productosLib.listar(null)
-      const serverData = []
       const datos = resp.data
-      console.log(datos)
-      for (const i in datos) {
-        const item = datos[i]
-        const obj = {}
-        obj.id = item.id
-        obj.nombre = item.nombre
-        obj.precio =
-          item.porkilos === 1
-            ? item.precio
-            : parseFloat(item.precio / item.unixcaja)
-        obj.disponible = item.disponible
-        obj.preciocaj = item.preciocaj
-        obj.unixcaja = item.unixcaja
-        obj.costoactu = item.costoactu
-        obj.porciva = item.porciva
-        obj.porkilos = item.porkilos
-        obj.imagen = item.imagen
-        serverData.push(obj)
-      }
+      const serverData = datos.map(function (obj) {
+        const precio = obj.precio
+        obj.precio = obj.porkilos === 1 ? precio : parseFloat(precio / obj.unixcaja)
+        obj.imagen = obj.imagen ? ENDPOINT_PATH + 'files/' + obj.id + '.png' : null
+        return obj
+      })
       this.$q.localStorage.remove('productos')
       this.$q.localStorage.set('productos', serverData)
+      const resp2 = await categoriasLib.listarcategorias()
+      this.$q.localStorage.remove('categorias')
+      this.$q.localStorage.set('categorias', resp2.data)
     },
     async enviarLogin () {
       this.loading = true
@@ -244,18 +234,6 @@ export default defineComponent({
     }
     console.log(this.mantener)
     console.log(this.imei)
-    /* const cadena = ENDPOINT_PATH
-    const request = new XMLHttpRequest()
-    try {
-      request.open('GET', cadena, false)
-      request.send()
-    } catch (error) {
-      this.$q.dialog({
-        title: 'Oops! Problemas con INTERNET',
-        message: 'Revise conexión e intente ingresar de nuevo!',
-        persistent: true
-      })
-    } */
   }
 })
 </script>
