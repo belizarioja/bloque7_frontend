@@ -86,7 +86,7 @@
                     </div>
                     <img
                       v-if="props.row.imagen"
-                      :src="props.row.imagen"
+                      :src="'data:image/png;base64, ' + props.row.imagen"
                       height="95"
                     />
                     <img
@@ -142,10 +142,10 @@
       <q-card class="my-card" flat bordered style="border-radius: 15px">
         <q-item>
           <q-item-section avatar>
-            <q-avatar>
-              <img v-if="imagenproducto" :src="imagenproducto">
-              <img v-else src="../assets/default.svg">
-            </q-avatar>
+            <div>
+              <img v-if="imagenproducto" :src="imagenproducto"  height="46">
+              <img v-else src="../assets/default.svg" height="46">
+            </div>
           </q-item-section>
           <q-item-section>
             <q-item-label>{{ nombreproducto }}</q-item-label>
@@ -198,7 +198,7 @@
             v-if="loaderimg"
           />
           <img v-if="noimg" src="../assets/default.svg" style="height: 50%;">
-          <img v-if="imagenproductoimg" :src="imagenproductoimg" style="height: 90%;">
+          <img v-if="imagenproductoimg" :src="'data:image/png;base64, ' + imagenproductoimg" style="height: 90%;">
           <div v-if="subtituloimg" class="subtitleimagenPopup">
             {{ nombreproductoimg }}
           </div>
@@ -335,6 +335,7 @@ import {
 // import VueSocialSharing from 'vue-social-sharing'
 import categoriasLib from '../logic/categorias'
 import productosLib from '../logic/productos'
+import authLib from '../logic/auth'
 const config = require('../config/endpoints.js')
 const ENDPOINT_PATH = config.endpoint_path
 
@@ -447,24 +448,21 @@ export default defineComponent({
       this.precioproductoimg = precio
       this.subtituloimg = true
     },
-    mensajeError () {
+    mensajeError (resp) {
+      const message = resp === 2 ? 'No hay ENLACE con BLOQUE 7' : 'No tiene INTERNET'
       this.$q.dialog({
-        title: '¡Problemas con INTERNET!',
-        message: 'Se requiere BUENA CONEXION para realizar esta acción',
+        title: '¡Problemas de CONEXION!',
+        message: message,
         persistent: true
       })
     },
-    checkNet () {
-      const cadena = ENDPOINT_PATH
-      const request = new XMLHttpRequest()
+    async checkNet () {
       try {
-        request.open('GET', cadena, false)
-        request.send()
-        console.log(' <<< Bien ')
-        return true
+        const resp = await authLib.bloque7()
+        const enviar = resp.status === 200 ? 1 : 2
+        return enviar
       } catch (error) {
-        console.log(' Mal >>>> ')
-        return false
+        return 3
       }
     },
     openSetItems (id, nombre, precio, preciocaj, unixcaja, costoactu, porciva, porkilos, disponible, imagen) {
@@ -478,6 +476,8 @@ export default defineComponent({
         this.costoactu = costoactu
         this.porciva = porciva
         this.porkilos = porkilos
+        this.imagenproducto = imagen
+        this.cantidad = 1
         this.layoutModal = true
       }
     },
@@ -497,8 +497,8 @@ export default defineComponent({
       // const itemscarrito = this.$q.localStorage.getItem('itemsholds')
       const index = holds.findIndex(obj => obj.status === 1)
       if (index !== -1) {
-        // console.log(holds[index].id, this.idproducto)
-        const index2 = itemscarrito.findIndex(obj => obj.idhold === holds[index].id && obj.idproducto === this.idproducto)
+        // console.log(holds[index].indice, this.idproducto)
+        const index2 = itemscarrito.findIndex(obj => obj.indice === holds[index].indice && obj.idproducto === this.idproducto)
         // console.log(index2)
         if (index2 === -1) {
           const obj = {}
@@ -518,7 +518,7 @@ export default defineComponent({
           itemscarrito.push(obj)
           holds[index].cantitemscarrito += parseInt(1)
         } else {
-          itemscarrito[index2].cantidad += parseInt(this.cantidad)
+          itemscarrito[index2].cantidad = parseInt(itemscarrito[index2].cantidad) + parseInt(this.cantidad)
           itemscarrito[index2].subtotal += parseFloat(this.subtotal)
         }
         this.$q.localStorage.remove('itemsholds')
@@ -585,25 +585,44 @@ export default defineComponent({
       // console.log(this.serverData)
     },
     async updateProductos () {
-      const chk = this.checkNet()
-      if (!chk) {
-        this.mensajeError()
+      const respnet = await this.checkNet()
+      if (respnet > 1) {
+        this.mensajeError(respnet)
         return
       }
       this.loader = true
       const resp = await productosLib.listar(null)
+      const serverData = []
       const datos = resp.data
-      const serverData = datos.map(function (obj) {
-        const precio = obj.precio
-        obj.precio = obj.porkilos === 1 ? precio : parseFloat(precio / obj.unixcaja)
-        obj.imagen = obj.imagen ? ENDPOINT_PATH + 'files/' + obj.id + '.png' : null
-        return obj
-      })
+      for (const i in datos) {
+        const item = datos[i]
+        const obj = {}
+        obj.id = item.id
+        obj.nombre = item.nombre
+        obj.precio =
+          item.porkilos === 1
+            ? item.precio
+            : parseFloat(item.precio / item.unixcaja)
+        obj.disponible = item.disponible
+        obj.preciocaj = item.preciocaj
+        obj.unixcaja = item.unixcaja
+        obj.idcategoria = item.idcategoria
+        obj.costoactu = item.costoactu
+        obj.porciva = item.porciva
+        obj.porkilos = item.porkilos
+        obj.imagen = false
+        const resp2 = await productosLib.getfile(item.id)
+        if (resp2.status === 200) {
+          // console.log(resp2)
+          obj.imagen = resp2.data.imgbase64
+        }
+        serverData.push(obj)
+      }
       this.$q.localStorage.remove('productos')
       this.$q.localStorage.set('productos', serverData)
-      const resp2 = await categoriasLib.listarcategorias()
+      const resp3 = await categoriasLib.listarcategorias()
       this.$q.localStorage.remove('categorias')
-      this.$q.localStorage.set('categorias', resp2.data)
+      this.$q.localStorage.set('categorias', resp3.data)
       this.listarProductos([])
       this.listarCategorias()
       this.loader = false

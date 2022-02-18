@@ -143,8 +143,8 @@
 import { ref, defineComponent } from 'vue'
 import authLib from '../logic/auth'
 import moment from 'moment'
-const config = require('../config/endpoints.js')
-const ENDPOINT_PATH = config.endpoint_path
+// const config = require('../config/endpoints.js')
+// const ENDPOINT_PATH = config.endpoint_path
 
 export default defineComponent({
   name: 'Usuarios',
@@ -192,10 +192,10 @@ export default defineComponent({
       const segundo = nombre.split(' ').length > 1 ? nombre.split(' ')[1].charAt(0) : ''
       return primer + segundo
     },
-    addUser (idcliente, nombrecliente) {
-      const resp = this.checkNet()
-      if (!resp) {
-        this.mensajeError()
+    async addUser (idcliente, nombrecliente) {
+      const respnet = await this.checkNet()
+      if (respnet > 1) {
+        this.mensajeError(respnet)
         return
       }
       this.$q.dialog({
@@ -224,10 +224,10 @@ export default defineComponent({
     listarUsuarios () {
       this.serverData = this.$q.localStorage.getItem('usuarios') ? this.$q.localStorage.getItem('usuarios') : []
     },
-    actualizar () {
-      const resp = this.checkNet()
-      if (!resp) {
-        this.mensajeError()
+    async actualizar () {
+      const respnet = await this.checkNet()
+      if (respnet > 1) {
+        this.mensajeError(respnet)
         return
       }
       this.getUsuarios()
@@ -260,10 +260,10 @@ export default defineComponent({
         this.$q.localStorage.set('usuarios', this.serverData)
       }
     },
-    hideShow (val, id, nombre) {
-      const resp = this.checkNet()
-      if (!resp) {
-        this.mensajeError()
+    async hideShow (val, id, nombre) {
+      const respnet = await this.checkNet()
+      if (respnet > 1) {
+        this.mensajeError(respnet)
         return
       }
       const valor = val === 1 ? 0 : 1
@@ -286,10 +286,10 @@ export default defineComponent({
         )
       })
     },
-    resetDevice (id, nombre) {
-      const resp = this.checkNet()
-      if (!resp) {
-        this.mensajeError()
+    async resetDevice (id, nombre) {
+      const respnet = await this.checkNet()
+      if (respnet > 1) {
+        this.mensajeError(respnet)
         return
       }
       this.$q.dialog({
@@ -310,24 +310,21 @@ export default defineComponent({
         )
       })
     },
-    mensajeError () {
+    mensajeError (resp) {
+      const message = resp === 2 ? 'No hay ENLACE con BLOQUE 7' : 'No tiene INTERNET'
       this.$q.dialog({
-        title: '¡Problemas con INTERNET!',
-        message: 'Se requiere BUENA CONEXION para realizar esta acción',
+        title: '¡Problemas de CONEXION!',
+        message: message,
         persistent: true
       })
     },
-    checkNet () {
-      const cadena = ENDPOINT_PATH
-      const request = new XMLHttpRequest()
+    async checkNet () {
       try {
-        request.open('GET', cadena, false)
-        request.send()
-        console.log(' <<< Bien ')
-        return true
+        const resp = await authLib.bloque7()
+        const enviar = resp.status === 200 ? 1 : 2
+        return enviar
       } catch (error) {
-        console.log(' Mal >>>> ')
-        return false
+        return 3
       }
     }
   },

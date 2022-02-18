@@ -233,9 +233,9 @@
                     <tr
                       v-if="serverData.length === 0"
                     >
-                      <td colspan="8" style="text-align: center;padding-top: 40px;">
+                      <td colspan="8" style="text-align: center;padding-top: 100px;">
                         <span>
-                          <q-icon name="production_quantity_limits" color="secondary" style="font-size:200px;" />
+                          <q-icon name="production_quantity_limits" style="font-size:200px;color: #a3a5a4;" />
                         </span>
                       </td>
                     </tr>
@@ -563,9 +563,9 @@ import { defineComponent, ref } from 'vue'
 import { useQuasar } from 'quasar'
 // import clientesLib from '../logic/clientes'
 // import pedidosLib from '../logic/pedidos'
+import authLib from '../logic/auth'
 import moment from 'moment'
 const config = require('../config/endpoints.js')
-const ENDPOINT_PATH = config.endpoint_path
 
 export default defineComponent({
   name: 'MainLayout',
@@ -694,10 +694,10 @@ export default defineComponent({
         })
       }
     },
-    gotoCambiarclave () {
-      const resp = this.checkNet()
-      if (!resp) {
-        this.mensajeError()
+    async gotoCambiarclave () {
+      const respnet = await this.checkNet()
+      if (respnet > 1) {
+        this.mensajeError(respnet)
         return
       }
       this.$router.push('/cambiarclave')
@@ -705,24 +705,21 @@ export default defineComponent({
     gotoAyuda () {
       this.$router.push('/ayuda')
     },
-    mensajeError () {
+    mensajeError (resp) {
+      const message = resp === 2 ? 'No hay ENLACE con BLOQUE 7' : 'No tiene INTERNET'
       this.$q.dialog({
-        title: '¡Problemas con INTERNET!',
-        message: 'Se requiere BUENA CONEXION para realizar esta acción',
+        title: '¡Problemas de CONEXION!',
+        message: message,
         persistent: true
       })
     },
-    checkNet () {
-      const cadena = ENDPOINT_PATH
-      const request = new XMLHttpRequest()
+    async checkNet () {
       try {
-        request.open('GET', cadena, false)
-        request.send()
-        console.log(' <<< Bien ')
-        return true
+        const resp = await authLib.bloque7()
+        const enviar = resp.status === 200 ? 1 : 2
+        return enviar
       } catch (error) {
-        console.log(' Mal >>>> ')
-        return false
+        return 3
       }
     },
     gotoSalir () {
@@ -757,15 +754,15 @@ export default defineComponent({
         persistent: true
       }).onOk(async () => {
         this.cleanCarrito()
-        console.log(indice)
+        // console.log(indice)
         const holds = this.$q.localStorage.getItem('holds')
         const index = holds.findIndex(obj => obj.status === 1)
-        console.log(index)
+        // console.log(index)
         if (index !== -1) {
           holds[index].status = 0
         }
         const index2 = holds.findIndex(obj => obj.indice === indice)
-        console.log(index2)
+        // console.log(index2)
         holds[index2].status = 1
         this.$q.localStorage.remove('holds')
         this.$q.localStorage.set('holds', holds)
@@ -792,7 +789,7 @@ export default defineComponent({
       }).onOk(async () => {
         const holds = this.$q.localStorage.getItem('holds')
         const index = holds.findIndex(obj => obj.indice === indice)
-        console.log(index)
+        // console.log(index)
         holds[index].status = 2
         this.$q.localStorage.remove('holds')
         this.$q.localStorage.set('holds', holds)
@@ -845,7 +842,7 @@ export default defineComponent({
       }).onOk(async () => {
         const holds = this.$q.localStorage.getItem('holds')
         const index = holds.findIndex(obj => obj.status === 1)
-        console.log(index)
+        // console.log(index)
         holds[index].status = 3
         this.$q.localStorage.remove('holds')
         this.$q.localStorage.set('holds', holds)
@@ -862,8 +859,8 @@ export default defineComponent({
       const idcliente = this.$q.localStorage.getItem('idcliente')
       this.serverDataCxc = []
       this.totalcxc = 0
-      console.log(idcliente)
-      const cuentasxc = this.$q.localStorage.getItem('cuentasxc')
+      // console.log(idcliente)
+      const cuentasxc = this.$q.localStorage.getItem('cuentasxc') ? this.$q.localStorage.getItem('cuentasxc') : []
       const find = cuentasxc.filter(obj => obj.idcliente === idcliente)
       if (find.length > 0) {
         this.totalitemscxc = find[0].details.length
@@ -883,15 +880,15 @@ export default defineComponent({
     async hideShowCarrito () {
       this.serverData = []
       this.totalcarrito = 0
-      const holds = this.$q.localStorage.getItem('holds')
-      const itemsholds = this.$q.localStorage.getItem('itemsholds')
+      const holds = this.$q.localStorage.getItem('holds') ? this.$q.localStorage.getItem('holds') : []
+      const itemsholds = this.$q.localStorage.getItem('itemsholds') ? this.$q.localStorage.getItem('itemsholds') : []
       const find = holds.find(obj => obj.status === 1)
-      console.log('Find 1 ', find)
+      // console.log('Find 1 ', find)
       this.nombrecliente = find.nombrecliente
       const indice = find.indice
       const datos = itemsholds.filter(obj => obj.indice === indice)
       this.totalitemspedido = datos.length
-      console.log('Find 2 ', datos)
+      // console.log('Find 2 ', datos)
       for (const i in datos) {
         const item = datos[i]
         const obj = {}
@@ -928,7 +925,7 @@ export default defineComponent({
     async hideShowSaves (idusuario) {
       this.serverDataSaves = []
       this.totalsaves = 0
-      const holds = this.$q.localStorage.getItem('holds')
+      const holds = this.$q.localStorage.getItem('holds') ? this.$q.localStorage.getItem('holds') : []
       const datos = holds.filter(obj => obj.status === 0)
       // console.log('Find 2 ', datos)
       this.totalitemsaves = datos.length
@@ -985,7 +982,7 @@ export default defineComponent({
     async deleteCarrito () {
       const holds = this.$q.localStorage.getItem('holds')
       const index = holds.findIndex(obj => obj.status === 1)
-      console.log(index)
+      // console.log(index)
       if (index >= 0) {
         holds[index].status = 2
       }
@@ -1040,43 +1037,17 @@ export default defineComponent({
         persistent: true
       }).onOk(() => {
         // pedidosLib.deleteitemcarrito(id)
-        console.log(indice, idproducto)
+        // console.log(indice, idproducto)
         const itemsholds = this.$q.localStorage.getItem('itemsholds')
         const index = itemsholds.findIndex(obj => obj.indice === indice && obj.idproducto === idproducto)
-        console.log(index)
+        // console.log(index)
         itemsholds.splice(index, 1)
         this.$q.localStorage.remove('itemsholds')
         this.$q.localStorage.set('itemsholds', itemsholds)
         this.hideShowCarrito()
       })
     }
-  },
-  mounted () {
-    console.log('Main Layout')
-    // this.hideShowSaves(this.idusuario)
-    // this.hideShowCarrito(this.idusuario)
   }
-  /* created () {
-    const verificarServidor = setInterval(() => {
-      const cadena = ENDPOINT_PATH
-      const request = new XMLHttpRequest()
-      try {
-        request.open('GET', cadena, false)
-        // TE FALTA
-        request.send()
-      } catch (error) {
-        console.log(console.log(cadena + ' CAIDO'))
-        clearInterval(verificarServidor)
-        this.$q.dialog({
-          title: 'Oops! Problemas con INTERNET',
-          message: 'Revise conexión e intente ingresar de nuevo!',
-          persistent: true
-        }).onOk(() => {
-          this.$router.push('/logout')
-        })
-      }
-    }, (1000 * 2))
-  } */
 })
 </script>
 

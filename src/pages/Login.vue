@@ -67,9 +67,6 @@ import productosLib from '../logic/productos'
 import categoriasLib from '../logic/categorias'
 import moment from 'moment'
 
-const config = require('../config/endpoints.js')
-const ENDPOINT_PATH = config.endpoint_path
-
 export default defineComponent({
   setup () {
     const imei = ref(
@@ -91,33 +88,49 @@ export default defineComponent({
     async getProductos () {
       const resp = await productosLib.listar(null)
       const datos = resp.data
-      const serverData = datos.map(function (obj) {
-        const precio = obj.precio
-        obj.precio = obj.porkilos === 1 ? precio : parseFloat(precio / obj.unixcaja)
-        obj.imagen = obj.imagen ? ENDPOINT_PATH + 'files/' + obj.id + '.png' : null
-        return obj
-      })
+      const serverData = []
+      for (const i in datos) {
+        const item = datos[i]
+        const obj = {}
+        obj.id = item.id
+        obj.nombre = item.nombre
+        obj.precio =
+          item.porkilos === 1
+            ? item.precio
+            : parseFloat(item.precio / item.unixcaja)
+        obj.disponible = item.disponible
+        obj.preciocaj = item.preciocaj
+        obj.unixcaja = item.unixcaja
+        obj.idcategoria = item.idcategoria
+        obj.costoactu = item.costoactu
+        obj.porciva = item.porciva
+        obj.porkilos = item.porkilos
+        obj.imagen = false
+        const resp2 = await productosLib.getfile(item.id)
+        if (resp2.status === 200) {
+          // console.log(resp2)
+          obj.imagen = resp2.data.imgbase64
+        }
+        serverData.push(obj)
+      }
       this.$q.localStorage.remove('productos')
       this.$q.localStorage.set('productos', serverData)
-      const resp2 = await categoriasLib.listarcategorias()
+      const resp3 = await categoriasLib.listarcategorias()
       this.$q.localStorage.remove('categorias')
-      this.$q.localStorage.set('categorias', resp2.data)
+      this.$q.localStorage.set('categorias', resp3.data)
     },
     async enviarLogin () {
       this.loading = true
       this.isDisabled = true
       try {
-        const respnet = this.checkNet()
-        if (!respnet) {
-          this.mensajeError()
+        const respnet = await this.checkNet()
+        if (respnet > 1) {
+          this.mensajeError(respnet)
+          this.loading = false
+          this.isDisabled = false
           return
         }
-        // console.log(this.usuario)
-        // console.log(this.clave)
-        // console.log(this.mantener)
-        // alert(this.mantener)
         const resp = await auth.login(this.usuario, this.clave, this.imei)
-        // console.log(resp)
         if (resp.data.status === 500) {
           // SI HAY ALGUN ERROR EN LAS CONSULTAS
           this.$q.dialog({
@@ -187,30 +200,24 @@ export default defineComponent({
           }
         }
       } catch (error) {
-        this.mensajeError()
+        this.mensajeError(3)
       }
     },
-    mensajeError () {
+    mensajeError (resp) {
+      const message = resp === 2 ? 'No hay ENLACE con BLOQUE 7' : 'No tiene INTERNET'
       this.$q.dialog({
-        title: '¡Problemas con INTERNET!',
-        message: 'Se requiere BUENA CONEXION para realizar esta acción',
+        title: '¡Problemas de CONEXION!',
+        message: message,
         persistent: true
-      }).onOk(async () => {
-        this.loading = false
-        this.isDisabled = false
       })
     },
-    checkNet () {
-      const cadena = ENDPOINT_PATH
-      const request = new XMLHttpRequest()
+    async checkNet () {
       try {
-        request.open('GET', cadena, false)
-        request.send()
-        console.log(' <<< Bien ')
-        return true
+        const resp = await auth.bloque7()
+        const enviar = resp.status === 200 ? 1 : 2
+        return enviar
       } catch (error) {
-        console.log(' Mal >>>> ')
-        return false
+        return 3
       }
     }
   },

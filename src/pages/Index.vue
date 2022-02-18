@@ -71,8 +71,7 @@
       <q-card class="borderdetailt">
         <q-bar  class="bg-primary text-white">
           <q-icon name="speaker_notes" />
-          <div>Resúmen para enviar</div>
-
+          <div>RESUMEN PARA ENVIAR</div>
           <q-space />
 
           <q-btn dense flat icon="close" v-close-popup>
@@ -80,7 +79,18 @@
           </q-btn>
         </q-bar>
         <q-card-section class="q-pt-none">
-          <q-list bordered padding style="margin-top: 15px">
+          <q-list
+           bordered
+           padding
+           style="margin-top: 15px"
+           v-if="enviados === 0 && eliminados === 0 && guardados === 0 && carrito === 0"
+           >
+            <q-item style=" display: grid;">
+              <q-icon name="verified" style="color: #8fc969;font-size: 190px;"/>
+              <span style="text-align: center; color: #707271;">NADA PENDIENTE POR ENVIAR</span>
+            </q-item>
+          </q-list>
+          <q-list v-else bordered padding style="margin-top: 15px">
             <q-item>
               <q-item-section top avatar>
                 <q-avatar color="primary" text-color="white" icon="production_quantity_limits" />
@@ -165,8 +175,8 @@ import vendedorLib from '../logic/vendedores'
 import authLib from '../logic/auth'
 import pedidosLib from '../logic/pedidos'
 import moment from 'moment'
-const config = require('../config/endpoints.js')
-const ENDPOINT_PATH = config.endpoint_path
+// const config = require('../config/endpoints.js')
+// const ENDPOINT_PATH = config.endpoint_path
 
 export default defineComponent({
   name: 'PageIndex',
@@ -273,24 +283,20 @@ export default defineComponent({
         })
       }
     },
-    mensajeError () {
+    mensajeError (resp) {
+      const message = resp === 2 ? 'No hay ENLACE con BLOQUE 7' : 'No tiene INTERNET'
       this.$q.dialog({
-        title: '¡Problemas con INTERNET!',
-        message: 'Se requiere BUENA CONEXION para realizar esta acción',
+        title: '¡Problemas de CONEXION!',
+        message: message,
         persistent: true
       })
     },
-    checkNet () {
-      const cadena = ENDPOINT_PATH
-      const request = new XMLHttpRequest()
+    async checkNet () {
       try {
-        request.open('GET', cadena, false)
-        request.send()
-        // console.log(' <<< Bien ')
-        return true
+        const resp = await authLib.bloque7()
+        return resp.status === 200 ? 1 : 2
       } catch (error) {
-        // console.log(' Mal >>>> ')
-        return false
+        return 3
       }
     },
     viewSincronized () {
@@ -461,18 +467,10 @@ export default defineComponent({
       this.$q.localStorage.set('categorias', serverData)
     },
     async getProductos () {
-      // console.log('getProductos antes')
       const resp = await productosLib.listar(null)
-      // const serverData = []
+      const serverData = []
       const datos = resp.data
-      // console.log('getProductos despues')
-      const serverData = datos.map(function (obj) {
-        const precio = obj.precio
-        obj.precio = obj.porkilos === 1 ? precio : parseFloat(precio / obj.unixcaja)
-        obj.imagen = obj.imagen ? ENDPOINT_PATH + 'files/' + obj.id + '.png' : null
-        return obj
-      })
-      /* for (const i in datos) {
+      for (const i in datos) {
         const item = datos[i]
         const obj = {}
         obj.id = item.id
@@ -488,14 +486,15 @@ export default defineComponent({
         obj.costoactu = item.costoactu
         obj.porciva = item.porciva
         obj.porkilos = item.porkilos
-        obj.imagen = item.imagen
-        // const resp = await productosLib.getfile(item.id)
-        // if (resp.status === 200) {
-        //  obj.imagen = ENDPOINT_PATH + 'files/' + item.id + '.png'
-        // }
+        obj.imagen = false
+        const resp2 = await productosLib.getfile(item.id)
+        if (resp2.status === 200) {
+          // console.log(resp2)
+          obj.imagen = resp2.data.imgbase64
+        }
         serverData.push(obj)
-      } */
-      // console.log(serverData)
+      }
+      console.log(serverData)
       this.loaderproductos = false
       this.$q.localStorage.remove('productos')
       this.$q.localStorage.set('productos', serverData)
@@ -612,32 +611,35 @@ export default defineComponent({
       const itemspedido = this.$q.localStorage.getItem('itemsholds') ? this.$q.localStorage.getItem('itemsholds') : []
       const pedidos = holds.filter((obj) => obj.status === 3)
       // console.log('Set pedidos')
-      for (const i in pedidos) {
-        const item = pedidos[i]
+      const idusuario = this.idusuario
+      const usuario = this.usuario
+      const idsucursal = this.idsucursal
+      pedidos.forEach(async function (item) {
+        // console.log(item)
         const idcliente = item.idcliente
-        const idusuario = this.idusuario
-        const usuario = this.usuario
-        const idsucursal = this.idsucursal
         const nombrecliente = item.nombrecliente
         const rifcliente = item.rifcliente
-        const totalcarrito = item.subtotal
         const comentario = 'PEDIDO DESDE APP'
         const arregloOriginal = itemspedido.filter(
           (obj) => obj.indice === item.indice
         )
-        console.log(arregloOriginal)
         const arregloDeArreglos = []
         const LONGITUD_PEDAZOS = 13
         for (let i = 0; i < arregloOriginal.length; i += LONGITUD_PEDAZOS) {
           const pedazo = arregloOriginal.slice(i, i + LONGITUD_PEDAZOS)
           arregloDeArreglos.push(pedazo)
         }
-        this.loader = true
-        for (const i in arregloDeArreglos) {
-          const arreglopedido = arregloDeArreglos[i]
+        for (const j in arregloDeArreglos) {
+          const arreglopedido = arregloDeArreglos[j]
+          let totalcarrito = 0
+          arreglopedido.forEach(function (elemento) {
+            totalcarrito = parseFloat(totalcarrito) + parseFloat(elemento.subtotal)
+          })
           await pedidosLib.setpedido(idusuario, usuario, idcliente, nombrecliente, rifcliente, totalcarrito, idsucursal, arreglopedido, comentario)
+          // const resp = await pedidosLib.setpedido(idusuario, usuario, idcliente, nombrecliente, rifcliente, totalcarrito, idsucursal, arreglopedido, comentario)
+          // console.log(resp.status)
         }
-      }
+      })
     },
     async setEliminados () {
       const holds = this.$q.localStorage.getItem('holds') ? this.$q.localStorage.getItem('holds') : []
@@ -667,22 +669,22 @@ export default defineComponent({
       await authLib.updateFechaUltGet(this.idusuario)
     },
     async setSincronized () {
-      const resp = this.checkNet()
-      if (!resp) {
-        this.mensajeError()
+      const respnet = await this.checkNet()
+      if (respnet > 1) {
+        this.mensajeError(respnet)
         return
       }
       this.layoutModal = false
-      this.loader = true
+      this.loaderproductos = true
       await this.setPedidos()
       await this.setGuardados()
       await this.setEliminados()
       await this.setUpdateFecha().then(() => {
-        console.log('Enviado de pedidos finalizó sin problema')
+        // console.log('Enviado de pedidos finalizó sin problema')
         this.feultget = moment().format('YYYY-MM-DD HH:mm:ss')
         this.$q.localStorage.remove('feultget')
         this.$q.localStorage.set('feultget', this.feultget)
-        this.loader = false
+        this.loaderproductos = false
         const totalItemSaves = document.querySelector('.totalItemSaves')
         totalItemSaves.classList.add('invisible')
         const totalItemHold = document.querySelector('.totalItemHold')
@@ -692,9 +694,9 @@ export default defineComponent({
       }).catch(this.falloCallback)
     },
     async getSincronized () {
-      const resp = this.checkNet()
-      if (!resp) {
-        this.mensajeError()
+      const respnet = await this.checkNet()
+      if (respnet > 1) {
+        this.mensajeError(respnet)
         return
       }
       this.loaderproductos = true
@@ -705,63 +707,23 @@ export default defineComponent({
       await this.setGuardados()
       await this.setEliminados()
       await this.setUpdateFecha()
-      this.getProductos()
+      await this.getProductos()
       await this.getVendedores()
       await this.getUsuarios()
-      this.getCxc()
+      await this.getCxc()
       await this.getPedidos()
       await this.getHolds()
       await this.getItemsHolds()
-      this.getCategorias()
-      this.getClientes().then(() => {
-        console.log('Sincronizado finalizó sin problema')
+      await this.getCategorias()
+      await this.getClientes().then(() => {
+        // console.log('Sincronizado finalizó sin problema')
         this.feultget = moment().format('YYYY-MM-DD HH:mm:ss')
         this.$q.localStorage.remove('feultget')
         this.$q.localStorage.set('feultget', this.feultget)
         this.loaderclientes = false
         // this.layoutModal = false
       }).catch(this.falloCallback)
-    }
-    /* async getSincronizedBK () {
-      const resp = this.checkNet()
-      if (!resp) {
-        this.mensajeError()
-        return
-      }
-      this.loader = true
-      this.setPedidos()
-        .then(this.setGuardados()
-          .then(this.setEliminados()
-            .then(this.getProductos()
-              .then(this.setSincronized()
-                .then(this.getUsuarios()
-                  .then(this.getVendedores()
-                    .then(this.getCxc()
-                      .then(this.getPedidos()
-                        .then(this.getHolds()
-                          .then(this.getItemsHolds()
-                            .then(this.getClientes()
-                              .then(this.getCategorias()
-                                .then(() => {
-                                  console.log('Sincronizado finalizó sin problema')
-                                  this.feultget = moment().format('YYYY-MM-DD HH:mm:ss')
-                                  this.$q.localStorage.remove('feultget')
-                                  this.$q.localStorage.set('feultget', this.feultget)
-                                  this.loader = false
-                                })
-                              ).catch(this.falloCallback)
-                            )
-                          )
-                        )
-                      )
-                    )
-                  )
-                )
-              )
-            )
-          )
-        )
-    } */
+    },
     /* async migrarproductos () {
       const resp = await productosLib.migrarproductos()
       console.log(resp)
@@ -781,12 +743,12 @@ export default defineComponent({
         // const resp2 = await productosLib.listaTemp()
         // console.log('getImagesProductos')
       }
-    },
+    }, */
     dataUrl (img) {
       return 'data:image/jpeg;base64,' + btoa(
         new Uint8Array(img.data).reduce((data, byte) => data + String.fromCharCode(byte), '')
       )
-    } */
+    }
   },
   computed: {
     loader () {
